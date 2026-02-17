@@ -1,0 +1,91 @@
+// config/admin-roles.js
+export const ADMIN_ROLES = {
+  SUPER_ADMIN: 'super_admin',
+  ADMIN: 'admin',
+  MODERATOR: 'moderator',
+  SUPPORT: 'support',
+  VIEWER: 'viewer'
+};
+
+export const ADMIN_PERMISSIONS = {
+  // User Management
+  VIEW_USERS: 'view_users',
+  CREATE_USER: 'create_user',
+  EDIT_USER: 'edit_user',
+  DELETE_USER: 'delete_user',
+  SUSPEND_USER: 'suspend_user',
+  
+  // Booking Management
+  VIEW_BOOKINGS: 'view_bookings',
+  CREATE_BOOKING: 'create_booking',
+  EDIT_BOOKING: 'edit_booking',
+  CANCEL_BOOKING: 'cancel_booking',
+  
+  // Admin Management
+  VIEW_ADMINS: 'view_admins',
+  CREATE_ADMIN: 'create_admin',
+  EDIT_ADMIN: 'edit_admin',
+  DELETE_ADMIN: 'delete_admin',
+  
+  // Content Management
+  VIEW_CONTENT: 'view_content',
+  CREATE_CONTENT: 'create_content',
+  EDIT_CONTENT: 'edit_content',
+  DELETE_CONTENT: 'delete_content',
+  
+  // Analytics
+  VIEW_ANALYTICS: 'view_analytics',
+  EXPORT_DATA: 'export_data',
+  
+  // Settings
+  VIEW_SETTINGS: 'view_settings',
+  EDIT_SETTINGS: 'edit_settings',
+  
+  // Audit
+  VIEW_LOGS: 'view_logs',
+  EXPORT_LOGS: 'export_logs'
+};
+
+export const ROLE_PERMISSIONS = {
+  [ADMIN_ROLES.SUPER_ADMIN]: Object.values(ADMIN_PERMISSIONS), // All permissions
+  
+  [ADMIN_ROLES.ADMIN]: [
+    ADMIN_PERMISSIONS.VIEW_USERS,
+    ADMIN_PERMISSIONS.CREATE_USER,
+    ADMIN_PERMISSIONS.EDIT_USER,
+    ADMIN_PERMISSIONS.VIEW_BOOKINGS,
+    ADMIN_PERMISSIONS.CREATE_BOOKING,
+    ADMIN_PERMISSIONS.EDIT_BOOKING,
+    ADMIN_PERMISSIONS.CANCEL_BOOKING,
+    ADMIN_PERMISSIONS.VIEW_CONTENT,
+    ADMIN_PERMISSIONS.CREATE_CONTENT,
+    ADMIN_PERMISSIONS.EDIT_CONTENT,
+    ADMIN_PERMISSIONS.VIEW_ANALYTICS,
+    ADMIN_PERMISSIONS.VIEW_LOGS
+  ],
+  
+  [ADMIN_ROLES.MODERATOR]: [
+    ADMIN_PERMISSIONS.VIEW_USERS,
+    ADMIN_PERMISSIONS.EDIT_USER,
+    ADMIN_PERMISSIONS.SUSPEND_USER,
+    ADMIN_PERMISSIONS.VIEW_BOOKINGS,
+    ADMIN_PERMISSIONS.CANCEL_BOOKING,
+    ADMIN_PERMISSIONS.VIEW_CONTENT,
+    ADMIN_PERMISSIONS.EDIT_CONTENT,
+    ADMIN_PERMISSIONS.VIEW_LOGS
+  ],
+  
+  [ADMIN_ROLES.SUPPORT]: [
+    ADMIN_PERMISSIONS.VIEW_USERS,
+    ADMIN_PERMISSIONS.VIEW_BOOKINGS,
+    ADMIN_PERMISSIONS.EDIT_BOOKING,
+    ADMIN_PERMISSIONS.VIEW_CONTENT
+  ],
+  
+  [ADMIN_ROLES.VIEWER]: [
+    ADMIN_PERMISSIONS.VIEW_USERS,
+    ADMIN_PERMISSIONS.VIEW_BOOKINGS,
+    ADMIN_PERMISSIONS.VIEW_CONTENT,
+    ADMIN_PERMISSIONS.VIEW_ANALYTICS
+  ]
+};
