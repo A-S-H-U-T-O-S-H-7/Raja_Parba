@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
-import useAdminAuthStore from '@/stores/useAdminAuthStore';
+import useAdminAuthStore from "@/lib/stores/useAdminAuthStore";
 import { toast } from 'react-hot-toast';
 
 export default function AdminLoginPage() {

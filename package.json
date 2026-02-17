@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "bcryptjs": "^3.0.3",
+    "date-fns": "^4.1.0",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.9.0",
@@ -19,6 +21,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hot-toast": "^2.6.0",
+    "sweetalert2": "^11.26.18",
     "swiper": "^12.1.1",
     "zustand": "^5.0.11"
   },

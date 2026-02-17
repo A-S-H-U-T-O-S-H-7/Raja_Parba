@@ -9,10 +9,8 @@ import BookingTabs from '@/components/profile/BookingTabs';
 import EmptyState from '@/components/profile/EmptyState';
 import QuickActions from '@/components/profile/QuickActions';
 import ContactInfo from '@/components/profile/ContactInfo';
-import HavanBookingCard from '@/components/profile/HavanBookingCard';
 import ShowBookingCard from '@/components/show/ShowBookingCard';
 import StallBookingCard from '@/components/stall/StallBookingCard';
-import DelegateCard from '@/components/deligateRegistration/DelegateCard';
 import DonationCard from '@/components/donation/DonationCard';
 import ImageModal from '@/components/ImageModal';
 import { useShifts } from '@/hooks/useShifts';
@@ -302,48 +300,7 @@ const ProfilePage = () => {
     }
   };
 
-  const fetchUserDelegateBookings = async () => {
-    try {
-      const delegateBookingsQuery = query(
-        collection(db, 'delegateBookings'),
-        where('userId', '==', user.uid)
-      );
-      
-      const snapshot = await getDocs(delegateBookingsQuery);
-      const delegateBookingsData = [];
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        let createdDate;
-        
-        if (data.createdAt) {
-          if (data.createdAt.toDate) {
-            createdDate = data.createdAt.toDate();
-          } else if (data.createdAt.seconds) {
-            createdDate = new Date(data.createdAt.seconds * 1000);
-          } else if (typeof data.createdAt === 'string') {
-            createdDate = parseISO(data.createdAt);
-          } else {
-            createdDate = new Date();
-          }
-        } else {
-          createdDate = new Date();
-        }
-        
-        delegateBookingsData.push({
-          id: doc.id,
-          ...data,
-          createdAt: createdDate,
-          type: 'delegate'
-        });
-      });
-      
-      delegateBookingsData.sort((a, b) => b.createdAt - a.createdAt);
-      setDelegateBookings(delegateBookingsData);
-    } catch (error) {
-      toast.error('Failed to load delegate booking history');
-    }
-  };
+  
 
   const fetchUserDonations = async () => {
     try {
@@ -395,8 +352,6 @@ const ProfilePage = () => {
       fetchUserShowBookings();
     } else if (activeTab === 'stall') {
       fetchUserStallBookings();
-    } else if (activeTab === 'delegates') {
-      fetchUserDelegateBookings();
     } else if (activeTab === 'donations') {
       fetchUserDonations();
     }
@@ -404,7 +359,6 @@ const ProfilePage = () => {
 
   // Handle booking status updates from individual booking cards
   const handleBookingStatusUpdate = async (bookingId, newStatus) => {
-    console.log(`🔄 Handling status update for booking ${bookingId}: ${newStatus}`);
     
     // Always refresh bookings to get latest data
     await fetchUserBookings();
@@ -502,16 +456,7 @@ const ProfilePage = () => {
 
   const renderBookings = () => {
     switch (activeTab) {
-      case 'havan':
-        return bookings.map((booking) => (
-          <HavanBookingCard 
-            key={booking.id} 
-            booking={booking} 
-            getShiftLabel={getShiftLabel}
-            getShiftTime={getShiftTime}
-            onStatusUpdate={handleBookingStatusUpdate}
-          />
-        ));
+      
       case 'show':
         return showBookings.map((booking) => (
           <ShowBookingCard 
@@ -528,10 +473,7 @@ const ProfilePage = () => {
             onCancel={fetchUserStallBookings}
           />
         ));
-      case 'delegates':
-        return delegateBookings.map((booking) => (
-          <DelegateCard key={booking.id} booking={booking} />
-        ));
+      
       case 'donations':
         return donations.map((donation) => (
           <DonationCard key={donation.id} donation={donation} />
@@ -563,10 +505,8 @@ const ProfilePage = () => {
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     counts={{
-                      havan: bookings.length,
                       show: showBookings.length,
                       stall: stallBookings.length,
-                      delegates: delegateBookings.length,
                       donations: donations.length
                     }}
                   />
@@ -574,10 +514,8 @@ const ProfilePage = () => {
 
                 {(() => {
                   const currentTabData = {
-                    havan: bookings,
                     show: showBookings,
                     stall: stallBookings,
-                    delegates: delegateBookings,
                     donations: donations
                   };
                   
