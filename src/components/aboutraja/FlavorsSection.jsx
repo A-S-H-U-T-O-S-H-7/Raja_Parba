@@ -1,109 +1,284 @@
-// components/about/FlavorsSection.tsx
 "use client";
 
 import { useRef } from "react";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
-import { Wheat } from "lucide-react";
 
 const foods = [
   {
     name: "Poda Pitha",
-    description: "Burned on the outside, soft within — like memories that scar and soothe. Baked overnight in earth ovens, its smoky sweetness is the taste of anticipation.",
+    description:
+      "Burned on the outside, soft within — like memories that scar and soothe. Baked overnight in earth ovens, its smoky sweetness is the taste of anticipation.",
     icon: "🔥",
-    image: "/images/poda-pitha.png"
+    image: "/podapithabg.png",
+    tag: "Baked",
+    tagColor: "#c0392b",
   },
   {
     name: "Manda Pitha",
-    description: "Steamed rice dumplings hiding sweet coconut-jaggery hearts. Each bite is a surprise — soft, warm, dissolving like childhood.",
+    description:
+      "Steamed rice dumplings hiding sweet coconut-jaggery hearts. Each bite is a surprise — soft, warm, dissolving like childhood.",
     icon: "🥟",
-    image: "/images/manda-pitha.png"
+    image: "/mandapithabg.png",
+    tag: "Steamed",
+    tagColor: "#2d6a4f",
   },
   {
     name: "Chakuli Pitha",
-    description: "Crispy, golden, paper-thin — served with bubbling hot curry. The crunch of celebration, the comfort of home.",
+    description:
+      "Crispy, golden, paper-thin — served with bubbling hot curry. The crunch of celebration, the comfort of home.",
     icon: "🫓",
-    image: "/images/chakuli-pitha.png"
+    image: "/chakulibg.png",
+    tag: "Crispy",
+    tagColor: "#b5451b",
   },
   {
     name: "Pana",
-    description: "A sweet drink of milk, banana, and palm sugar. Cool as monsoon breeze, sweet as the days themselves.",
+    description:
+      "A sweet drink of milk, banana, and palm sugar. Cool as monsoon breeze, sweet as the days themselves.",
     icon: "🥛",
-    image: "/images/pana.png"
+    image: "/panabg2.png",
+    tag: "Drink",
+    tagColor: "#1a6b8a",
   },
   {
-    name: "Arisha Pitha",
-    description: "Deep-fried rice flour discs, caramelized and crisp. The sound of frying oil is the music of Raja kitchens.",
-    icon: "🍪",
-    image: "/images/arisha-pitha.png"
-  },
+  name: "Mitha Paan",
+  description:
+    "Fresh betel leaves filled with gulkand, fennel seeds, coconut, and sweet supari. Mitha Paan is a fragrant and flavorful traditional mouth freshener enjoyed during Raja celebrations.",
+  icon: "🍃",
+  image: "/PAAN-1.jpg",
+  tag: "Traditional",
+  tagColor: "#2e7d32",
+},
+
   {
     name: "Chenna Poda",
-    description: "Odisha's gift to the world — caramelized cottage cheese burnt to perfection. A dessert that tastes like joy itself.",
+    description:
+      "Odisha's gift to the world — caramelized cottage cheese burnt to perfection. A dessert that tastes like joy itself.",
     icon: "🍰",
-    image: "/images/chenna-poda.png"
-  }
+    image: "/chenapodabg.png",
+    tag: "Signature",
+    tagColor: "#7a2d6b",
+  },
 ];
 
 export default function FlavorsSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const isInView = useInView(ref, { once: true, amount: 0.15 });
 
   return (
-    <section ref={ref} className="py-32 px-4 bg-gradient-to-b from-[#E8D5B5] to-[#F5E6D3] relative overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section
+      ref={ref}
+      className="relative overflow-hidden py-8 px-4"
+      style={{
+        background:
+          "linear-gradient(150deg, #f5e8d0 0%, #eedad8 35%, #f0e2cc 65%, #ecddd0 100%)",
+      }}
+    >
+      {/* Noise texture */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: "120px",
+        }}
+      />
+
+      {/* Decorative blobs */}
+      <div
+        className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full opacity-20"
+        style={{ background: "radial-gradient(circle, #e8a87c 0%, transparent 70%)" }}
+      />
+      <div
+        className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full opacity-15"
+        style={{ background: "radial-gradient(circle, #c0392b 0%, transparent 70%)" }}
+      />
+
+      <div className="relative mx-auto max-w-7xl">
+
+        {/* ── Header ── */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          transition={{ duration: 0.6 }}
+          className="mb-10 text-center"
         >
-          <div className="inline-flex items-center gap-2 bg-orange-100 px-4 py-2 rounded-full mb-6">
-            <Wheat className="w-4 h-4 text-orange-600" />
-            <span className="text-orange-700 font-medium">TASTE OF TRADITION</span>
+          <div className="mb-3 flex items-center justify-center gap-3">
+            <div className="h-px w-10 bg-[#b5451b] opacity-50" />
+            <span
+              style={{
+                fontFamily: "'Cinzel', serif",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "#b5451b",
+              }}
+            >
+              Taste of Tradition
+            </span>
+            <div className="h-px w-10 bg-[#b5451b] opacity-50" />
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-[#2C1810] mb-6">
-            Flavors That Remember
+
+          <h2
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: "clamp(2rem, 4vw, 2.75rem)",
+              fontWeight: 700,
+              color: "#2c1810",
+            }}
+          >
+            Flavors That{" "}
+            <span
+              className="italic"
+              style={{
+                background: "linear-gradient(90deg, #b5451b, #e8a87c)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Remember
+            </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Every pitha, every sweet, every sip of pana carries a story. Not just of recipes, but of hands that prepared them, generations that passed them down, and hearts that still crave them.
+
+          <p
+            style={{
+              fontFamily: "'Lora', serif",
+              fontSize: "1rem",
+              lineHeight: 1.75,
+              color: "#7a5040",
+              maxWidth: "36rem",
+              margin: "0.75rem auto 0",
+            }}
+          >
+            Every pitha, every sip of pana carries a story — not just of recipes,
+            but of hands that prepared them and hearts that still crave them.
           </p>
         </motion.div>
 
-        {/* Food Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* ── Food Grid ── */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {foods.map((food, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
+              initial={{ opacity: 0, y: 24 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="group relative bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+              className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              style={{
+                background: "rgba(255,252,248,0.88)",
+                border: "1px solid rgba(181,69,27,0.12)",
+                boxShadow: "0 2px 16px rgba(44,24,16,0.07)",
+                backdropFilter: "blur(8px)",
+              }}
             >
-              {/* Image Container */}
-              <div className="relative h-48 w-full bg-gradient-to-br from-amber-100 to-orange-100">
+              {/* Image strip */}
+              <div
+                className="relative h-62 w-full overflow-hidden"
+                style={{
+                  background: "linear-gradient(135deg, #fdf0e8 0%, #f5e2d0 100%)",
+                }}
+              >
                 <Image
                   src={food.image}
                   alt={food.name}
                   fill
-                  className="object-contain p-4 group-hover:scale-110 transition-transform duration-700"
+                  className="object-cover p-2 transition-transform rounded-lg duration-700 group-hover:scale-105"
+                />
+
+                {/* Tag badge */}
+                <div
+                  className="absolute left-3 top-3 rounded-full px-3 py-1 text-white"
+                  style={{
+                    background: food.tagColor,
+                    fontSize: "0.7rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {food.tag}
+                </div>
+
+                {/* Bottom gradient bleed */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-8"
+                  style={{
+                    background:
+                      "linear-gradient(to top, rgba(255,252,248,0.95), transparent)",
+                  }}
                 />
               </div>
-              
+
               {/* Content */}
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-3xl">{food.icon}</span>
-                  <h3 className="text-xl font-bold text-[#2C1810]">{food.name}</h3>
+              <div className="px-3 pb-2 pt-2">
+                <div className="mb-2 flex items-center gap-2">
+                  <span style={{ fontSize: "1.5rem", lineHeight: 1 }}>{food.icon}</span>
+                  <h3
+                    style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: "1.2rem",
+                      fontWeight: 700,
+                      color: "#2c1810",
+                    }}
+                  >
+                    {food.name}
+                  </h3>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed">{food.description}</p>
+
+                {/* Accent line */}
+                <div
+                  style={{
+                    height: "1px",
+                    width: "2rem",
+                    background: food.tagColor,
+                    opacity: 0.4,
+                    marginBottom: "0.6rem",
+                  }}
+                />
+
+                <p
+                  style={{
+                    fontFamily: "'Lora', serif",
+                    fontSize: "0.875rem",
+                    lineHeight: 1.75,
+                    color: "#6b4c38",
+                  }}
+                >
+                  {food.description}
+                </p>
               </div>
 
-              {/* Decorative Corner */}
-              <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-amber-500/20 to-transparent rounded-tl-full"></div>
+              {/* Hover glow corner */}
+              <div
+                className="pointer-events-none absolute bottom-0 right-0 h-16 w-16 rounded-tl-full opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  background: `radial-gradient(circle at bottom right, ${food.tagColor}22, transparent)`,
+                }}
+              />
             </motion.div>
           ))}
         </div>
+
+        {/* ── Bottom quote ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.65 }}
+          className="mt-8 text-center"
+        >
+          <p
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: "1.15rem",
+              fontStyle: "italic",
+              color: "#9a6b50",
+            }}
+          >
+            "In every bite of a pitha, generations speak."
+          </p>
+        </motion.div>
+
       </div>
     </section>
   );

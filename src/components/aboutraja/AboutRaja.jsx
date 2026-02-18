@@ -19,9 +19,10 @@ export default function AboutPage() {
 
   return (
     <div ref={containerRef} className="bg-[#FDF2E9] text-gray-800 overflow-x-hidden">
-      <HeroSection />
       <SacredBondSection />
       <FourDaysSection />
+            <HeroSection />
+
       <FlavorsSection />
       <FarmersSection />
       <MemoriesSection />

@@ -10,7 +10,7 @@ const CardSection = () => {
     {
       title: "About Raja Parba",
       description: "Celebrating the divine womanhood and the rhythm of monsoon, where every heart dances with joy and traditions come alive.",
-      link: "#",
+      link: "about-raja",
       linkText: "Learn More",
       image: "/aboutraja1.png",
       icon: Heart

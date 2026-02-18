@@ -1,108 +1,236 @@
-// components/about/SacredBondSection.tsx
 "use client";
-
 import { useRef } from "react";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
-import { Heart } from "lucide-react";
 
 export default function SacredBondSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
-  return (
-    <section ref={ref} className="relative py-32 px-4 bg-gradient-to-b from-[#FDF2E9] to-[#F5E6D3] overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-40 left-10 w-72 h-72 bg-amber-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-40 right-10 w-96 h-96 bg-rose-200/30 rounded-full blur-3xl"></div>
-      </div>
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 20 },
+    animate: isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
+    transition: { duration: 0.6, delay, ease: "easeOut" },
+  });
 
-      <div className="relative max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+  return (
+    <section
+      ref={ref}
+      className="relative overflow-hidden bg-[#1a0a00] py-10"
+      style={{
+        background:
+          "linear-gradient(135deg, #1a0a00 0%, #2d1200 40%, #1a0810 100%)",
+      }}
+    >
+      {/* Subtle grain texture overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: "150px",
+        }}
+      />
+
+      {/* Radial glow behind image */}
+      <div
+        className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-[500px] w-[400px] opacity-30"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, #c0392b 0%, #8b1a4a 40%, transparent 70%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           
-          {/* Image Side */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.8 }}
-            className="relative"
-          >
-            <div className="relative h-[600px] w-full">
+          {/* ── Image Side ── */}
+          <motion.div {...fadeUp(0)} className="relative h-[380px] lg:h-[420px]">
+            {/* Decorative frame lines */}
+            <div className="absolute -left-3 -top-3 h-16 w-16 border-l-2 border-t-2 border-[#e8a87c] opacity-60" />
+            <div className="absolute -bottom-3 -right-3 h-16 w-16 border-b-2 border-r-2 border-[#e8a87c] opacity-60" />
+
+            {/* Image with blend */}
+            <div className="relative h-full w-full overflow-hidden rounded-sm">
               <Image
-                src="/images/womanhood.png"
-                alt="Womanhood and Earth"
+                src="/basudha1.png"
+                alt="Womanhood and Basudha"
                 fill
-                className="object-contain"
+                className="object-cover"
+                
+              />
+              {/* Duotone overlay */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(160deg, rgba(180,50,30,0.35) 0%, rgba(120,20,60,0.5) 60%, rgba(26,8,16,0.7) 100%)",
+                  mixBlendMode: "multiply",
+                }}
               />
             </div>
-            
-            {/* Floating Elements */}
-            <motion.div 
-              className="absolute -top-10 -right-10 text-7xl"
-              animate={{ rotate: [0, 10, -10, 0], y: [0, -10, 10, 0] }}
-              transition={{ duration: 8, repeat: Infinity }}
+
+            {/* Floating emoji accents */}
+            <motion.span
+              className="absolute -right-4 top-6 text-xl"
+              animate={{ y: [0, -6, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
             >
               🌸
-            </motion.div>
-            <motion.div 
-              className="absolute -bottom-10 -left-10 text-7xl"
-              animate={{ rotate: [0, -10, 10, 0], y: [0, 10, -10, 0] }}
-              transition={{ duration: 8, repeat: Infinity, delay: 2 }}
+            </motion.span>
+            <motion.span
+              className="absolute -left-4 bottom-10 text-lg"
+              animate={{ y: [0, 6, 0] }}
+              transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", delay: 0.5 }}
             >
               🌿
+            </motion.span>
+          </motion.div>
+
+          {/* ── Content Side ── */}
+          <div className="flex flex-col gap-5">
+            {/* Label */}
+            <motion.div {...fadeUp(0.15)} className="flex items-center gap-3">
+              <div className="h-px w-8 bg-[#e8a87c]" />
+              <span
+                className="text-xs font-semibold uppercase tracking-[0.2em] text-[#e8a87c]"
+                style={{ fontFamily: "'Cinzel', serif" }}
+              >
+                The Sacred Bond
+              </span>
             </motion.div>
-          </motion.div>
 
-          {/* Content Side */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.8 }}
-            className="space-y-6"
-          >
-            <div className="inline-flex items-center gap-2 bg-rose-100 px-4 py-2 rounded-full">
-              <Heart className="w-4 h-4 text-rose-600" />
-              <span className="text-rose-700 font-medium text-sm">THE SACRED BOND</span>
-            </div>
+            {/* Heading */}
+            <motion.h2
+              {...fadeUp(0.2)}
+              className="text-3xl font-bold leading-tight text-[#f5ede0] lg:text-4xl"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              Womanhood &{" "}
+              <span
+                className="italic"
+                style={{
+                  background: "linear-gradient(90deg, #e8a87c, #c0392b)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Basudha
+              </span>
+              <br />
+              <span className="text-2xl font-normal text-[#d4b896] lg:text-3xl">
+                Two Souls, One Rhythm
+              </span>
+            </motion.h2>
 
-            <h2 className="text-4xl md:text-5xl font-bold text-[#2C1810] leading-tight">
-              Womanhood & Basudha — 
-              <span className="text-rose-700"> Two Souls, One Rhythm</span>
-            </h2>
+            {/* Body */}
+            <motion.p
+              {...fadeUp(0.3)}
+              className="text-base leading-relaxed text-amber-100"
+              style={{ fontFamily: "'Lora', serif" }}
+            >
+              In the quiet wisdom of Odisha,{" "}
+              <span className="font-semibold text-amber-300">Basudha</span> —
+              Mother Earth — is never just soil. She breathes. She bleeds. She
+              creates. And for three sacred days of Raja, she rests.
+            </motion.p>
 
-            <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
-              <p>
-                In the quiet wisdom of Odisha, <span className="font-semibold text-rose-700">Basudha — Mother Earth — is never just soil.</span> She breathes. She bleeds. She creates. And for three sacred days of Raja, she rests.
+            {/* Pull quote */}
+            <motion.blockquote
+              {...fadeUp(0.38)}
+              className="relative border-l-2 border-[#c0392b] pl-4 py-1"
+            >
+              <p
+                className="text-sm italic leading-relaxed text-[#d4b896]"
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}
+              >
+                "Just as a woman is honored during her cycle, the Earth too is
+                given pause — a reminder that creation demands reverence, not
+                exploitation."
               </p>
-              
-              <p className="pl-6 border-l-4 border-rose-400 italic text-gray-600">
-                &quot;Just as a woman is honored during her cycle, the Earth too is given pause — a reminder that creation demands reverence, not exploitation.&quot;
-              </p>
-              
-              <p>
-                This is not mythology. This is ecology wrapped in emotion. When we celebrate Raja, we don&apos;t just mark a season. 
-                <span className="font-semibold text-[#2C1810]"> We acknowledge that the ground beneath our feet is alive — and like every living being, it deserves moments of rest, respect, and celebration.</span>
-              </p>
+            </motion.blockquote>
 
-              <p>
-                Raja teaches daughters they are powerful. It teaches sons to respect that power. In every swing that flies high, in every new dress worn with pride, Odisha whispers to its girls: 
-                <span className="font-bold text-rose-700"> &quot;You are Earth. You are sacred. You are celebrated.&quot;</span>
-              </p>
-            </div>
+            {/* Closing paragraph */}
+            <motion.p
+              {...fadeUp(0.45)}
+              className="text-base leading-relaxed text-amber-100"
+              style={{ fontFamily: "'Lora', serif" }}
+            >
+              This is ecology wrapped in emotion. When we celebrate Raja, we
+              acknowledge that the ground beneath our feet is{" "}
+              <em>alive</em> — and like every living being, it deserves moments
+              of rest and celebration. Raja teaches daughters they are powerful;
+              it teaches sons to revere that power.
+            </motion.p>
 
-            {/* Stats/Quote Box */}
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-rose-200">
-                <div className="text-3xl font-bold text-rose-700">3 Days</div>
-                <div className="text-sm text-gray-600">Of sacred rest for Mother Earth</div>
+            {/* Stats row */}
+            <motion.div
+              {...fadeUp(0.55)}
+              className="mt-1 flex items-stretch gap-4"
+            >
+              <div
+                className="flex flex-1 flex-col items-center justify-center rounded-sm py-4 px-3 text-center"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(232,168,124,0.2)",
+                }}
+              >
+                <span
+                  className="text-3xl font-bold text-[#e8a87c]"
+                  style={{ fontFamily: "'Cinzel', serif" }}
+                >
+                  3
+                </span>
+                <span className="mt-0.5 text-xs uppercase tracking-widest text-[#9a7d5e]">
+                  Sacred Days
+                </span>
+                <span className="mt-1 text-[11px] text-[#7a6045]">
+                  of rest for Mother Earth
+                </span>
               </div>
-              <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-rose-200">
-                <div className="text-3xl font-bold text-rose-700">∞</div>
-                <div className="text-sm text-gray-600">Generations of wisdom</div>
+
+              <div
+                className="flex flex-1 flex-col items-center justify-center rounded-sm py-4 px-3 text-center"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(192,57,43,0.2)",
+                }}
+              >
+                <span
+                  className="text-3xl font-bold text-[#c0392b]"
+                  style={{ fontFamily: "'Cinzel', serif" }}
+                >
+                  ∞
+                </span>
+                <span className="mt-0.5 text-xs uppercase tracking-widest text-[#9a7d5e]">
+                  Generations
+                </span>
+                <span className="mt-1 text-[11px] text-[#7a6045]">
+                  of living wisdom
+                </span>
               </div>
-            </div>
-          </motion.div>
+
+              <div
+                className="flex flex-1 flex-col items-center justify-center rounded-sm py-4 px-3 text-center"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(232,168,124,0.15)",
+                }}
+              >
+                <span
+                  className="text-3xl font-bold text-[#e8a87c]"
+                  style={{ fontFamily: "'Cinzel', serif" }}
+                >
+                  🌸
+                </span>
+                <span className="mt-0.5 text-xs uppercase tracking-widest text-[#9a7d5e]">
+                  Raja Festival
+                </span>
+                <span className="mt-1 text-[11px] text-[#7a6045]">
+                  You are Earth. You are sacred.
+                </span>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>

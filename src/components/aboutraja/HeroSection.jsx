@@ -1,87 +1,100 @@
-// components/about/RotatingHeroSection.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Playfair_Display, Cinzel, Cormorant_Garamond } from 'next/font/google';
+import { Playfair_Display, Cinzel, Cormorant_Garamond } from "next/font/google";
 
-// Beautiful font options
-const playfair = Playfair_Display({ 
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
-const cinzel = Cinzel({ 
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  display: 'swap',
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
-// Additional elegant font option
-const cormorant = Cormorant_Garamond({ 
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const elements = [
   {
     id: 1,
     title: "Poda Pitha",
-    description: "The smoky-sweet aroma that wakes up with the sun. Baked overnight in earth ovens, every bite carries generations of love.",
+    description:
+      "The smoky-sweet aroma that wakes up with the sun. Baked overnight in earth ovens, every bite carries generations of love.",
     image: "/podapitha2.png",
-    icon: "🔥"
+    icon: "🔥",
+    accent: "#e8a87c",
   },
   {
     id: 2,
     title: "Manda Pitha",
-    description: "Soft rice dumplings cradling sweet coconut and jaggery. Steamed to perfection, they melt like memories on your tongue.",
+    description:
+      "Soft rice dumplings cradling sweet coconut and jaggery. Steamed to perfection, they melt like memories on your tongue.",
     image: "/mandapitha.png",
-    icon: "🥟"
+    icon: "🥟",
+    accent: "#a8d5a2",
   },
   {
     id: 3,
     title: "Raja Doli",
-    description: "Swings tied to ancient mango branches. Girls fly high, touching the sky, their laughter becoming the music of monsoon.",
+    description:
+      "Swings tied to ancient mango branches. Girls fly high, touching the sky, their laughter becoming the music of monsoon.",
     image: "/rajadoli2.png",
-    icon: "🌿"
+    icon: "🌿",
+    accent: "#a8d5a2",
   },
   {
     id: 4,
     title: "Chenna Poda",
-    description: "The cheesecake of Odisha — caramelized, burnt, beautiful. A dessert that tastes like celebration itself.",
+    description:
+      "The cheesecake of Odisha — caramelized, burnt, beautiful. A dessert that tastes like celebration itself.",
     image: "/chenapoda.png",
-    icon: "🍰"
+    icon: "🍰",
+    accent: "#e8a87c",
   },
   {
     id: 5,
     title: "Alta & Mehndi",
-    description: "Red alta tracing poetry on feet. Mehndi blooming like monsoon flowers on open palms. Every girl becomes a goddess.",
+    description:
+      "Red alta tracing poetry on feet. Mehndi blooming like monsoon flowers on open palms. Every girl becomes a goddess.",
     image: "/alata.png",
-    icon: "🌸"
+    icon: "🌸",
+    accent: "#f4a0a0",
   },
   {
     id: 6,
     title: "New Dresses",
-    description: "The rustle of new cotton. Bright colors mirroring the rain-washed earth. Raja's first gift to every daughter.",
+    description:
+      "The rustle of new cotton. Bright colors mirroring the rain-washed earth. Raja's first gift to every daughter.",
     image: "/nuadress.png",
-    icon: "👗"
+    icon: "👗",
+    accent: "#e8b4e8",
   },
   {
     id: 7,
     title: "Ludo & Games",
-    description: "Courtyards filled with dice and laughter. Three days where work pauses and play begins. Childhood, relived.",
+    description:
+      "Courtyards filled with dice and laughter. Three days where work pauses and play begins. Childhood, relived.",
     image: "/mandir3.png",
-    icon: "🎲"
+    icon: "🎲",
+    accent: "#e8a87c",
   },
   {
     id: 8,
     title: "Mitha Pana",
-    description: "Courtyards filled with dice and laughter. Three days where work pauses and play begins. Childhood, relived.",
+    description:
+      "Cool palm-sugar drinks on warm monsoon afternoons. Every sip is a pause — sweet, slow, sacred.",
     image: "/mithapana.png",
-    icon: "🎲"
+    icon: "🥤",
+    accent: "#a8d5a2",
   },
 ];
 
@@ -90,143 +103,261 @@ export default function HeroSection() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % elements.length);
+      setActiveIndex((p) => (p + 1) % elements.length);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
 
-  // Beautiful gradient background
-  const gradientBg = "bg-gradient-to-br from-emerald-500 via-teal-100 to-emerald-600";
+  const active = elements[activeIndex];
 
   return (
-    <section className={`relative h-[550px] md:h-[450px] w-full overflow-hidden ${gradientBg}`}>
-      
-      {/* MANDALA LEFT - 60% visible */}
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[300px] md:w-[480px] h-[300px] md:h-[500px] opacity-30 md:opacity-100 pointer-events-none">
-        <div className="relative w-full h-full md:ml-[-150px]">
-          <Image
-            src="/mandala3.png"
-            alt="Decorative mandala"
-            fill
-            className="object-contain drop-shadow-2xl animate-[spin_50s_linear_infinite_reverse] "
-            priority
-          />
-        </div>
+    <section
+      className="relative w-full overflow-hidden"
+      style={{
+        height: "clamp(420px, 52vw, 520px)",
+        background:
+          "linear-gradient(135deg, #1a0818 0%, #2d0f1e 35%, #220a18 65%, #1a0810 100%)",
+      }}
+    >
+      {/* Grain */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.08]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: "200px",
+          mixBlendMode: "overlay",
+        }}
+      />
+
+      {/* Static deep crimson-plum radial atmosphere */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at 20% 50%, rgba(160,30,80,0.25) 0%, transparent 55%)," +
+            "radial-gradient(ellipse at 80% 50%, rgba(100,15,50,0.2) 0%, transparent 55%)",
+        }}
+      />
+
+      {/* Dynamic per-slide accent glow */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`glow-${activeIndex}`}
+          className="pointer-events-none absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          style={{
+            background: `radial-gradient(ellipse at 70% 50%, ${active.accent}18 0%, transparent 60%)`,
+          }}
+        />
+      </AnimatePresence>
+
+      {/* Mandala RIGHT — behind image, purely decorative */}
+      <div
+        className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2"
+        style={{ width: "420px", height: "420px", opacity: 0.1 }}
+      >
+        <Image
+          src="/mandala3.png"
+          alt=""
+          fill
+          className="object-contain"
+          style={{ animation: "spin 60s linear infinite reverse" }}
+        />
       </div>
 
-      {/* MANDALA RIGHT - subtle accent */}
-      <div className="absolute right-0 bottom-0 w-[200px] md:w-[350px] h-[200px] md:h-[350px] opacity-40 pointer-events-none">
-        <div className="relative w-full h-full md:mr-[-100px]">
-          <Image
-            src="/mandala2.png"
-            alt="Decorative mandala"
-            fill
-            className="object-contain drop-shadow-2xl animate-[spin_50s_linear_infinite_reverse]"
-          />
-        </div>
+      {/* Mandala LEFT — barely visible edge accent */}
+      <div
+        className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2"
+        style={{
+          width: "180px",
+          height: "180px",
+          opacity: 0.06,
+          marginLeft: "-60px",
+        }}
+      >
+        <Image
+          src="/mandala2.png"
+          alt=""
+          fill
+          className="object-contain"
+          style={{ animation: "spin 80s linear infinite" }}
+        />
       </div>
 
-      {/* Decorative Pattern Overlay */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 w-40 h-40 border-4 border-amber-200/30 rounded-full"></div>
-        <div className="absolute bottom-10 right-10 w-60 h-60 border-4 border-amber-200/20 rounded-full"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border-2 border-amber-200/10 rounded-full"></div>
-      </div>
+      {/* ── Main layout ── */}
+      <div className="relative h-full mx-auto max-w-6xl px-6 lg:px-10 flex items-center z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center w-full">
 
-      {/* Soft Floating Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(12)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute  text-xl"
-            initial={{
-              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-              y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-              rotate: 0
-            }}
-            animate={{
-              y: [null, -20, 20, -20],
-              rotate: 360
-            }}
-            transition={{
-              duration: 12 + Math.random() * 8,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          >
-            {["🌸", "🌿", "🍂", "🌺", "🌾"][Math.floor(Math.random() * 5)]}
-          </motion.div>
-        ))}
-      </div>
+          {/* ── Left: Text ── */}
+          <div className="order-2 lg:order-1">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`text-${activeIndex}`}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                {/* Label */}
+                <div className="mb-3 flex items-center gap-3">
+                  <span style={{ fontSize: "1.8rem", lineHeight: 1 }}>
+                    {active.icon}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-px w-6"
+                      style={{ background: active.accent, opacity: 0.8 }}
+                    />
+                    <span
+                      className={cinzel.className}
+                      style={{
+                        fontSize: "0.65rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.22em",
+                        textTransform: "uppercase",
+                        color: active.accent,
+                      }}
+                    >
+                      The Soul of Raja
+                    </span>
+                  </div>
+                </div>
 
-      {/* Main Content - Centered vertically */}
-      <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center z-10">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
-          
-          {/* Left Content */}
-          <motion.div
-            key={`content-${activeIndex}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-white order-2 lg:order-1"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-4xl">{elements[activeIndex].icon}</span>
-              <span className={`text-amber-300 font-medium tracking-[0.2em] text-xs uppercase ${cinzel.className}`}>
-                The Soul of Raja
-              </span>
-            </div>
-            
-            <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold mb-4 leading-tight ${playfair.className}`}>
-              {elements[activeIndex].title}
-            </h1>
-            
-            <p className={`text-base sm:text-lg text-amber-50/90 leading-relaxed mb-6 max-w-xl ${cormorant.className}`}>
-              {elements[activeIndex].description}
-            </p>
+                {/* Title */}
+                <h1
+                  className={playfair.className}
+                  style={{
+                    fontSize: "clamp(2.2rem, 5vw, 3.4rem)",
+                    fontWeight: 700,
+                    lineHeight: 1.1,
+                    color: "#f5e8f0",
+                    marginBottom: "0.75rem",
+                  }}
+                >
+                  {active.title}
+                </h1>
 
-            {/* Progress Indicators */}
-            <div className="flex gap-2">
-              {elements.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveIndex(idx)}
-                  className={`h-1 rounded-full transition-all duration-300 ${
-                    idx === activeIndex 
-                      ? "w-10 bg-amber-400" 
-                      : "w-3 bg-amber-200/30 hover:bg-amber-300/50"
-                  }`}
-                  aria-label={`Go to slide ${idx + 1}`}
+                {/* Accent line */}
+                <div
+                  style={{
+                    height: "2px",
+                    width: "48px",
+                    background: `linear-gradient(90deg, ${active.accent}, transparent)`,
+                    marginBottom: "0.9rem",
+                    borderRadius: "2px",
+                  }}
                 />
-              ))}
-            </div>
-          </motion.div>
 
-          {/* Right Image */}
-          <motion.div
-            key={`image-${activeIndex}`}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="relative h-[220px] sm:h-[280px] md:h-[350px] w-full order-1 lg:order-2"
+                {/* Description */}
+                <p
+                  className={cormorant.className}
+                  style={{
+                    fontSize: "1.1rem",
+                    lineHeight: 1.75,
+                    color: "rgba(245,232,240,0.75)",
+                    maxWidth: "28rem",
+                    marginBottom: "1.5rem",
+                  }}
+                >
+                  {active.description}
+                </p>
+
+                {/* Progress dots */}
+                <div className="flex gap-2 items-center">
+                  {elements.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveIndex(idx)}
+                      style={{
+                        height: "3px",
+                        width: idx === activeIndex ? "2rem" : "0.6rem",
+                        borderRadius: "2px",
+                        background:
+                          idx === activeIndex
+                            ? active.accent
+                            : "rgba(245,232,240,0.2)",
+                        transition: "all 0.3s ease",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                      }}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* ── Right: Image ── */}
+          <div
+            className="order-1 lg:order-2 relative flex items-center justify-center"
+            style={{ height: "clamp(200px, 32vw, 360px)" }}
           >
-            {/* Soft glow behind image */}
-            <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-3xl transform scale-75"></div>
-            
-            <Image
-              src={elements[activeIndex].image}
-              alt={elements[activeIndex].title}
-              fill
-              className="object-contain drop-shadow-2xl"
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
+            {/* Glow halo */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`halo-${activeIndex}`}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6 }}
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: `radial-gradient(ellipse at center, ${active.accent}35 0%, ${active.accent}12 40%, transparent 70%)`,
+                  filter: "blur(18px)",
+                  transform: "scale(0.85)",
+                }}
+              />
+            </AnimatePresence>
+
+            {/* Decorative ring */}
+            <div
+              className="absolute inset-4 rounded-full pointer-events-none"
+              style={{
+                border: `1px solid ${active.accent}22`,
+              }}
             />
-          </motion.div>
+
+            {/* Image */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`img-${activeIndex}`}
+                initial={{ opacity: 0, scale: 0.92, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                transition={{ duration: 0.55, ease: "easeOut" }}
+                className="relative w-full h-full"
+              >
+                <Image
+                  src={active.image}
+                  alt={active.title}
+                  fill
+                  className="object-contain"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{
+                    filter: "drop-shadow(0 8px 40px rgba(160,30,80,0.4))",
+                  }}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
         </div>
       </div>
 
-      
+      {/* Bottom fade */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-12"
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent, rgba(20,4,12,0.5))",
+        }}
+      />
     </section>
   );
 }
