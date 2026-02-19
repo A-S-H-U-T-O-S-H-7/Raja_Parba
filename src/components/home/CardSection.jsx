@@ -18,7 +18,7 @@ const CardSection = () => {
     {
       title: "Event Highlights",
       description: "From colorful swings to melodious folk songs, immerse yourself in the vibrant celebrations that touch your soul.",
-      link: "#",
+      link: "events",
       linkText: "View Events",
       image: "/eventhighlight1.png",
       icon: Sparkles
