@@ -91,6 +91,12 @@ export default function Header() {
               >
                 Gallery
               </Link>
+              <Link 
+                href="/guests" 
+                className="px-4 py-2 text-red-800 hover:text-red-600 font-bold text-base xl:text-lg transition-colors"
+              >
+                Our Guests
+              </Link>
             </nav>
 
             {/* Desktop Right Section - Conditional based on login */}

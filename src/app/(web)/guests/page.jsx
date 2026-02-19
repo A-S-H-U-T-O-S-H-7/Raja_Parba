@@ -1,11 +1,10 @@
-import JagannathSchedule from '@/components/dailyevent/DailyEvent'
+import GuestsPage from '@/components/guests/Guests'
 import React from 'react'
 
 function page() {
   return (
     <div>
-        
-      <JagannathSchedule />
+      <GuestsPage/>
     </div>
   )
 }

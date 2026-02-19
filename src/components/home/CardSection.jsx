@@ -26,7 +26,7 @@ const CardSection = () => {
     {
       title: "Photo Gallery",
       description: "Precious moments frozen in time, capturing the laughter, colors, and traditions of this beautiful festival.",
-      link: "#",
+      link: "gallery",
       linkText: "View Photos",
       image: "/raja-gallery.png",
       icon: Camera
@@ -34,7 +34,7 @@ const CardSection = () => {
     {
       title: "Our Guests",
       description: "Welcoming honored souls who grace our celebration and make this festival even more memorable.",
-      link: "#",
+      link: "guests",
       linkText: "Meet Our Guests",
       image: "/guestbanner.png",
       icon: Users
