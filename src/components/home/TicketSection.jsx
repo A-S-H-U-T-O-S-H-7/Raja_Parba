@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Playfair_Display, Cinzel } from "next/font/google";
+import Link from "next/link";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -86,6 +87,7 @@ const TicketSection = () => {
             </p>
 
             {/* CTA Button */}
+            <Link href="/about-raja" >
             <div className="flex items-center justify-center md:justify-start">
               <button className="group relative inline-flex items-center gap-2 px-6 md:px-8 py-3.5 bg-gradient-to-r from-red-800 via-red-400 to-red-900 text-white font-semibold rounded-xl shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-purple-500/40 transform hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-800 via-red-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -97,6 +99,7 @@ const TicketSection = () => {
                 </span>
               </button>
             </div>
+            </Link>
 
           </div>
         </div>
