@@ -167,7 +167,7 @@ Join us in shaping unforgettable moments. Your support lets dreams soar and comm
       </div>
 
       {/* Corner Design - Fixed to overlap outside */}
-              <div className="absolute bottom-[-30px] left-[-10px] md:bottom-[-60px] md:left-[-50px] w-24 h-24 md:w-72 md:h-72 z-20">
+              <div className="absolute bottom-[-15px] left-[-10px] md:bottom-[-60px] md:left-[-50px] w-28 h-28 md:w-72 md:h-72 z-20">
                 <Image
                   src="/greencorner.png"
                   alt="corner design"
@@ -175,7 +175,7 @@ Join us in shaping unforgettable moments. Your support lets dreams soar and comm
                   className="object-contain transform "
                 />
               </div>
-              <div className="absolute   bottom-[-30px] right-[-50px] md:bottom-[-60px] md:right-[-50px] w-24 h-24 md:w-72 md:h-72 z-20">
+              <div className="absolute   bottom-[-15px] right-[-10px] md:bottom-[-60px] md:right-[-50px] w-28 h-28 md:w-72 md:h-72 z-20">
                 <Image
                   src="/greencorner.png"
                   alt="corner design"

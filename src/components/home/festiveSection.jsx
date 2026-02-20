@@ -19,7 +19,7 @@ const ExperienceSection = () => {
   const experiences = [
     {
       title: "Raja Swing & Games",
-      description: "Experience the joy of traditional swings and participate in festive games",
+      description: "Experience the joy of traditional swings and participate in festival",
       image: "/raja-swing.png"
     },
     

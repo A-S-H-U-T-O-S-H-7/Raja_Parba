@@ -192,6 +192,12 @@ export default function Header() {
                 >
                   Gallery
                 </Link>
+                <Link 
+                href="/guests" 
+                className="px-4 py-2 text-red-800 hover:text-red-600 font-bold text-base xl:text-lg transition-colors"
+              >
+                Our Guests
+              </Link>
                 
                 {/* Mobile CTA Buttons - Conditional based on login */}
                 <div className="flex flex-col gap-3 mt-4 px-4">
