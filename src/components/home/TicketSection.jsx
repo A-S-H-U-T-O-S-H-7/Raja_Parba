@@ -45,7 +45,7 @@ const TicketSection = () => {
         <div className="flex flex-col md:flex-row items-center md:h-[420px]">
 
           {/* Mandala Left */}
-          <div className="relative w-full md:w-auto flex justify-center md:justify-start overflow-hidden md:overflow-visible py-8 md:py-0">
+          <div className="relative w-full md:w-auto flex justify-center md:justify-start overflow-hidden md:overflow-visible py-2 md:py-0">
             <div className="relative w-[280px] h-[280px] md:w-[450px] md:h-[490px] md:ml-[-200px]">
               <Image
                 src="/mandala.png"
@@ -58,7 +58,7 @@ const TicketSection = () => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 text-center md:text-left px-6 md:px-12 lg:px-16 pb-1 pt-8 md:py-0 relative z-20">
+          <div className="flex-1 text-center md:text-left px-6 md:px-12 lg:px-16 pb-1 pt-2 md:pt-8 md:py-0 relative z-20">
 
             {/* Top Label */}
             <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
@@ -87,12 +87,12 @@ const TicketSection = () => {
 
             {/* CTA Button */}
             <div className="flex items-center justify-center md:justify-start">
-              <button className="group relative inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-purple-500/40 transform hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <button className="group relative inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-red-800 via-red-400 to-red-900 text-white font-semibold rounded-xl shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-purple-500/40 transform hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-red-800 via-red-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative flex items-center gap-2">
                   <span className="text-xl">🌸</span>
                   <span className={`${cinzel.className} text-sm md:text-base`}>
-                    Explore the Culture Behind Raja
+                    Explore the Culture Behind ... 
                   </span>
                 </span>
               </button>

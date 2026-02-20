@@ -112,7 +112,7 @@ export default function HeroSection() {
 
   return (
     <section
-      className="relative w-full overflow-hidden"
+      className="relative w-full overflow-hidden "
       style={{
         height: "clamp(420px, 52vw, 520px)",
         background:
@@ -188,7 +188,7 @@ export default function HeroSection() {
       </div>
 
       {/* ── Main layout ── */}
-      <div className="relative h-full mx-auto max-w-6xl px-6 lg:px-10 flex items-center z-10">
+      <div className="relative h-full mx-auto max-w-6xl  px-6 lg:px-10 flex items-center z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center w-full">
 
           {/* ── Left: Text ── */}

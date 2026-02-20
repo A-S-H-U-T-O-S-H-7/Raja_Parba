@@ -20,16 +20,16 @@ export default function FarmersSection() {
       className="relative overflow-hidden"
       style={{
         background:
-          "linear-gradient(175deg, #0e1520 0%, #111e2a 25%, #152415 50%, #1a2a1a 75%, #0e1a10 100%)",
+          "linear-gradient(175deg, #0a1a0a 0%, #0d1f0d 25%, #122412 50%, #162a16 75%, #0e1a0e 100%)",
       }}
     >
-      {/* Atmospheric radial glow — stormy sky feel */}
+      {/* Atmospheric radial glow — earthy green tones only */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 60% 20%, rgba(60,90,130,0.25) 0%, transparent 60%)," +
-            "radial-gradient(ellipse at 20% 80%, rgba(30,80,40,0.2) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 60% 20%, rgba(40,90,40,0.3) 0%, transparent 60%)," +
+            "radial-gradient(ellipse at 20% 80%, rgba(30,80,30,0.2) 0%, transparent 50%)",
         }}
       />
 
@@ -42,7 +42,7 @@ export default function FarmersSection() {
         }}
       />
 
-      {/* Rain streaks */}
+      {/* Rain streaks — green-tinted */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {[...Array(32)].map((_, i) => (
           <motion.div
@@ -54,7 +54,7 @@ export default function FarmersSection() {
               width: "1px",
               height: "45px",
               background:
-                "linear-gradient(to bottom, transparent, rgba(140,180,220,0.18), transparent)",
+                "linear-gradient(to bottom, transparent, rgba(120,200,120,0.15), transparent)",
             }}
             initial={{ y: -60 }}
             animate={{ y: "110vh" }}
@@ -68,8 +68,6 @@ export default function FarmersSection() {
         ))}
       </div>
 
-     
-
       {/* ── Main content ── */}
       <div className="relative mx-auto max-w-8xl px-6 py-12 lg:px-10">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
@@ -79,37 +77,37 @@ export default function FarmersSection() {
 
             {/* Label */}
             <motion.div {...fadeUp(0)} className="flex items-center gap-3">
-              <div className="h-px w-8" style={{ background: "#7eb8d4" }} />
+              <div className="h-px w-8" style={{ background: "#6abf6a" }} />
               <span
                 style={{
-                  fontFamily: "'Cinzel', serif",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
                   fontSize: "0.75rem",
                   fontWeight: 600,
                   letterSpacing: "0.2em",
                   textTransform: "uppercase",
-                  color: "#7eb8d4",
+                  color: "#6abf6a",
                 }}
               >
                 The Sacred Pause
               </span>
             </motion.div>
 
-            {/* Heading */}
+            {/* Heading — keeping serif for title as requested */}
             <motion.h2
               {...fadeUp(0.1)}
               style={{
-                fontFamily: "'Cormorant Garamond', serif",
+                fontFamily: "Georgia, 'Times New Roman', serif",
                 fontSize: "clamp(2rem, 4vw, 2.75rem)",
                 fontWeight: 700,
                 lineHeight: 1.2,
-                color: "#eef2f0",
+                color: "#eef2ee",
               }}
             >
               Waiting for the{" "}
               <span
                 className="italic"
                 style={{
-                  background: "linear-gradient(90deg, #7eb8d4, #a8d5a2)",
+                  background: "linear-gradient(90deg, #6abf6a, #a8d5a2)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -118,14 +116,14 @@ export default function FarmersSection() {
               </span>
             </motion.h2>
 
-            {/* Paragraphs */}
+            {/* Paragraphs — normal system font */}
             <motion.p
               {...fadeUp(0.2)}
               style={{
-                fontFamily: "'Lora', serif",
+                fontFamily: "system-ui, -apple-system, sans-serif",
                 fontSize: "1rem",
                 lineHeight: 1.8,
-                color: "#b8ccd8",
+                color: "#b0c8b0",
               }}
             >
               When Raja ends, farmers don&apos;t rush to their fields. They wait.
@@ -139,10 +137,10 @@ export default function FarmersSection() {
             <motion.p
               {...fadeUp(0.28)}
               style={{
-                fontFamily: "'Lora', serif",
+                fontFamily: "system-ui, -apple-system, sans-serif",
                 fontSize: "1rem",
                 lineHeight: 1.8,
-                color: "#9ab8aa",
+                color: "#90b090",
               }}
             >
               This is not just agriculture. This is conversation. For generations,
@@ -156,15 +154,15 @@ export default function FarmersSection() {
             <motion.p
               {...fadeUp(0.35)}
               style={{
-                fontFamily: "'Lora', serif",
+                fontFamily: "system-ui, -apple-system, sans-serif",
                 fontSize: "1rem",
                 lineHeight: 1.8,
-                color: "#9ab8aa",
+                color: "#90b090",
               }}
             >
               The first monsoon rain after Raja is not just water. It is blessing.
               It is permission. It is the Earth saying,{" "}
-              <em style={{ color: "#c8dff0" }}>
+              <em style={{ color: "#c0e0b0" }}>
                 "I am ready now. Let us create together."
               </em>
             </motion.p>
@@ -174,19 +172,19 @@ export default function FarmersSection() {
               {...fadeUp(0.42)}
               className="rounded-xl p-5"
               style={{
-                background: "rgba(14,21,32,0.6)",
-                border: "1px solid rgba(126,184,212,0.2)",
+                background: "rgba(10,26,10,0.7)",
+                border: "1px solid rgba(106,191,106,0.2)",
                 backdropFilter: "blur(10px)",
               }}
             >
               <span style={{ fontSize: "1.6rem" }}>🌧️</span>
               <p
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
                   fontSize: "1.15rem",
                   fontStyle: "italic",
                   lineHeight: 1.7,
-                  color: "#c8dff0",
+                  color: "#c0e0b0",
                   marginTop: "0.5rem",
                 }}
               >
@@ -195,10 +193,10 @@ export default function FarmersSection() {
               </p>
               <p
                 style={{
-                  fontFamily: "'Cinzel', serif",
+                  fontFamily: "system-ui, -apple-system, sans-serif",
                   fontSize: "0.68rem",
                   letterSpacing: "0.12em",
-                  color: "#5a8aaa",
+                  color: "#4a8a4a",
                   marginTop: "0.5rem",
                 }}
               >
@@ -214,12 +212,12 @@ export default function FarmersSection() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="relative"
           >
-            {/* Glow frame */}
+            {/* Glow frame — green only */}
             <div
               className="absolute -inset-3 rounded-2xl opacity-20"
               style={{
                 background:
-                  "linear-gradient(135deg, #7eb8d4, transparent 60%)",
+                  "linear-gradient(135deg, #6abf6a, transparent 60%)",
               }}
             />
 
@@ -228,7 +226,7 @@ export default function FarmersSection() {
               style={{
                 height: "420px",
                 boxShadow:
-                  "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(126,184,212,0.12)",
+                  "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(106,191,106,0.12)",
               }}
             >
               <Image
@@ -246,7 +244,7 @@ export default function FarmersSection() {
                 className="absolute inset-x-0 bottom-0 h-24"
                 style={{
                   background:
-                    "linear-gradient(to top, rgba(10,20,26,0.9), transparent)",
+                    "linear-gradient(to top, rgba(10,26,10,0.9), transparent)",
                 }}
               />
 
@@ -256,26 +254,26 @@ export default function FarmersSection() {
                 style={{
                   background: "rgba(0,0,0,0.5)",
                   backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(126,184,212,0.2)",
+                  border: "1px solid rgba(106,191,106,0.2)",
                 }}
               >
                 <p
                   style={{
-                    fontFamily: "'Cinzel', serif",
+                    fontFamily: "system-ui, -apple-system, sans-serif",
                     fontSize: "0.65rem",
                     letterSpacing: "0.15em",
                     textTransform: "uppercase",
-                    color: "#7eb8d4",
+                    color: "#6abf6a",
                   }}
                 >
                   After Raja ends
                 </p>
                 <p
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "Georgia, 'Times New Roman', serif",
                     fontSize: "1rem",
                     fontWeight: 700,
-                    color: "#eef2f0",
+                    color: "#eef2ee",
                   }}
                 >
                   The Earth speaks. Farmers listen.
@@ -285,8 +283,6 @@ export default function FarmersSection() {
           </motion.div>
         </div>
       </div>
-
-      
     </section>
   );
 }

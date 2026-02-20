@@ -18,20 +18,22 @@ const cinzel = Cinzel({
 const ExperienceSection = () => {
   const experiences = [
     {
-      title: "Dance & Music",
-      description: "Immerse yourself in the vibrant folk dances and melodious music",
-      image: "/raja-celebration.png"
+      title: "Raja Swing & Games",
+      description: "Experience the joy of traditional swings and participate in festive games",
+      image: "/raja-swing.png"
     },
+    
     {
       title: "Pitha & Delicacies",
       description: "Savor authentic Odia delicacies and traditional sweet pithas",
       image: "/pitha-delicacies.png"
     },
     {
-      title: "Raja Swing & Games",
-      description: "Experience the joy of traditional swings and participate in festive games",
-      image: "/raja-swing.png"
-    }
+      title: "Dance & Music",
+      description: "Immerse yourself in the vibrant folk dances and melodious music",
+      image: "/raja-celebration.png"
+    },
+    
   ];
 
   return (
@@ -127,7 +129,7 @@ const ExperienceSection = () => {
         </div>
 
         {/* Corner Design - Fixed to overlap outside */}
-        <div className="absolute bottom-[-30px] left-[-10px] md:bottom-[-60px] md:left-[-50px] w-24 h-24 md:w-72 md:h-72 z-20">
+        <div className="absolute bottom-[-30px] left-[-15px] md:bottom-[-60px] md:left-[-50px] w-32 h-32 md:w-72 md:h-72 z-20">
           <Image
             src="/greencorner.png"
             alt="corner design"
@@ -135,7 +137,7 @@ const ExperienceSection = () => {
             className="object-contain transform "
           />
         </div>
-        <div className="absolute   bottom-[-30px] right-[-50px] md:bottom-[-60px] md:right-[-50px] w-24 h-24 md:w-72 md:h-72 z-20">
+        <div className="absolute   bottom-[-30px] right-[-15px] md:bottom-[-60px] md:right-[-50px] w-32 h-32 md:w-72 md:h-72 z-20">
           <Image
             src="/greencorner.png"
             alt="corner design"

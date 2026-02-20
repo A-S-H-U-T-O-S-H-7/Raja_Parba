@@ -82,7 +82,7 @@ export default function SponsorPerformerSection() {
   };
 
   return (
-    <div className="relative  bg-gradient-to-br from-indigo-200 via-white to-cyan-200   rounded-2xl overflow-hidden">
+    <div className="relative  bg-gradient-to-br from-teal-200 via-white to-teal-200   rounded-2xl overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-0 -left-4 w-32 h-32 bg-purple-300 rounded-full   animate-blob"></div>
@@ -99,7 +99,7 @@ export default function SponsorPerformerSection() {
           <div className="mb-10">
             
             
-            <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent leading-tight mb-2">
+            <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 via-amber-500 to-rose-800 bg-clip-text text-transparent leading-tight mb-2">
               Where Dreams Meet Opportunity
             </h1>
             
@@ -112,11 +112,11 @@ export default function SponsorPerformerSection() {
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {/* Sponsor Card */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur-lg opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-pink-600 rounded-3xl blur-lg opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
               <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-2">
               
               <div className='flex justify-center gap-4 '>
-                <div className=" w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center   transform group-hover:scale-110 transition-transform duration-300">
+                <div className=" w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-rose-500 to-pink-500 rounded-2xl flex items-center justify-center   transform group-hover:scale-110 transition-transform duration-300">
                   <Heart className="w-4 h-4 text-white" />
                 </div>
                 
@@ -128,7 +128,7 @@ Join us in shaping unforgettable moments. Your support lets dreams soar and comm
 
                 <button
                   onClick={() => setShowSponsorModal(true)}
-                  className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 md:py-4 px-4 md:px-8 rounded-xl md:rounded-2xl hover:shadow-lg  flex items-center justify-center group-hover:shadow-purple-500/25"
+                  className="w-full cursor-pointer bg-gradient-to-r from-rose-600 via-rose-500 to-pink-800 text-white font-semibold py-3 md:py-4 px-4 md:px-8 rounded-xl md:rounded-2xl hover:shadow-lg  flex items-center justify-center group-hover:shadow-purple-500/25"
                 >
                   <Star className="w-5 h-5 mr-2" />
                   Partner With Us
@@ -138,11 +138,11 @@ Join us in shaping unforgettable moments. Your support lets dreams soar and comm
 
             {/* Performer Card */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-3xl blur-lg opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl blur-lg opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
               <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-2">
               
               <div className='flex justify-center gap-4 '>
-                <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl flex items-center justify-center ">
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center ">
                   <Mic className="w-4 h-4 text-white" />
                 </div>
                 
@@ -155,7 +155,7 @@ Join us in shaping unforgettable moments. Your support lets dreams soar and comm
                 
                 <button
                   onClick={() => setShowPerformerModal(true)}
-                  className="w-full cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-semibold py-3 md:py-4 px-4 md:px-8 rounded-xl md:rounded-2xl hover:shadow-lg  flex items-center justify-center group-hover:shadow-indigo-500/25"
+                  className="w-full cursor-pointer bg-gradient-to-r from-emerald-600 via-teal-400 to-teal-600 text-white font-semibold py-3 md:py-4 px-4 md:px-8 rounded-xl md:rounded-2xl hover:shadow-lg  flex items-center justify-center group-hover:shadow-indigo-500/25"
                 >
                   <Users className="w-5 h-5 mr-2" />
                   Share Your Talent

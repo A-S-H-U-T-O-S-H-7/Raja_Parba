@@ -44,7 +44,7 @@ export default function SacredBondSection() {
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           
           {/* ── Image Side ── */}
-          <motion.div {...fadeUp(0)} className="relative h-[380px] lg:h-[420px]">
+          <motion.div {...fadeUp(0)} className="relative h-[250px] lg:h-[420px]">
             {/* Decorative frame lines */}
             <div className="absolute -left-3 -top-3 h-16 w-16 border-l-2 border-t-2 border-[#e8a87c] opacity-60" />
             <div className="absolute -bottom-3 -right-3 h-16 w-16 border-b-2 border-r-2 border-[#e8a87c] opacity-60" />
