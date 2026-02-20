@@ -105,7 +105,7 @@ const ExperienceSection = () => {
                 </div>
 
                 {/* Text Content with Enhanced Design */}
-                <div className="bg-white/95 max-w-[300px] backdrop-blur-md rounded-xl px-2 py-1 shadow-xl border border-amber-200/50 hover:border-amber-300 transition-all duration-300 w-full">
+                <div className="bg-white/95 max-w-[350px] md:max-w-[300px] backdrop-blur-md rounded-xl px-2 py-1 shadow-xl border border-amber-200/50 hover:border-amber-300 transition-all duration-300 w-full">
                   <h3 className={`${cinzel.className} text-base md:text-lg font-bold text-green-800 mb-1 group-hover:text-amber-700 transition-colors duration-300`}>
                     {experience.title}
                   </h3>
