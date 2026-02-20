@@ -254,7 +254,7 @@ const HeroContent = () => {
 
       {/* Footer Border */}
       <div
-        className="absolute w-full h-4 md:h-8 mt-[-20] rotate-180 z-10 bg-repeat-x bg-center"
+        className="absolute w-full h-5 md:h-8 mt-[-10px] md:mt-[-20] rotate-180 z-10 bg-repeat-x bg-center"
         style={{
           backgroundImage: 'url(/footerborder.png)',
           backgroundSize: 'auto 100%'
