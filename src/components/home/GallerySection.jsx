@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Playfair_Display, Cinzel } from 'next/font/google';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
 import Link from 'next/link';
 
 const playfair = Playfair_Display({ 
@@ -29,18 +29,43 @@ const GallerySection = () => {
 
   useEffect(() => {
     const fetchShowcaseImages = async () => {
+      const normalizeDocs = (snapshot) => {
+        const seen = new Set();
+        return snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            const imageUrl = (data.url || data.imageUrl || data.downloadURL || '').trim();
+            return {
+              id: doc.id,
+              ...data,
+              imageUrl,
+            };
+          })
+          .filter((item) => item.imageUrl && !seen.has(item.id) && seen.add(item.id));
+      };
+
       try {
         const q = query(
           collection(db, 'gallery'),
           where('showcase', '==', true),
           orderBy('order', 'asc'),
-          orderBy('createdAt', 'desc')
+          orderBy('createdAt', 'desc'),
+          limit(20)
         );
         const snapshot = await getDocs(q);
-        const fetchedImages = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        let fetchedImages = normalizeDocs(snapshot);
+
+        // Fallback for legacy docs or if showcase query returns only invalid URLs.
+        if (fetchedImages.length === 0) {
+          const fallbackQ = query(
+            collection(db, 'gallery'),
+            orderBy('createdAt', 'desc'),
+            limit(20)
+          );
+          const fallbackSnapshot = await getDocs(fallbackQ);
+          fetchedImages = normalizeDocs(fallbackSnapshot);
+        }
+
         setImages(fetchedImages);
       } catch (error) {
         console.error('Error fetching showcase images:', error);
@@ -55,19 +80,25 @@ const GallerySection = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setIsInView(true); },
-      { threshold: 0.3 }
+      { threshold: 0.15, rootMargin: '120px 0px' }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
   }, []);
 
   useEffect(() => {
-    if (!isInView || images.length === 0) return;
+    if (images.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
-    }, 3000);
+    }, 2600);
     return () => clearInterval(interval);
-  }, [isInView, images.length]);
+  }, [images.length]);
+
+  useEffect(() => {
+    if (currentIndex >= images.length) {
+      setCurrentIndex(0);
+    }
+  }, [images.length, currentIndex]);
 
   const getCardStyle = (index) => {
     const diff = index - currentIndex;
@@ -136,7 +167,7 @@ const GallerySection = () => {
                 >
                   <div className={`card-inner ${isCenterCard ? 'center-card' : ''}`}>
                     <Image
-                      src={image.url}
+                      src={image.imageUrl}
                       alt={image.title || 'Festival moment'}
                       fill
                       className="object-cover"
