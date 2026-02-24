@@ -12,7 +12,30 @@ import {
   confirmPasswordReset,
 } from "firebase/auth";
 
-const AuthContext = createContext();
+const defaultAuthContextValue = {
+  user: null,
+  loading: false,
+  signup: async () => {
+    throw new Error("AuthProvider is not mounted");
+  },
+  login: async () => {
+    throw new Error("AuthProvider is not mounted");
+  },
+  signInWithGoogle: async () => {
+    throw new Error("AuthProvider is not mounted");
+  },
+  sendPasswordReset: async () => {
+    throw new Error("AuthProvider is not mounted");
+  },
+  resetPassword: async () => {
+    throw new Error("AuthProvider is not mounted");
+  },
+  logout: async () => {
+    throw new Error("AuthProvider is not mounted");
+  },
+};
+
+const AuthContext = createContext(defaultAuthContextValue);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -139,4 +162,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext) || defaultAuthContextValue;
