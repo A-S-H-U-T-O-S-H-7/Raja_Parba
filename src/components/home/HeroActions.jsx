@@ -1,377 +1,568 @@
+// HeroActions.jsx
 import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Heart, Star, Users, Mic, Calendar, Sparkles, Award, Crown, Sparkle } from 'lucide-react';
+import { Playfair_Display, Cinzel } from 'next/font/google';
 import ShowModal from "./ShowModal";
+import { createSponsorApplication, createPerformerApplication } from '@/services/sponsorPerformerService';
+import SponsorModal from "../sponsor-perfomer/SponsorModal";
+import PerformerModal from "../sponsor-perfomer/PerformerModal";
+import ToastNotification from "../sponsor-perfomer/ToastNotification";
+import PortalModal from "./PortalModal";
+import StarField from "./StarField";
+
+const playfair = Playfair_Display({ 
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+const cinzel = Cinzel({ 
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+});
 
 function HeroActions({ user }) {
+  const [isShowModalOpen, setIsShowModalOpen] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  
+  // Sponsor Modal State
+  const [showSponsorModal, setShowSponsorModal] = useState(false);
+  const [sponsorForm, setSponsorForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    organization: '',
+    address: '',
+    city: ''
+  });
+  
+  // Performer Modal State
+  const [showPerformerModal, setShowPerformerModal] = useState(false);
+  const [performerForm, setPerformerForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    gender: '',
+    performanceCategory: '',
+    customPerformanceType: '',
+    performanceType: '',
+    participationType: '',
+    groupName: '',
+    memberCount: '',
+    memberNames: [],
+    trackMusicName: ''
+  });
+  
+  // Toast State
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
-   const [isShowModalOpen, setIsShowModalOpen] = useState(false);
+  const showToastMessage = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 5000);
+  };
 
   const openShowModal = () => setIsShowModalOpen(true);
   const closeShowModal = () => setIsShowModalOpen(false);
+  
+  const openSponsorModal = () => setShowSponsorModal(true);
+  const openPerformerModal = () => setShowPerformerModal(true);
+
+  // Handle action for non-authenticated users
+  const handleAction = (action) => {
+    if (!user) {
+      setPendingAction(action);
+      setShowLoginPrompt(true);
+    } else {
+      if (action === 'sponsor') openSponsorModal();
+      else if (action === 'performer') openPerformerModal();
+      else if (action === 'show') openShowModal();
+      else if (action === 'stall') window.location.href = '/stall';
+      else if (action === 'awards') window.location.href = '/awards';
+      else if (action === 'kumari') window.location.href = '/raja-kumari';
+      else if (action === 'fancy-dress') window.location.href = '/fancy-dress';
+    }
+  };
+
+  const handleSponsorSubmit = async () => {
+    if (sponsorForm.name && sponsorForm.email && sponsorForm.phone && sponsorForm.organization && sponsorForm.address && sponsorForm.city) {
+      try {
+        const result = await createSponsorApplication(sponsorForm);
+        
+        // Send confirmation email
+        try {
+          const { sendSponsorConfirmationEmail } = await import('@/services/emailService');
+          const emailResult = await sendSponsorConfirmationEmail(sponsorForm);
+          console.log('📧 Sponsor email sent:', emailResult.success ? 'Success' : emailResult.error);
+        } catch (emailError) {
+          console.error('❌ Failed to send sponsor email:', emailError);
+        }
+        
+        showToastMessage("Thank you for your interest in sponsoring! Our partnership team will reach out to you within 24 hours to discuss exciting collaboration opportunities.");
+        setSponsorForm({ name: '', email: '', phone: '', organization: '', address: '', city: '' });
+        setShowSponsorModal(false);
+      } catch (error) {
+        console.error('Error submitting sponsor application:', error);
+        showToastMessage("Sorry, there was an error submitting your application. Please try again later.");
+      }
+    }
+  };
+
+  const handlePerformerSubmit = async () => {
+    const resolvedPerformanceType =
+      performerForm.performanceCategory === 'Others'
+        ? (performerForm.customPerformanceType || '').trim()
+        : (performerForm.performanceCategory || '').trim();
+
+    const isGroup = performerForm.participationType === 'Group';
+    const memberCount = Number(performerForm.memberCount || 0);
+
+    const isFormValid =
+      (performerForm.name || '').trim() &&
+      (performerForm.email || '').trim() &&
+      (performerForm.phone || '').trim() &&
+      (performerForm.address || '').trim() &&
+      (performerForm.gender || '').trim() &&
+      (performerForm.participationType || '').trim() &&
+      (performerForm.trackMusicName || '').trim() &&
+      resolvedPerformanceType &&
+      (!isGroup || ((performerForm.groupName || '').trim() && memberCount > 0));
+
+    if (isFormValid) {
+      const performerPayload = {
+        ...performerForm,
+        performanceType: resolvedPerformanceType,
+        groupName: isGroup ? performerForm.groupName : '',
+        memberCount: isGroup ? String(memberCount) : '',
+        memberNames: isGroup ? (performerForm.memberNames || []) : [],
+      };
+
+      try {
+        const result = await createPerformerApplication(performerPayload);
+        
+        // Send confirmation email
+        try {
+          const { sendPerformerConfirmationEmail } = await import('@/services/emailService');
+          const emailResult = await sendPerformerConfirmationEmail(performerPayload);
+          console.log('📧 Performer email sent:', emailResult.success ? 'Success' : emailResult.error);
+        } catch (emailError) {
+          console.error('❌ Failed to send performer email:', emailError);
+        }
+        
+        showToastMessage("We're thrilled about your performance application! Our talent acquisition team will contact you soon to discuss your artistic journey with us.");
+        setPerformerForm({
+          name: '',
+          email: '',
+          phone: '',
+          address: '',
+          gender: '',
+          performanceCategory: '',
+          customPerformanceType: '',
+          performanceType: '',
+          participationType: '',
+          groupName: '',
+          memberCount: '',
+          memberNames: [],
+          trackMusicName: ''
+        });
+        setShowPerformerModal(false);
+      } catch (error) {
+        console.error('Error submitting performer application:', error);
+        showToastMessage("Sorry, there was an error submitting your application. Please try again later.");
+      }
+    }
+  };
+
+  const cards = [
+    {
+      id: 'sponsor',
+      title: 'Be a Sponsor',
+      description: 'Partner with us',
+      icon: Star,
+      gradient: 'from-amber-500 to-orange-500',
+      lightGradient: 'from-amber-50 to-orange-50',
+      borderColor: 'amber',
+      image: '/sponser.png',
+      action: 'sponsor'
+    },
+    {
+      id: 'performer',
+      title: 'Join as Performer',
+      description: 'Showcase talent',
+      icon: Mic,
+      gradient: 'from-fuchsia-500 to-purple-500',
+      lightGradient: 'from-fuchsia-50 to-purple-50',
+      borderColor: 'purple',
+      image: '/performer.png',
+      action: 'performer'
+    },
+    
+    {
+      id: 'show',
+      title: 'Show Booking',
+      description: 'Book tickets now',
+      icon: Calendar,
+      gradient: 'from-blue-500 to-cyan-500',
+      lightGradient: 'from-blue-50 to-cyan-50',
+      borderColor: 'blue',
+      image: '/show.png',
+      action: 'show'
+    },
+    {
+      id: 'stall',
+      title: 'Stall Booking',
+      description: 'Reserve your stall',
+      icon: Heart,
+      gradient: 'from-purple-500 to-pink-500',
+      lightGradient: 'from-purple-50 to-pink-50',
+      borderColor: 'pink',
+      image: '/stall.png',
+      action: 'stall',
+      isLink: true
+    },
+    {
+      id: 'awards',
+      title: 'Awards Nomination',
+      description: 'Nominate yourself',
+      icon: Award,
+      gradient: 'from-yellow-500 to-amber-500',
+      lightGradient: 'from-yellow-50 to-amber-50',
+      borderColor: 'yellow',
+      image: '/awards.png',
+      action: 'awards'
+    },
+    {
+      id: 'kumari',
+      title: 'Raja Kumari',
+      description: 'Royal contest',
+      icon: Crown,
+      gradient: 'from-rose-500 to-red-500',
+      lightGradient: 'from-rose-50 to-red-50',
+      borderColor: 'rose',
+      image: '/rajaqueen.png',
+      action: 'kumari'
+    },
+    {
+      id: 'fancy-dress',
+      title: 'Fancy Dress',
+      description: 'Show your style',
+      icon: Sparkle,
+      gradient: 'from-emerald-500 to-teal-500',
+      lightGradient: 'from-emerald-50 to-teal-50',
+      borderColor: 'emerald',
+      image: '/fancy.png',
+      action: 'fancy-dress'
+    }
+  ];
+
   return (
-    <div className="flex justify-center items-center py-4 md:py-8 px-2 md:px-4">
-      {user ? (
-        <div className="flex flex-row gap-6 md:gap-12 lg:gap-20 items-center justify-center w-full  flex-wrap">
+    <div className="relative w-full py-10 md:py-14 px-4 overflow-x-clip overflow-y-visible bg-gradient-to-br from-teal-300 via-white to-emerald-400">
+      
+      {/* Star Field Effect */}
+      <StarField count={40} />
+
+      {/* Bubble Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-10 -left-4 w-34 h-34 bg-purple-300 rounded-full opacity-80  animate-blob"></div>
+        <div className="absolute top-0 -right-4 w-22 h-22 bg-yellow-300 rounded-full opacity-70  animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute bottom-20 right-20 w-56 h-56 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-3000"></div>
+      </div>
+
+      {/* Top Border */}
+      <div
+        className="absolute top-0 left-0 w-full h-4 bg-repeat-x bg-center opacity-95"
+        style={{
+          backgroundImage: 'url(/goldenborder.png)',
+          backgroundSize: 'auto 100%',
+        }}
+      />
+
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1.5 h-1.5 bg-yellow-400/30 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, Math.random() * 20 - 10, 0],
+              scale: [1, 1.5, 1],
+              opacity: [0.3, 0.7, 0.3],
+            }}
+            transition={{
+              duration: 4 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Header Section with New Fonts */}
+        <div className="text-center mb-6 md:mb-8">
           
-          {/* Havan Booking Circle */}
-          <div className="group relative flex items-center justify-center">
-            {/* Mobile Version - Simple Round Button */}
-            <div className="block md:hidden relative">
-              <Link 
-                href="/havan"
-                className="relative group flex items-center justify-center
-                           w-16 h-16 sm:w-18 sm:h-18
-                           bg-gradient-to-br from-orange-400 via-red-500 to-yellow-500
-                           rounded-full shadow-xl cursor-pointer
-                           transform active:scale-95 transition-all duration-200
-                           focus:outline-none focus:ring-4 focus:ring-orange-300 focus:ring-opacity-50
-                           touch-manipulation"
-              >
-                <div className="flex flex-col items-center justify-center text-center">
-                  <img 
-                    src="/havanicon.png" 
-                    alt="Havan" 
-                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain drop-shadow-sm mb-1"
-                  />
-                  <span className="text-white font-bold text-xs tracking-wide drop-shadow-lg">
-                    Havan
-                  </span>
-                </div>
-              </Link>
-              
-              {/* Mobile Floating particles */}
-              <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-yellow-400 rounded-full animate-bounce delay-100"></div>
-              <div className="absolute -bottom-2 -left-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-400 rounded-full animate-pulse delay-300"></div>
-              <div className="absolute top-1 -left-3 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-red-400 rounded-full animate-ping delay-500"></div>
-            </div>
-            
-            {/* Desktop Version - Original Design */}
-            <div className="hidden md:block">
-              {/* Outer glow ring */}
-              <div className="absolute -inset-3 bg-gradient-to-r from-orange-400/20 via-red-500/20 to-yellow-500/20 rounded-full blur-xl opacity-75 animate-pulse group-hover:opacity-100 group-hover:blur-lg transition-all duration-500"></div>
-              
-              {/* Icon container - always visible */}
-              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-15 h-15 bg-gradient-to-br from-white via-orange-50 to-white rounded-full shadow-2xl flex items-center justify-center z-20 border-2 border-orange-200/50 group-hover:scale-95 transition-all duration-300">
-                <img 
-                  src="/havanicon.png" 
-                  alt="Havan" 
-                  className="w-8 h-8 object-contain drop-shadow-sm group-hover:scale-90 transition-transform duration-300"
-                />
-              </div>
-              
-              {/* Expandable button */}
-              <div className="relative w-16 h-16 group-hover:w-72 group-hover:h-14 transition-all duration-700 ease-out flex items-center justify-center">
-                <Link
-                  href="/havan"
-                  className="absolute inset-0 rounded-full group-hover:rounded-2xl
-                             bg-gradient-to-br from-orange-400 via-red-500 to-yellow-500
-                             hover:shadow-2xl hover:shadow-orange-500/30 cursor-pointer
-                             transform hover:scale-105 group-hover:scale-100 transition-all duration-500
-                             flex items-center justify-center overflow-hidden"
-                >
-                  {/* Hover background overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-500 
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  {/* Shine animation */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent
-                                -skew-x-12 translate-x-[-200%] group-hover:translate-x-[300%] 
-                                transition-transform duration-1200 ease-out
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  {/* Text content - only visible on hover */}
-                  <div className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-full h-full pl-16
-                                transition-all duration-500 delay-200">
-                    <span className="text-white font-semibold text-base tracking-wide whitespace-nowrap 
-                                   drop-shadow-lg flex items-center gap-2">
-                      Reserve Your Havan Spot
-                    </span>
-                  </div>
-                </Link>
-              </div>
-              
-              {/* Floating particles */}
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-bounce delay-100"></div>
-              <div className="absolute -bottom-2 -left-2 w-2 h-2 bg-orange-400 rounded-full animate-pulse delay-300"></div>
-              <div className="absolute top-1 -left-3 w-1.5 h-1.5 bg-red-400 rounded-full animate-ping delay-500"></div>
-            </div>
+          <motion.h3 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className={`${playfair.className} text-xl sm:text-2xl md:text-4xl text-amber-800 mb-2 drop-shadow-sm`}
+          >
+            Celebrate Raja Parba 2026
+          </motion.h3>
+          <motion.p 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-xs sm:text-sm md:text-base text-gray-700 max-w-3xl mx-auto"
+          >
+            Join Odisha&apos;s grand festival of swings, songs, tradition, and joyful community spirit.
+          </motion.p>
+          <div className="mt-3 flex items-center justify-center gap-2">
+            <div className="h-0.5 w-10 bg-amber-400/80 rounded-full"></div>
+            <div className="h-1 w-16 bg-red-500/80 rounded-full"></div>
+            <div className="h-0.5 w-10 bg-amber-400/80 rounded-full"></div>
           </div>
+        </div>
 
-          {/* Stall Booking Circle */}
-          <div className="group relative flex items-center justify-center">
-            {/* Mobile Version - Simple Round Button */}
-            <div className="block md:hidden relative">
+        {/* Cards Grid - Smaller boxes, 2 columns on mobile, 4 on tablet, 7 on desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
+          {cards.map((card, index) => {
+            const IconComponent = card.icon;
+            
+            return (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="group relative"
+              >
+                {/* Glow Effect */}
+                <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-xl blur-md opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
+                
+                {/* Main Card */}
+                <div className={`relative bg-gradient-to-br ${card.lightGradient} backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-${card.borderColor}-200/50 group-hover:-translate-y-0.5`}>
+                  
+                  {/* Top Gradient Bar */}
+                  <div className={`h-1 bg-gradient-to-r ${card.gradient}`}></div>
+                  
+                  {/* Card Content - Smaller padding */}
+                  <div className="p-3 flex flex-col items-center">
+                    
+                    {/* Icon/Image Container - Smaller */}
+                    <div className="relative mb-2">
+                      {/* Outer Glow Ring */}
+                      <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-full blur-sm opacity-0 group-hover:opacity-40 transition-opacity duration-300`}></div>
+                      
+                      {/* Image Container - Smaller */}
+                      <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br ${card.gradient} p-1 shadow-md`}>
+                        <div className="w-full h-full rounded-full bg-white flex items-center justify-center p-1.5">
+                          <img 
+                            src={card.image} 
+                            alt={card.title} 
+                            className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = `https://via.placeholder.com/32?text=${card.title.charAt(0)}`;
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Floating Icon Overlay - Smaller */}
+                      <div className={`absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-r ${card.gradient} flex items-center justify-center shadow-md`}>
+                        <IconComponent className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
+                      </div>
+                    </div>
+
+                    {/* Title - Smaller text */}
+                    <h3 className={`${playfair.className} text-xs sm:text-sm font-bold text-gray-800 mb-1 text-center line-clamp-1`}>
+                      {card.title}
+                    </h3>
+
+                    {/* Description - Smaller text */}
+                    <p className="text-[10px] sm:text-xs text-gray-600 text-center mb-2 line-clamp-1">
+                      {card.description}
+                    </p>
+
+                    {/* Decorative Line - Smaller */}
+                    <div className={`w-8 h-0.5 bg-gradient-to-r from-transparent via-${card.borderColor}-500 to-transparent mb-2`}></div>
+
+                    {/* Action Button - Smaller */}
+                    {card.isLink ? (
+                      <Link
+                        href={user ? card.action === 'stall' ? "/stall" : `/${card.action}` : "#"}
+                        onClick={(e) => {
+                          if (!user) {
+                            e.preventDefault();
+                            handleAction(card.action);
+                          }
+                        }}
+                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn`}
+                      >
+                        <span>{user ? "Book" : "Join"}</span>
+                        <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => handleAction(card.action)}
+                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn`}
+                      >
+                        <span>{user ? "Apply" : "Join"}</span>
+                        <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Login Prompt Modal - Using PortalModal */}
+        <PortalModal isOpen={showLoginPrompt} onClose={() => setShowLoginPrompt(false)}>
+          <div className="p-6">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-1 bg-gradient-to-r from-amber-500 to-red-600 rounded-full"></div>
+            </div>
+
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center shadow-lg">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+            </div>
+
+            <h3 className={`${cinzel.className} text-xl font-bold text-center text-gray-800 mb-2`}>
+              Join the Celebration!
+            </h3>
+
+            <p className={`${playfair.className} text-sm text-gray-600 text-center mb-6`}>
+              Please login or register to {pendingAction === 'sponsor' ? 'become a sponsor' : 
+                pendingAction === 'performer' ? 'join as a performer' : 
+                pendingAction === 'show' ? 'book show tickets' : 
+                pendingAction === 'awards' ? 'nominate for awards' :
+                pendingAction === 'kumari' ? 'participate in Raja Kumari' :
+                pendingAction === 'fancy-dress' ? 'join fancy dress' : 'book a stall'}
+            </p>
+
+            <div className="space-y-3">
               <Link
-                href="/stall"
-                className="relative group flex items-center justify-center
-                           w-16 h-16 sm:w-18 sm:h-18
-                           bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500
-                           rounded-full shadow-xl cursor-pointer
-                           transform active:scale-95 transition-all duration-200
-                           focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-opacity-50
-                           touch-manipulation"
+                href="/register"
+                className="block w-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-white py-3 px-4 rounded-xl font-semibold text-center hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                onClick={() => setShowLoginPrompt(false)}
               >
-                <div className="flex flex-col items-center justify-center text-center">
-                  <img 
-                    src="/stall.png" 
-                    alt="Stall" 
-                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain drop-shadow-sm mb-1"
-                  />
-                  <span className="text-white font-bold text-xs tracking-wide drop-shadow-lg">
-                    Stall
-                  </span>
-                </div>
+                Register Now
               </Link>
               
-              {/* Mobile Floating particles */}
-              <div className="absolute -top-2 -left-1 w-2 h-2 sm:w-3 sm:h-3 bg-pink-400 rounded-full animate-pulse delay-200"></div>
-              <div className="absolute -bottom-1 -right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-400 rounded-full animate-bounce delay-400"></div>
-              <div className="absolute top-2 -right-3 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full animate-ping delay-600"></div>
-            </div>
-            
-            {/* Desktop Version - Original Design */}
-            <div className="hidden md:block">
-              <div className="absolute -inset-3 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-indigo-500/20 rounded-full blur-xl opacity-75 animate-pulse group-hover:opacity-100 group-hover:blur-lg transition-all duration-500"></div>
-              
-              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-15 h-15 bg-gradient-to-br from-white via-purple-50 to-white rounded-full shadow-2xl flex items-center justify-center z-20 border-2 border-purple-200/50 group-hover:scale-95 transition-all duration-300">
-                <img 
-                  src="/stall.png" 
-                  alt="Stall" 
-                  className="w-8 h-8 object-contain drop-shadow-sm group-hover:scale-90 transition-transform duration-300"
-                />
-              </div>
-              
-              <div className="relative w-16 h-16 group-hover:w-64 group-hover:h-14 transition-all duration-700 ease-out flex items-center justify-center">
-                <Link
-                  href="/stall"
-                  className="absolute inset-0 rounded-full group-hover:rounded-2xl
-                             bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500
-                             hover:shadow-2xl hover:shadow-purple-500/30 cursor-pointer
-                             transform hover:scale-105 group-hover:scale-100 transition-all duration-500
-                             flex items-center justify-center overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-pink-500 to-purple-600 
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-500 
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent
-                                -skew-x-12 translate-x-[-200%] group-hover:translate-x-[300%] 
-                                transition-transform duration-1200 ease-out
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  <div className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-full h-full pl-16
-                                transition-all duration-500 delay-200">
-                    <span className="text-white font-semibold text-base tracking-wide whitespace-nowrap 
-                                   drop-shadow-lg flex items-center gap-2">
-                      Reserve Your Stall
-                    </span>
-                  </div>
-                </Link>
-              </div>
-              
-              <div className="absolute -top-2 -left-1 w-3 h-3 bg-pink-400 rounded-full animate-pulse delay-200"></div>
-              <div className="absolute -bottom-1 -right-2 w-2 h-2 bg-purple-400 rounded-full animate-bounce delay-400"></div>
-              <div className="absolute top-2 -right-3 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-ping delay-600"></div>
-            </div>
-          </div>
-
-          {/* Show Booking Circle */}
-          <div className="group relative flex items-center justify-center">
-            <div className="block md:hidden relative">
-              <button onClick={openShowModal}
-                className="relative group flex items-center justify-center
-                           w-16 h-16 sm:w-18 sm:h-18
-                           bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500
-                           rounded-full shadow-xl cursor-pointer
-                           transform active:scale-95 transition-all duration-200
-                           focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50
-                           touch-manipulation"
+              <Link
+                href="/login"
+                className="block w-full bg-white border-2 border-red-600 text-red-600 py-3 px-4 rounded-xl font-semibold text-center hover:bg-red-600 hover:text-white transition-all duration-300"
+                onClick={() => setShowLoginPrompt(false)}
               >
-                <div className="flex flex-col items-center justify-center text-center">
-                  <img 
-                    src="/show.png" 
-                    alt="Show" 
-                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain drop-shadow-sm mb-1"
-                  />
-                  <span className="text-white font-bold text-xs tracking-wide drop-shadow-lg">
-                    Show
-                  </span>
-                </div>
+                Login
+              </Link>
+
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                className="block w-full text-gray-500 py-2 text-sm hover:text-gray-700 transition-colors"
+              >
+                Continue Browsing
               </button>
-              
-              <div className="absolute -bottom-2 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-cyan-400 rounded-full animate-bounce delay-300"></div>
-              <div className="absolute -top-1 -left-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-400 rounded-full animate-pulse delay-500"></div>
-              <div className="absolute -bottom-3 left-1 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-teal-400 rounded-full animate-ping delay-700"></div>
             </div>
-            
-            <div className="hidden md:block">
-              <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-teal-500/20 rounded-full blur-xl opacity-75 animate-pulse group-hover:opacity-100 group-hover:blur-lg transition-all duration-500"></div>
-              
-              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-15 h-15 bg-gradient-to-br from-white via-blue-50 to-white rounded-full shadow-2xl flex items-center justify-center z-20 border-2 border-blue-200/50 group-hover:scale-95 transition-all duration-300">
-                <img 
-                  src="/show.png" 
-                  alt="Show" 
-                  className="w-8 h-8 object-contain drop-shadow-sm group-hover:scale-90 transition-transform duration-300"
-                />
-              </div>
-              
-              <div className="relative w-16 h-16 group-hover:w-72 group-hover:h-14 transition-all duration-700 ease-out flex items-center justify-center">
-                <button onClick={openShowModal}
-                  className="absolute inset-0 rounded-full group-hover:rounded-2xl
-                             bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500
-                             hover:shadow-2xl hover:shadow-blue-500/30 cursor-pointer
-                             transform hover:scale-105 group-hover:scale-100 transition-all duration-500
-                             flex items-center justify-center overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-600 
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-500 
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent
-                                -skew-x-12 translate-x-[-200%] group-hover:translate-x-[300%] 
-                                transition-transform duration-1200 ease-out
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  <div className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-full h-full pl-16 pr-4
-                                transition-all duration-500 delay-200">
-                    <span className="text-white font-semibold text-base tracking-wide whitespace-nowrap 
-                                   drop-shadow-lg flex items-center gap-2">
-                      Reserve Your Show Spot
-                    </span>
-                  </div>
-                </button>
-              </div>
-              
-              <div className="absolute -bottom-2 -right-1 w-3 h-3 bg-cyan-400 rounded-full animate-bounce delay-300"></div>
-              <div className="absolute -top-1 -left-2 w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-500"></div>
-              <div className="absolute -bottom-3 left-1 w-1.5 h-1.5 bg-teal-400 rounded-full animate-ping delay-700"></div>
-            </div>
-          </div>
 
-          {/* Delegate Registration Circle */}
-          <div className="group relative flex items-center justify-center">
-            {/* Mobile Version - Simple Round Button */}
-            <div className="block md:hidden relative">
-              <Link
-                href="/delegate"
-                className="relative group flex items-center justify-center
-                           w-16 h-16 sm:w-18 sm:h-18
-                           bg-gradient-to-br from-emerald-500 via-green-500 to-lime-500
-                           rounded-full shadow-xl cursor-pointer
-                           transform active:scale-95 transition-all duration-200
-                           focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50
-                           touch-manipulation"
-              >
-                <div className="flex flex-col items-center justify-center text-center">
-                  <img 
-                    src="/delegate.png" 
-                    alt="Delegate" 
-                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain drop-shadow-sm mb-1"
-                  />
-                  <span className="text-white font-bold text-xs tracking-wide drop-shadow-lg">
-                    Delegate
-                  </span>
-                </div>
-              </Link>
-              
-              {/* Mobile Floating particles */}
-              <div className="absolute -top-2 -right-2 w-2 h-2 sm:w-3 sm:h-3 bg-lime-400 rounded-full animate-bounce delay-400"></div>
-              <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-400 rounded-full animate-pulse delay-600"></div>
-              <div className="absolute top-3 -left-2 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-green-400 rounded-full animate-ping delay-800"></div>
-            </div>
-            
-            {/* Desktop Version - Original Design */}
-            <div className="hidden md:block">
-              <div className="absolute -inset-3 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-lime-500/20 rounded-full blur-xl opacity-75 animate-pulse group-hover:opacity-100 group-hover:blur-lg transition-all duration-500"></div>
-              
-              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-15 h-15 bg-gradient-to-br from-white via-emerald-50 to-white rounded-full shadow-2xl flex items-center justify-center z-20 border-2 border-emerald-200/50 group-hover:scale-95 transition-all duration-300">
-                <img 
-                  src="/delegate.png" 
-                  alt="Delegate" 
-                  className="w-12 h-12 object-contain drop-shadow-sm group-hover:scale-90 transition-transform duration-300"
-                />
-              </div>
-              
-              <div className="relative w-16 h-16 group-hover:w-80 group-hover:h-14 transition-all duration-700 ease-out flex items-center justify-center">
-                <Link
-                  href="/delegate"
-                  className="absolute inset-0 rounded-full group-hover:rounded-2xl
-                             bg-gradient-to-br from-emerald-500 via-green-500 to-lime-500
-                             hover:shadow-2xl hover:shadow-emerald-500/30 cursor-pointer
-                             transform hover:scale-105 group-hover:scale-100 transition-all duration-500
-                             flex items-center justify-center overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-lime-500 via-green-500 to-emerald-600 
-                                opacity-0 group-hover:opacity-100 transition-opacity duration-500 
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent
-                                -skew-x-12 translate-x-[-200%] group-hover:translate-x-[300%] 
-                                transition-transform duration-1200 ease-out
-                                rounded-full group-hover:rounded-2xl"></div>
-                  
-                  <div className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-full h-full pl-16 pr-4
-                                transition-all duration-500 delay-200">
-                    <span className="text-white font-semibold text-base tracking-wide whitespace-nowrap 
-                                   drop-shadow-lg flex items-center gap-2">
-                      Register as Delegate
-                    </span>
-                  </div>
-                </Link>
-              </div>
-              
-              <div className="absolute -top-2 -right-2 w-3 h-3 bg-lime-400 rounded-full animate-bounce delay-400"></div>
-              <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-600"></div>
-              <div className="absolute top-3 -left-2 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping delay-800"></div>
+            <div className="flex justify-center gap-2 mt-4">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <Sparkles className="w-4 h-4 text-red-500" />
+              <Sparkles className="w-4 h-4 text-amber-500" />
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="flex flex-col sm:flex-row gap-6 items-center justify-center max-w-4xl mx-auto">
-          
-          {/* Register Button */}
-          <div className="group relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-orange-400/30 via-red-500/30 to-yellow-500/30 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <Link
-              href="/register"
-              className="relative inline-flex items-center justify-center 
-                         bg-gradient-to-br from-orange-500 via-red-500 to-yellow-500 
-                         text-white px-10 py-5 rounded-2xl text-lg font-bold 
-                         shadow-2xl min-w-[280px] hover:scale-105 hover:shadow-orange-500/25 
-                         transition-all duration-300 overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-400 rounded-2xl"></div>
-              
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
-                            -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] 
-                            transition-transform duration-800"></div>
-              
-              <span className="relative text-2xl mr-4 group-hover:animate-pulse">🎯</span>
-              <span className="relative font-bold tracking-wide">Register Now</span>
-            </Link>
-          </div>
-          
-          {/* Login Button */}
-          <div className="group relative">
-            <div className="absolute -inset-1 bg-orange-500/20 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <Link
-              href="/login"
-              className="relative inline-flex items-center justify-center 
-                         border-3 border-orange-500 bg-white/95 backdrop-blur-sm 
-                         text-orange-700 px-10 py-5 rounded-2xl text-lg font-bold 
-                         shadow-2xl min-w-[240px] hover:bg-orange-500 hover:text-white 
-                         hover:scale-105 hover:shadow-orange-500/25 transition-all duration-300"
-            >
-              <span className="relative text-2xl mr-4 group-hover:animate-pulse">🔐</span>
-              <span className="relative font-bold tracking-wide">LogIn</span>
-            </Link>
-          </div>
-        </div>
-      )}
-            <ShowModal isOpen={isShowModalOpen} onClose={closeShowModal} />
+        </PortalModal>
 
+        {/* Modals */}
+        <ShowModal isOpen={isShowModalOpen} onClose={closeShowModal} />
+        
+        <SponsorModal 
+          showSponsorModal={showSponsorModal}
+          setShowSponsorModal={setShowSponsorModal}
+          sponsorForm={sponsorForm}
+          setSponsorForm={setSponsorForm}
+          handleSponsorSubmit={handleSponsorSubmit}
+        />
+
+        <PerformerModal 
+          showPerformerModal={showPerformerModal}
+          setShowPerformerModal={setShowPerformerModal}
+          performerForm={performerForm}
+          setPerformerForm={setPerformerForm}
+          handlePerformerSubmit={handlePerformerSubmit}
+        />
+
+        <ToastNotification 
+          showToast={showToast}
+          toastMessage={toastMessage}
+        /> 
+      </div>
+
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(20px, -30px) scale(1.1); }
+          66% { transform: translate(-15px, 15px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        
+        .animation-delay-3000 {
+          animation-delay: 3s;
+        }
+        
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
+
+      {/* Corner Design - overflow only in y-direction */}
+      <div className="absolute -bottom-5 left-[-20px] md:-bottom-14 md:left-[-30px] w-28 h-28 md:w-56 md:h-56 z-20 pointer-events-none">
+        <Image
+          src="/greencorner.png"
+          alt="corner design"
+          fill
+          className="object-contain object-bottom"
+        />
+      </div>
+      <div className="absolute -bottom-5 right-[-20px] md:-bottom-14 md:right-[-30px] w-28 h-28 md:w-56 md:h-56 z-20 pointer-events-none">
+        <Image
+          src="/greencorner.png"
+          alt="corner design"
+          fill
+          className="object-contain object-bottom scale-x-[-1]"
+        />
+      </div>
     </div>
   );
 }

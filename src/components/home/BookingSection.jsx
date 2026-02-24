@@ -16,51 +16,7 @@ const cinzel = Cinzel({
 function BookingSection({ user }) {
   return (
     <>
-      {/* Stall & Show Booking Intro */}
-      <section className="relative py-10 bg-gradient-to-br from-[#FDF1E6] via-[#FFF5EB] to-[#FFE8D6] overflow-hidden">
-        {/* Decorative animated elements */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-red-200/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        
-        {/* Floating decorative patterns */}
-        <div className="absolute top-10 left-10 text-6xl opacity-10 animate-bounce" style={{ animationDuration: '3s' }}>🪷</div>
-        <div className="absolute bottom-10 right-20 text-5xl opacity-10 animate-bounce" style={{ animationDuration: '4s', animationDelay: '0.5s' }}>🎵</div>
-        
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className={`${playfair.className} text-3xl sm:text-4xl lg:text-5xl font-bold text-red-900 mb-3 animate-fade-in-up`}>
-            Stall & Show Booking
-          </h2>
-
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent mx-auto mb-4"></div>
-
-          <p className={`${cinzel.className} text-gray-700 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed mb-6 animate-fade-in-up`} style={{ animationDelay: '0.2s' }}>
-            Be a part of Raja Mahotsav Delhi by booking your stall or performance slot.
-            Showcase your talent and celebrate Odia tradition.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            <Link
-              href="/book-stall"
-              className="group relative bg-gradient-to-r from-red-700 to-red-800 hover:from-red-800 hover:to-red-900 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:scale-105"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2 font-semibold">
-                ⛺ Book a Stall
-              </span>
-              <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </Link>
-
-            <Link
-              href="/book-show"
-              className="group relative bg-gradient-to-r from-green-700 to-green-800 hover:from-green-800 hover:to-green-900 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:scale-105"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2 font-semibold">
-                🎤 Book a Show Slot
-              </span>
-              <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </Link>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Why Book Online Section */}
       <section className="relative py-12 bg-gradient-to-b from-white to-gray-50 overflow-hidden">

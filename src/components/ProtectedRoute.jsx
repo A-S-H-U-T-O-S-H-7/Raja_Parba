@@ -1,10 +1,10 @@
 "use client";
-import { useAuth } from "@/context/AuthContext";
+import useAuthStore from "@/lib/stores/useAuthStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {

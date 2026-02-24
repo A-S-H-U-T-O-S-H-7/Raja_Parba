@@ -15,14 +15,24 @@ export default function SponsorPerformerSection() {
     name: '',
     email: '',
     phone: '',
-    address: ''
+    organization: '',
+    address: '',
+    city: ''
   });
   const [performerForm, setPerformerForm] = useState({
     name: '',
     email: '',
     phone: '',
     address: '',
-    performanceType: ''
+    gender: '',
+    performanceCategory: '',
+    customPerformanceType: '',
+    performanceType: '',
+    participationType: '',
+    groupName: '',
+    memberCount: '',
+    memberNames: [],
+    trackMusicName: ''
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -34,7 +44,7 @@ export default function SponsorPerformerSection() {
   };
 
   const handleSponsorSubmit = async () => {
-    if (sponsorForm.name && sponsorForm.email && sponsorForm.phone && sponsorForm.address) {
+    if (sponsorForm.name && sponsorForm.email && sponsorForm.phone && sponsorForm.organization && sponsorForm.address && sponsorForm.city) {
       try {
         const result = await createSponsorApplication(sponsorForm);
         
@@ -48,7 +58,7 @@ export default function SponsorPerformerSection() {
         }
         
         showToastMessage("Thank you for your interest in sponsoring! Our partnership team will reach out to you within 24 hours to discuss exciting collaboration opportunities.");
-        setSponsorForm({ name: '', email: '', phone: '', address: '' });
+        setSponsorForm({ name: '', email: '', phone: '', organization: '', address: '', city: '' });
         setShowSponsorModal(false);
       } catch (error) {
         console.error('Error submitting sponsor application:', error);
@@ -58,21 +68,62 @@ export default function SponsorPerformerSection() {
   };
 
   const handlePerformerSubmit = async () => {
-    if (performerForm.name && performerForm.email && performerForm.phone && performerForm.address && performerForm.performanceType) {
+    const resolvedPerformanceType =
+      performerForm.performanceCategory === 'Others'
+        ? (performerForm.customPerformanceType || '').trim()
+        : (performerForm.performanceCategory || '').trim();
+
+    const isGroup = performerForm.participationType === 'Group';
+    const memberCount = Number(performerForm.memberCount || 0);
+
+    const isFormValid =
+      (performerForm.name || '').trim() &&
+      (performerForm.email || '').trim() &&
+      (performerForm.phone || '').trim() &&
+      (performerForm.address || '').trim() &&
+      (performerForm.gender || '').trim() &&
+      (performerForm.participationType || '').trim() &&
+      (performerForm.trackMusicName || '').trim() &&
+      resolvedPerformanceType &&
+      (!isGroup || ((performerForm.groupName || '').trim() && memberCount > 0));
+
+    if (isFormValid) {
+      const performerPayload = {
+        ...performerForm,
+        performanceType: resolvedPerformanceType,
+        groupName: isGroup ? performerForm.groupName : '',
+        memberCount: isGroup ? String(memberCount) : '',
+        memberNames: isGroup ? (performerForm.memberNames || []) : [],
+      };
+
       try {
-        const result = await createPerformerApplication(performerForm);
+        const result = await createPerformerApplication(performerPayload);
         
         // Send confirmation email
         try {
           const { sendPerformerConfirmationEmail } = await import('@/services/emailService');
-          const emailResult = await sendPerformerConfirmationEmail(performerForm);
+          const emailResult = await sendPerformerConfirmationEmail(performerPayload);
           console.log('📧 Performer email sent:', emailResult.success ? 'Success' : emailResult.error);
         } catch (emailError) {
           console.error('❌ Failed to send performer email:', emailError);
         }
         
         showToastMessage("We're thrilled about your performance application! Our talent acquisition team will contact you soon to discuss your artistic journey with us.");
-        setPerformerForm({ name: '', email: '', phone: '', address: '', performanceType: '' });
+        setPerformerForm({
+          name: '',
+          email: '',
+          phone: '',
+          address: '',
+          gender: '',
+          performanceCategory: '',
+          customPerformanceType: '',
+          performanceType: '',
+          participationType: '',
+          groupName: '',
+          memberCount: '',
+          memberNames: [],
+          trackMusicName: ''
+        });
         setShowPerformerModal(false);
       } catch (error) {
         console.error('Error submitting performer application:', error);

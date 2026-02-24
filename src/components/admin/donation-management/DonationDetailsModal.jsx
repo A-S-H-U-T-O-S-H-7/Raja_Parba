@@ -17,11 +17,11 @@ import {
   HomeIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import { useTheme } from '@/context/ThemeContext';
+import useThemeStore from '@/lib/stores/useThemeStore';
 import { format, isValid } from 'date-fns';
 
 export default function DonationDetailsModal({ donation, isOpen, onClose, onRefresh }) {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode } = useThemeStore();
   const [updating, setUpdating] = useState(false);
 
   if (!isOpen || !donation) return null;

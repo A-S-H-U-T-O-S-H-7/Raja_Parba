@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { calculatePriceBreakdown, getNextBulkMilestone, formatCurrency, getDiscountDisplayInfo } from '@/utils/pricingUtils';
 
@@ -15,65 +15,52 @@ export const BookingProvider = ({ children }) => {
     defaultSeatPrice: 500,
     taxRate: 0,
     bulkDiscounts: [],
-    earlyBirdDiscount: { isActive: false, discountPercent: 0, daysBeforeEvent: 7 },
+    earlyBirdDiscounts: [],
     seasonalPricing: []
   });
   const [loading, setLoading] = useState(false);
   
-  // Real-time sync with admin pricing settings (Havan booking)
+  // Load price settings once on mount - no real-time listener to avoid permission errors
   useEffect(() => {
-    const havanPricingRef = doc(db, 'settings', 'havanPricing');
-    
-    // Set up real-time listener for havan pricing changes
-    const unsubscribeHavanPricing = onSnapshot(havanPricingRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const newPriceSettings = {
-          defaultSeatPrice: data.seatPrice || 500,
-          taxRate: 0, // No tax as per admin requirements
-          bulkDiscounts: data.bulkBookingDiscounts || [],
-          earlyBirdDiscounts: data.earlyBirdDiscounts || [],
-          seasonalPricing: [] // Not implemented for havan yet
-        };
+    const loadPricingSettings = async () => {
+      try {
+        // Try havan pricing first
+        const havanRef = doc(db, 'settings', 'havanPricing');
+        const havanSnap = await getDoc(havanRef);
         
-        setPriceSettings(newPriceSettings);
+        if (havanSnap.exists()) {
+          const data = havanSnap.data();
+          setPriceSettings({
+            defaultSeatPrice: data.seatPrice || 500,
+            taxRate: 0, // No tax as per admin requirements
+            bulkDiscounts: data.bulkBookingDiscounts || [],
+            earlyBirdDiscounts: data.earlyBirdDiscounts || [],
+            seasonalPricing: [] // Not implemented for havan yet
+          });
+          return;
+        }
         
-        // Pricing updated silently - no toast needed
-      } else {
-        // Fallback to general settings for backward compatibility
+        // Fallback to general settings
         const generalRef = doc(db, 'settings', 'general');
-        const unsubscribeGeneral = onSnapshot(generalRef, (generalSnap) => {
-          if (generalSnap.exists()) {
-            setPriceSettings(prev => ({
-              ...prev,
-              defaultSeatPrice: generalSnap.data().seatPrice || 500
-            }));
-            
-            // Pricing updated silently - no toast needed
-          }
-        }, (error) => {
-          console.error('Error listening to general settings:', error);
-        });
+        const generalSnap = await getDoc(generalRef);
         
-        return unsubscribeGeneral;
+        if (generalSnap.exists()) {
+          const data = generalSnap.data();
+          setPriceSettings(prev => ({
+            ...prev,
+            defaultSeatPrice: data.seatPrice || 500,
+            bulkDiscounts: data.bulkDiscounts || [],
+            earlyBirdDiscounts: data.earlyBirdDiscounts || []
+          }));
+        }
+      } catch (error) {
+        // Silently fail - using defaults already set
+        // No console logs, no toasts - UI works with defaults
       }
-    }, (error) => {
-      console.error('Error listening to havan price settings:', error);
-      // Set default values on error
-      setPriceSettings({
-        defaultSeatPrice: 500,
-        taxRate: 0,
-        bulkDiscounts: [],
-        earlyBirdDiscounts: [],
-        seasonalPricing: []
-      });
-    });
-
-    // Cleanup function
-    return () => {
-      unsubscribeHavanPricing();
     };
-  }, [selectedSeats.length]); // Re-run when selectedSeats changes to properly handle notifications
+
+    loadPricingSettings();
+  }, []); // Empty dependency array - run once on mount
 
   const addSeat = (seatId) => {
     if (!selectedSeats.includes(seatId)) {
@@ -118,7 +105,7 @@ export const BookingProvider = ({ children }) => {
     return activeSeasonalPricing ? activeSeasonalPricing.multiplier : 1;
   };
   
-  // Get complete pricing breakdown using new utility functions
+  // Get complete pricing breakdown using utility functions
   const getPricingBreakdown = () => {
     if (selectedSeats.length === 0) {
       return {
@@ -255,21 +242,21 @@ export const BookingProvider = ({ children }) => {
     return {
       ...breakdown,
       seasonalMultiplier,
-    // Enhanced discount details for display
-    discounts: {
-      ...breakdown.discounts,
-      seasonal: {
-        applied: seasonalMultiplier !== 1,
-        multiplier: seasonalMultiplier,
-        name: priceSettings.seasonalPricing.find(p => p.isActive)?.name
+      // Enhanced discount details for display
+      discounts: {
+        ...breakdown.discounts,
+        seasonal: {
+          applied: seasonalMultiplier !== 1,
+          multiplier: seasonalMultiplier,
+          name: priceSettings.seasonalPricing.find(p => p.isActive)?.name
+        }
+      },
+      // Add savings information for UI
+      savings: {
+        amount: breakdown.originalAmount - breakdown.discountedAmount,
+        percentage: breakdown.discounts.combined.percent,
+        applied: breakdown.discounts.combined.applied
       }
-    },
-    // Add savings information for UI
-    savings: {
-      amount: breakdown.originalAmount - breakdown.discountedAmount,
-      percentage: breakdown.discounts.combined.percent,
-      applied: breakdown.discounts.combined.applied
-    }
     };
   };
 
@@ -300,6 +287,7 @@ export const BookingProvider = ({ children }) => {
     getBaseAmount,
     getTaxAmount,
     getPricingBreakdown,
+    getEnhancedPricingBreakdown,
     getSeasonalMultiplier,
     getEarlyBirdDiscount,
     getBulkDiscount,

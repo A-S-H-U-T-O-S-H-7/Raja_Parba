@@ -36,8 +36,19 @@ export const createSponsorApplication = async (sponsorData) => {
 // Create a new performer application
 export const createPerformerApplication = async (performerData) => {
   try {
-    const docRef = await addDoc(collection(db, PERFORMERS_COLLECTION), {
+    const normalizedPerformerData = {
       ...performerData,
+      performanceType:
+        performerData.performanceType ||
+        performerData.customPerformanceType ||
+        performerData.performanceCategory ||
+        '',
+      memberNames: Array.isArray(performerData.memberNames) ? performerData.memberNames : [],
+      memberCount: performerData.memberCount ? String(performerData.memberCount) : ''
+    };
+
+    const docRef = await addDoc(collection(db, PERFORMERS_COLLECTION), {
+      ...normalizedPerformerData,
       status: 'pending',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),

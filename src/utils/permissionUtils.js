@@ -12,12 +12,6 @@ export const PERMISSIONS = {
   SHOW_SEATS_VIEW: 'show_seats_view',
   SHOW_SEATS_MANAGE: 'show_seats_manage',
   
-  // Havan Bookings
-  HAVAN_BOOKINGS_VIEW: 'havan_bookings_view',
-  HAVAN_BOOKINGS_MANAGE: 'havan_bookings_manage',
-  HAVAN_BOOKINGS_CANCEL: 'havan_bookings_cancel',
-  HAVAN_BOOKINGS_PAYMENT: 'havan_bookings_payment',
-  
   // Stall Bookings
   STALL_BOOKINGS_VIEW: 'stall_bookings_view',
   STALL_BOOKINGS_MANAGE: 'stall_bookings_manage',
@@ -57,15 +51,6 @@ export const PERMISSION_GROUPS = [
   {
     title: 'Show Seats',
     permissions: [PERMISSIONS.SHOW_SEATS_VIEW, PERMISSIONS.SHOW_SEATS_MANAGE]
-  },
-  {
-    title: 'Havan Bookings',
-    permissions: [
-      PERMISSIONS.HAVAN_BOOKINGS_VIEW,
-      PERMISSIONS.HAVAN_BOOKINGS_MANAGE,
-      PERMISSIONS.HAVAN_BOOKINGS_CANCEL,
-      PERMISSIONS.HAVAN_BOOKINGS_PAYMENT
-    ]
   },
   {
     title: 'Stall Bookings',
@@ -201,10 +186,6 @@ export const getReadablePermissions = (admin) => {
     [PERMISSIONS.VIEW_STATS]: 'Statistics & Reports',
     [PERMISSIONS.SHOW_SEATS_VIEW]: 'View Show Seats',
     [PERMISSIONS.SHOW_SEATS_MANAGE]: 'Manage Show Seats',
-    [PERMISSIONS.HAVAN_BOOKINGS_VIEW]: 'View Havan Bookings',
-    [PERMISSIONS.HAVAN_BOOKINGS_MANAGE]: 'Manage Havan Bookings',
-    [PERMISSIONS.HAVAN_BOOKINGS_CANCEL]: 'Cancel Havan Bookings',
-    [PERMISSIONS.HAVAN_BOOKINGS_PAYMENT]: 'Manage Havan Payments',
     [PERMISSIONS.STALL_BOOKINGS_VIEW]: 'View Stall Bookings',
     [PERMISSIONS.STALL_BOOKINGS_MANAGE]: 'Manage Stall Bookings',
     [PERMISSIONS.STALL_BOOKINGS_CANCEL]: 'Cancel Stall Bookings',
@@ -241,7 +222,6 @@ export const canAccessRoute = (admin, route) => {
     '/admin': [PERMISSIONS.VIEW_DASHBOARD],
     '/admin/dashboard': [PERMISSIONS.VIEW_DASHBOARD],
     '/admin/show-seats': [PERMISSIONS.SHOW_SEATS_VIEW, PERMISSIONS.SHOW_SEATS_MANAGE],
-    '/admin/havan-bookings': [PERMISSIONS.HAVAN_BOOKINGS_VIEW, PERMISSIONS.HAVAN_BOOKINGS_MANAGE],
     '/admin/stall-bookings': [PERMISSIONS.STALL_BOOKINGS_VIEW, PERMISSIONS.STALL_BOOKINGS_MANAGE],
     '/admin/show-bookings': [PERMISSIONS.SHOW_BOOKINGS_VIEW, PERMISSIONS.SHOW_BOOKINGS_MANAGE],
     '/admin/users': [PERMISSIONS.USERS_VIEW, PERMISSIONS.USERS_MANAGE],

@@ -1,14 +1,14 @@
 "use client";
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAdmin } from '@/context/AdminContext';
+import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 
 export default function ProtectedAdminRoute({ children, requiredPermission = null }) {
-  const { adminUser, loading, hasPermission } = useAdmin();
+  const { adminUser, loading, hasPermission } = useAdminAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading) { 
       if (!adminUser) {
         router.push('/admin/login');
         return;
@@ -28,7 +28,7 @@ export default function ProtectedAdminRoute({ children, requiredPermission = nul
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
           <p className="text-gray-600">Verifying admin access...</p>
         </div>
-      </div>
+      </div> 
     );
   }
 

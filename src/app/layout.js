@@ -16,24 +16,28 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <ThemeProvider>
-          <AuthProvider>
-            <AdminProvider>
-              <BookingProvider>
-                {children}
-                <Toaster 
-                  position="top-right"
-                  toastOptions={{
-                    duration: 4000,
-                    style: {
-                      background: '#363636',
-                      color: '#fff',
-                    },
-                  }}
-                />
-                {/* <AuthDebugger /> */}
-              </BookingProvider>
-            </AdminProvider>
-          </AuthProvider>
+          {/* COMMENTED OUT OLD PROVIDERS */}
+          {/* <AuthProvider> */}
+          {/* <AdminProvider> */}
+          
+          {/* Only BookingProvider is active now */}
+          <BookingProvider>
+            {children}
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+              }}
+            />
+            {/* <AuthDebugger /> */}
+          </BookingProvider>
+          
+          {/* </AdminProvider> */}
+          {/* </AuthProvider> */}
         </ThemeProvider>
       </body>
     </html>

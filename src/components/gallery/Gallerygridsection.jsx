@@ -1,38 +1,15 @@
+// app/gallery/page.jsx (UPDATE)
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { db } from '@/lib/firebase/config';
+import { collection, query, orderBy, getDocs, limit, startAfter } from 'firebase/firestore';
 
 const PAGE_SIZE = 24;
-const DEMO_TOTAL = 500;
 
-const LABELS = [
-  "Raja Celebration", "Poda Pitha", "Doli Swing", "Sambalpuri Saree",
-  "Chenna Poda", "Mehndi Evening", "Odissi Performance", "Opening Ceremony",
-  "Manda Pitha", "Folk Singer", "Alta on Feet", "Raja Kumari",
-  "Stall Bazaar", "Comedy Night", "New Dress", "Fireworks",
-  "Nabakalebar Stars", "Fancy Dress",
-];
-
-const ALL = Array.from({ length: DEMO_TOTAL }, (_, i) => ({
-  id: i + 1,
-  src: `/images/gallery/gallery-${String((i % 18) + 1).padStart(2, "0")}.jpg`,
-  label: LABELS[i % LABELS.length],
-}));
-
-// Replace with real CRM API when ready
-async function fetchPage(page) {
-  await new Promise((r) => setTimeout(r, 500));
-  const start = (page - 1) * PAGE_SIZE;
-  return {
-    images: ALL.slice(start, start + PAGE_SIZE),
-    hasMore: start + PAGE_SIZE < ALL.length,
-    total: ALL.length,
-  };
-}
-
-// ── Lightbox ──
+// Lightbox Component (keep as is)
 function Lightbox({ img, images, onClose, onNav }) {
   const idx = images.findIndex((i) => i.id === img.id);
 
@@ -99,11 +76,11 @@ function Lightbox({ img, images, onClose, onNav }) {
       >
         <div className="bg-white p-2.5 pb-14 shadow-2xl mx-auto max-w-xl">
           <div className="relative w-full bg-amber-50 overflow-hidden" style={{ height: "clamp(240px, 52vh, 500px)" }}>
-            <Image src={img.src} alt={img.label} fill className="object-contain" />
+            <Image src={img.url} alt={img.title || 'Gallery image'} fill className="object-contain" />
           </div>
           <div className="flex items-center justify-center h-14">
             <p className="text-sm italic text-amber-900/60 text-center" style={{ fontFamily: "'Lora', serif" }}>
-              {img.label}
+              {img.title || 'Raja Festival Moment'}
             </p>
           </div>
         </div>
@@ -112,19 +89,19 @@ function Lightbox({ img, images, onClose, onNav }) {
   );
 }
 
-// ── Card ──
+// Gallery Card Component (keep as is)
 function GalleryCard({ img, idx, onClick }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.38, delay: (idx % PAGE_SIZE) * 0.018 }}
+      transition={{ duration: 0.38, delay: (idx % 24) * 0.018 }}
       className="group relative overflow-hidden cursor-pointer rounded-sm aspect-square bg-amber-100 shadow-sm hover:shadow-lg transition-shadow duration-300"
       onClick={() => onClick(img)}
     >
       <Image
-        src={img.src}
-        alt={img.label}
+        src={img.url}
+        alt={img.title || 'Gallery image'}
         fill
         loading="lazy"
         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -142,7 +119,7 @@ function GalleryCard({ img, idx, onClick }) {
         className="absolute bottom-0 inset-x-0 px-3 pb-2.5 text-white text-xs italic translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
         style={{ fontFamily: "'Lora', serif" }}
       >
-        {img.label}
+        {img.title || 'Raja Festival Moment'}
       </p>
 
       {/* Expand */}
@@ -153,52 +130,93 @@ function GalleryCard({ img, idx, onClick }) {
   );
 }
 
-// ── Main ──
-export default function GalleryGridSection() {
+// Main Gallery Page
+export default function GalleryPage() {
   const [images, setImages] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [lightboxImg, setLightboxImg] = useState(null);
   const sentinelRef = useRef(null);
-  const pageRef = useRef(0);
-  const loadingRef = useRef(false);
-  const hasMoreRef = useRef(true);
+  const lastDocRef = useRef(null);
+  const isFetchingRef = useRef(false);
 
-  const load = useCallback(async () => {
-    if (loadingRef.current || !hasMoreRef.current) return;
-    loadingRef.current = true;
+  const fetchImages = useCallback(async () => {
+    if (isFetchingRef.current || !hasMore) return;
+    
+    isFetchingRef.current = true;
     setLoading(true);
-    const next = pageRef.current + 1;
-    const data = await fetchPage(next);
-    pageRef.current = next;
-    hasMoreRef.current = data.hasMore;
-    setImages((p) => [...p, ...data.images]);
-    setHasMore(data.hasMore);
-    setTotal(data.total);
-    setLoading(false);
-    loadingRef.current = false;
-  }, []);
+    try {
+      let q = query(
+        collection(db, 'gallery'),
+        orderBy('order', 'asc'),
+        orderBy('createdAt', 'desc'),
+        limit(PAGE_SIZE)
+      );
 
-  useEffect(() => { load(); }, []); // eslint-disable-line
+      if (lastDocRef.current) {
+        q = query(q, startAfter(lastDocRef.current));
+      }
+
+      const snapshot = await getDocs(q);
+      const newImages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      if (snapshot.docs.length > 0) {
+        lastDocRef.current = snapshot.docs[snapshot.docs.length - 1];
+      }
+
+      setImages(prev => {
+        const seen = new Set(prev.map((item) => item.id));
+        const merged = [...prev];
+        newImages.forEach((item) => {
+          if (!seen.has(item.id)) {
+            seen.add(item.id);
+            merged.push(item);
+          }
+        });
+        return merged;
+      });
+      setHasMore(snapshot.docs.length === PAGE_SIZE);
+      
+      // Get total count (you might want a separate count query)
+      if (total === 0) {
+        const countSnapshot = await getDocs(collection(db, 'gallery'));
+        setTotal(countSnapshot.size);
+      }
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      isFetchingRef.current = false;
+      setLoading(false);
+    }
+  }, [hasMore, total]);
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
+    
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) load(); },
+      ([e]) => { if (e.isIntersecting) fetchImages(); },
       { rootMargin: "400px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [load]);
+  }, [fetchImages]);
 
   const handleNav = useCallback((i) => {
     if (i >= 0 && i < images.length) setLightboxImg(images[i]);
   }, [images]);
 
   return (
-    <>
+    <main>
+      
       <section className="bg-amber-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-3 sm:px-5 py-8">
 
@@ -257,6 +275,6 @@ export default function GalleryGridSection() {
           />
         )}
       </AnimatePresence>
-    </>
+    </main>
   );
 }

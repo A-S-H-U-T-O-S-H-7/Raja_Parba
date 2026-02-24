@@ -20,6 +20,7 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-dropzone": "^15.0.0",
     "react-hot-toast": "^2.6.0",
     "sweetalert2": "^11.26.18",
     "swiper": "^12.1.1",

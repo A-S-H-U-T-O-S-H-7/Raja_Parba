@@ -17,7 +17,7 @@ import {
   CurrencyRupeeIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { useTheme } from '@/context/ThemeContext';
+import useThemeStore from '@/lib/stores/useThemeStore';
 import DonationDetailsModal from './DonationDetailsModal';
 import DocumentViewerModal from '../DocumentViewerModal';
 import { format, isWithinInterval, subDays, startOfDay } from 'date-fns';
@@ -25,7 +25,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 
 export default function DonationManagement() {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode } = useThemeStore();
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

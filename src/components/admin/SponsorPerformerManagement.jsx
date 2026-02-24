@@ -585,11 +585,66 @@ export default function SponsorPerformerManagement() {
                 <label className="block text-sm font-medium mb-1">Address</label>
                 <p>{selectedApplication.address}</p>
               </div>
+
+              {selectedApplication.organization && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Organization</label>
+                  <p>{selectedApplication.organization}</p>
+                </div>
+              )}
+
+              {selectedApplication.city && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">City</label>
+                  <p>{selectedApplication.city}</p>
+                </div>
+              )}
               
               {selectedApplication.performanceType && (
                 <div>
                   <label className="block text-sm font-medium mb-1">Performance Type</label>
                   <p>{selectedApplication.performanceType}</p>
+                </div>
+              )}
+
+              {selectedApplication.gender && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Gender</label>
+                  <p>{selectedApplication.gender}</p>
+                </div>
+              )}
+
+              {selectedApplication.participationType && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Participation Type</label>
+                  <p>{selectedApplication.participationType}</p>
+                </div>
+              )}
+
+              {selectedApplication.trackMusicName && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Track / Music Name</label>
+                  <p>{selectedApplication.trackMusicName}</p>
+                </div>
+              )}
+
+              {selectedApplication.participationType === 'Group' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Group Name</label>
+                    <p>{selectedApplication.groupName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Member Count</label>
+                    <p>{selectedApplication.memberCount || 'N/A'}</p>
+                  </div>
+                </div>
+              )}
+
+              {Array.isArray(selectedApplication.memberNames) && selectedApplication.memberNames.some(Boolean) && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Group Members</label>
+                  <p>{selectedApplication.memberNames.filter(Boolean).join(', ')}</p>
                 </div>
               )}
               

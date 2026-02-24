@@ -14,33 +14,37 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [name, setName] = useState("");
+
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      toast.error("Passwords do not match");
-      return;
-    }
-    
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
+  e.preventDefault();
+  
+  if (password !== confirmPassword) {
+    setError("Passwords do not match");
+    toast.error("Passwords do not match");
+    return;
+  }
+  
+  if (password.length < 6) {
+    setError("Password must be at least 6 characters");
+    toast.error("Password must be at least 6 characters");
+    return;
+  }
 
-    setError("");
-    const result = await signUp(email, password);
-    
-    if (result.success) {
-      toast.success('Account created successfully!');
-      router.push("/");
-    } else {
-      setError(result.error);
-      toast.error(result.error);
-    }
-  };
+  setError("");
+  
+  // Pass name to signUp function
+  const result = await signUp(email, password, name);
+  
+  if (result.success) {
+    toast.success('Account created successfully!');
+    router.push("/");
+  } else {
+    setError(result.error);
+    toast.error(result.error);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-50 px-4 sm:px-6 lg:px-8">
@@ -82,6 +86,20 @@ export default function RegisterPage() {
                   required
                 />
               </div>
+{/* name */}
+              <div>
+  <label className="block text-sm font-semibold text-gray-700 mb-2">
+    Full Name
+  </label>
+  <input
+    type="text"
+    placeholder="Enter your full name"
+    className="w-full px-4 py-2.5 text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    required
+  />
+</div>
               
               {/* Password Fields in Same Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -155,7 +173,7 @@ export default function RegisterPage() {
               <Link href="/login" className="font-medium text-orange-600 hover:text-orange-500 transition-colors">
                 Log in here
               </Link>
-            </p>
+            </p> 
           </div>
           
           <div className="mt-3 text-center">

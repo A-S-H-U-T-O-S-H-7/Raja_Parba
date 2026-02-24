@@ -10,21 +10,25 @@ import {
   updateDoc,
   deleteDoc,
   addDoc,
-  serverTimestamp 
+  serverTimestamp,
+  orderBy,
+  limit
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import bcrypt from 'bcryptjs'; // Install: npm install bcryptjs
 
 class AdminAuthService {
-  // Admin login (custom credentials, NOT Firebase Auth)
+  // Admin login with plain text password (TEMPORARY FOR TESTING)
   async login(username, password) {
     try {
+      console.log('🔐 Login attempt:', username);
+      
       // Find admin by username
       const adminsRef = collection(db, 'admin_users');
       const q = query(adminsRef, where('username', '==', username.toLowerCase()));
       const querySnapshot = await getDocs(q);
       
       if (querySnapshot.empty) {
+        console.log('❌ User not found');
         return { 
           success: false, 
           error: 'Invalid username or password' 
@@ -33,16 +37,19 @@ class AdminAuthService {
 
       const adminDoc = querySnapshot.docs[0];
       const adminData = adminDoc.data();
-
-      // Verify password
-      const isValid = await bcrypt.compare(password, adminData.password);
       
-      if (!isValid) {
+      console.log('✅ User found:', adminData.username);
+
+      // 🔓 TEMPORARY: Plain text password comparison
+      if (adminData.password !== password) {
+        console.log('❌ Password mismatch');
         return { 
           success: false, 
           error: 'Invalid username or password' 
         };
       }
+
+      console.log('✅ Password matched');
 
       // Check if admin is active
       if (adminData.status !== 'active') {
@@ -55,27 +62,32 @@ class AdminAuthService {
       // Update last login
       await updateDoc(doc(db, 'admin_users', adminDoc.id), {
         lastLogin: serverTimestamp(),
-        lastLoginIp: null, // You can add IP tracking
+        lastLoginIp: null
       });
 
       // Remove password from response
       const { password: _, ...adminWithoutPassword } = adminData;
       
-      // Generate session token (you can use JWT or just store session)
+      // Generate session token
       const sessionToken = this.generateSessionToken();
       
-      // Store session in Firestore or use httpOnly cookies
+      // Store session in Firestore
       await setDoc(doc(db, 'admin_sessions', sessionToken), {
         adminId: adminDoc.id,
         username: adminData.username,
+        name: adminData.name,
         role: adminData.role,
+        permissions: adminData.permissions || [],
         createdAt: serverTimestamp(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
       });
 
       return { 
         success: true, 
-        admin: adminWithoutPassword,
+        admin: {
+          id: adminDoc.id,
+          ...adminWithoutPassword
+        },
         sessionToken,
         error: null 
       };
@@ -85,6 +97,62 @@ class AdminAuthService {
         success: false, 
         error: 'Login failed. Please try again.' 
       };
+    }
+  }
+
+  // Verify session
+  async verifySession(sessionToken) {
+    try {
+      const sessionDoc = await getDoc(doc(db, 'admin_sessions', sessionToken));
+      
+      if (!sessionDoc.exists()) {
+        return { success: false, error: 'Invalid session' };
+      }
+
+      const session = sessionDoc.data();
+      
+      // Check if session expired
+      if (session.expiresAt?.toDate() < new Date()) {
+        await deleteDoc(doc(db, 'admin_sessions', sessionToken));
+        return { success: false, error: 'Session expired' };
+      }
+
+      // Get admin details
+      const adminDoc = await getDoc(doc(db, 'admin_users', session.adminId));
+      
+      if (!adminDoc.exists() || adminDoc.data().status !== 'active') {
+        await deleteDoc(doc(db, 'admin_sessions', sessionToken));
+        return { success: false, error: 'Admin account not found or inactive' };
+      }
+
+      const adminData = adminDoc.data();
+      const { password: _, ...adminWithoutPassword } = adminData;
+
+      return { 
+        success: true, 
+        admin: {
+          id: adminDoc.id,
+          ...adminWithoutPassword
+        },
+        session,
+        error: null 
+      };
+    } catch (error) {
+      console.error('Verify session error:', error);
+      return { success: false, error: 'Failed to verify session' };
+    }
+  }
+
+  // Logout
+  async logout(sessionToken) {
+    try {
+      if (sessionToken) {
+        await deleteDoc(doc(db, 'admin_sessions', sessionToken));
+      }
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Logout error:', error);
+      return { success: false, error: 'Failed to logout' };
     }
   }
 
@@ -119,14 +187,11 @@ class AdminAuthService {
         }
       }
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Create admin document
+      // Create admin document (store password as plain text for testing)
       const adminRef = await addDoc(collection(db, 'admin_users'), {
         username: username.toLowerCase(),
         email: email?.toLowerCase(),
-        password: hashedPassword,
+        password: password, // Plain text for testing
         name,
         role: role || 'admin',
         permissions: permissions || [],
@@ -163,11 +228,6 @@ class AdminAuthService {
   async updateAdmin(adminId, updates, updatedBy) {
     try {
       const adminRef = doc(db, 'admin_users', adminId);
-      
-      // If updating password, hash it
-      if (updates.password) {
-        updates.password = await bcrypt.hash(updates.password, 10);
-      }
 
       // Don't allow username change (for security)
       delete updates.username;
@@ -242,61 +302,6 @@ class AdminAuthService {
     }
   }
 
-  // Verify session
-  async verifySession(sessionToken) {
-    try {
-      const sessionDoc = await getDoc(doc(db, 'admin_sessions', sessionToken));
-      
-      if (!sessionDoc.exists()) {
-        return { success: false, error: 'Invalid session' };
-      }
-
-      const session = sessionDoc.data();
-      
-      // Check if session expired
-      if (session.expiresAt?.toDate() < new Date()) {
-        await deleteDoc(doc(db, 'admin_sessions', sessionToken));
-        return { success: false, error: 'Session expired' };
-      }
-
-      // Get admin details
-      const adminDoc = await getDoc(doc(db, 'admin_users', session.adminId));
-      
-      if (!adminDoc.exists() || adminDoc.data().status !== 'active') {
-        await deleteDoc(doc(db, 'admin_sessions', sessionToken));
-        return { success: false, error: 'Admin account not found or inactive' };
-      }
-
-      const adminData = adminDoc.data();
-      const { password: _, ...adminWithoutPassword } = adminData;
-
-      return { 
-        success: true, 
-        admin: {
-          id: adminDoc.id,
-          ...adminWithoutPassword
-        },
-        session 
-      };
-    } catch (error) {
-      console.error('Verify session error:', error);
-      return { success: false, error: 'Failed to verify session' };
-    }
-  }
-
-  // Logout
-  async logout(sessionToken) {
-    try {
-      if (sessionToken) {
-        await deleteDoc(doc(db, 'admin_sessions', sessionToken));
-      }
-      return { success: true, error: null };
-    } catch (error) {
-      console.error('Logout error:', error);
-      return { success: false, error: 'Failed to logout' };
-    }
-  }
-
   // Get all admins (super admin only)
   async getAllAdmins() {
     try {
@@ -307,9 +312,9 @@ class AdminAuthService {
         return {
           id: doc.id,
           ...adminWithoutPassword,
-          createdAt: data.createdAt?.toDate(),
-          lastLogin: data.lastLogin?.toDate(),
-          updatedAt: data.updatedAt?.toDate()
+          createdAt: data.createdAt?.toDate?.() || data.createdAt,
+          lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
+          updatedAt: data.updatedAt?.toDate?.() || data.updatedAt
         };
       });
       
@@ -320,14 +325,42 @@ class AdminAuthService {
     }
   }
 
+  // Get admin by ID
+  async getAdminById(adminId) {
+    try {
+      const adminDoc = await getDoc(doc(db, 'admin_users', adminId));
+      
+      if (!adminDoc.exists()) {
+        return { success: false, error: 'Admin not found' };
+      }
+
+      const data = adminDoc.data();
+      const { password: _, ...adminWithoutPassword } = data;
+
+      return { 
+        success: true, 
+        admin: {
+          id: adminDoc.id,
+          ...adminWithoutPassword,
+          createdAt: data.createdAt?.toDate?.() || data.createdAt,
+          lastLogin: data.lastLogin?.toDate?.() || data.lastLogin
+        },
+        error: null 
+      };
+    } catch (error) {
+      console.error('Get admin error:', error);
+      return { success: false, error: 'Failed to fetch admin' };
+    }
+  }
+
   // Log admin activity
   async logAdminActivity(data) {
     try {
       await addDoc(collection(db, 'admin_activity_logs'), {
         ...data,
         timestamp: serverTimestamp(),
-        ipAddress: null, // Add IP tracking if needed
-        userAgent: null // Add user agent if needed
+        ipAddress: null,
+        userAgent: null
       });
     } catch (error) {
       console.error('Log activity error:', error);
@@ -335,21 +368,31 @@ class AdminAuthService {
   }
 
   // Get admin activity logs
-  async getActivityLogs(adminId, limit = 50) {
+  async getActivityLogs(adminId = null, limitCount = 50) {
     try {
+      let q;
       const logsRef = collection(db, 'admin_activity_logs');
-      const q = query(
-        logsRef,
-        where('adminId', '==', adminId),
-        orderBy('timestamp', 'desc'),
-        limit(limit)
-      );
+      
+      if (adminId) {
+        q = query(
+          logsRef,
+          where('adminId', '==', adminId),
+          orderBy('timestamp', 'desc'),
+          limit(limitCount)
+        );
+      } else {
+        q = query(
+          logsRef,
+          orderBy('timestamp', 'desc'),
+          limit(limitCount)
+        );
+      }
       
       const snapshot = await getDocs(q);
       const logs = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate()
+        timestamp: doc.data().timestamp?.toDate?.() || doc.data().timestamp
       }));
       
       return { success: true, logs, error: null };
@@ -362,8 +405,40 @@ class AdminAuthService {
   // Generate session token
   generateSessionToken() {
     return 'adm_' + Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15);
+           Math.random().toString(36).substring(2, 15) +
+           Date.now().toString(36);
+  }
+
+  // Check if username exists
+  async checkUsernameExists(username) {
+    try {
+      const q = query(
+        collection(db, 'admin_users'), 
+        where('username', '==', username.toLowerCase())
+      );
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.error('Check username error:', error);
+      return false;
+    }
+  }
+
+  // Check if email exists
+  async checkEmailExists(email) {
+    try {
+      const q = query(
+        collection(db, 'admin_users'), 
+        where('email', '==', email.toLowerCase())
+      );
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.error('Check email error:', error);
+      return false;
+    }
   }
 }
 
+// Export singleton instance
 export const adminAuthService = new AdminAuthService();
