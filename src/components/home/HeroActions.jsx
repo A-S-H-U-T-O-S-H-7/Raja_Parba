@@ -196,6 +196,7 @@ function HeroActions({ user }) {
     }
   };
 
+  // Cards with static classes (no dynamic template literals for Tailwind)
   const cards = [
     {
       id: 'sponsor',
@@ -204,7 +205,8 @@ function HeroActions({ user }) {
       icon: Star,
       gradient: 'from-amber-500 to-orange-500',
       lightGradient: 'from-amber-50 to-orange-50',
-      borderColor: 'amber',
+      borderClass: 'border-amber-200/50',
+      viaColor: 'via-amber-500',
       image: '/sponser.png',
       action: 'sponsor'
     },
@@ -215,11 +217,11 @@ function HeroActions({ user }) {
       icon: Mic,
       gradient: 'from-fuchsia-500 to-purple-500',
       lightGradient: 'from-fuchsia-50 to-purple-50',
-      borderColor: 'purple',
+      borderClass: 'border-purple-200/50',
+      viaColor: 'via-purple-500',
       image: '/performer.png',
       action: 'performer'
     },
-    
     {
       id: 'show',
       title: 'Show Booking',
@@ -227,7 +229,8 @@ function HeroActions({ user }) {
       icon: Calendar,
       gradient: 'from-blue-500 to-cyan-500',
       lightGradient: 'from-blue-50 to-cyan-50',
-      borderColor: 'blue',
+      borderClass: 'border-blue-200/50',
+      viaColor: 'via-blue-500',
       image: '/show.png',
       action: 'show'
     },
@@ -238,7 +241,8 @@ function HeroActions({ user }) {
       icon: Heart,
       gradient: 'from-purple-500 to-pink-500',
       lightGradient: 'from-purple-50 to-pink-50',
-      borderColor: 'pink',
+      borderClass: 'border-pink-200/50',
+      viaColor: 'via-pink-500',
       image: '/stall.png',
       action: 'stall',
       isLink: true
@@ -250,7 +254,8 @@ function HeroActions({ user }) {
       icon: Award,
       gradient: 'from-yellow-500 to-amber-500',
       lightGradient: 'from-yellow-50 to-amber-50',
-      borderColor: 'yellow',
+      borderClass: 'border-yellow-200/50',
+      viaColor: 'via-yellow-500',
       image: '/awards.png',
       action: 'awards'
     },
@@ -261,7 +266,8 @@ function HeroActions({ user }) {
       icon: Crown,
       gradient: 'from-rose-500 to-red-500',
       lightGradient: 'from-rose-50 to-red-50',
-      borderColor: 'rose',
+      borderClass: 'border-rose-200/50',
+      viaColor: 'via-rose-500',
       image: '/rajaqueen.png',
       action: 'kumari'
     },
@@ -272,7 +278,8 @@ function HeroActions({ user }) {
       icon: Sparkle,
       gradient: 'from-emerald-500 to-teal-500',
       lightGradient: 'from-emerald-50 to-teal-50',
-      borderColor: 'emerald',
+      borderClass: 'border-emerald-200/50',
+      viaColor: 'via-emerald-500',
       image: '/fancy.png',
       action: 'fancy-dress'
     }
@@ -307,62 +314,8 @@ function HeroActions({ user }) {
         }}
       />
 
-      {/* Optimized Floating Particles - CSS Animations instead of Framer Motion */}
+      {/* Optimized Floating Particles - CSS Animations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <style jsx>{`
-          @keyframes float-particle {
-            0% {
-              transform: translate(0, 0) scale(1);
-              opacity: 0.2;
-            }
-            25% {
-              transform: translate(8px, -12px) scale(1.2);
-              opacity: 0.5;
-            }
-            50% {
-              transform: translate(-5px, -20px) scale(1.4);
-              opacity: 0.7;
-            }
-            75% {
-              transform: translate(10px, -12px) scale(1.2);
-              opacity: 0.5;
-            }
-            100% {
-              transform: translate(0, 0) scale(1);
-              opacity: 0.2;
-            }
-          }
-          
-          .particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background-color: rgba(250, 204, 21, 0.3);
-            border-radius: 9999px;
-            box-shadow: 0 0 10px rgba(250, 204, 21, 0.3);
-            animation: float-particle infinite ease-in-out;
-            will-change: transform, opacity;
-          }
-          
-          .particle-large {
-            width: 8px;
-            height: 8px;
-            background-color: rgba(250, 204, 21, 0.4);
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
-          }
-          
-          .particle-small {
-            width: 4px;
-            height: 4px;
-            background-color: rgba(250, 204, 21, 0.2);
-            box-shadow: 0 0 8px rgba(250, 204, 21, 0.2);
-          }
-          
-          .animation-paused {
-            animation-play-state: paused;
-          }
-        `}</style>
-        
         {particles.map((particle, i) => (
           <div
             key={i}
@@ -408,7 +361,7 @@ function HeroActions({ user }) {
           </div>
         </div>
 
-        {/* Cards Grid - Smaller boxes, 2 columns on mobile, 4 on tablet, 7 on desktop */}
+        {/* Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
           {cards.map((card, index) => {
             const IconComponent = card.icon;
@@ -424,21 +377,21 @@ function HeroActions({ user }) {
                 {/* Glow Effect */}
                 <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-xl blur-md opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
                 
-                {/* Main Card */}
-                <div className={`relative bg-gradient-to-br ${card.lightGradient} backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-${card.borderColor}-200/50 group-hover:-translate-y-0.5`}>
+                {/* Main Card - Using static border class */}
+                <div className={`relative bg-gradient-to-br ${card.lightGradient} backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border ${card.borderClass} group-hover:-translate-y-0.5`}>
                   
                   {/* Top Gradient Bar */}
                   <div className={`h-1 bg-gradient-to-r ${card.gradient}`}></div>
                   
-                  {/* Card Content - Smaller padding */}
+                  {/* Card Content */}
                   <div className="p-3 flex flex-col items-center">
                     
-                    {/* Icon/Image Container - Smaller */}
+                    {/* Icon/Image Container */}
                     <div className="relative mb-2">
                       {/* Outer Glow Ring */}
                       <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-full blur-sm opacity-0 group-hover:opacity-40 transition-opacity duration-300`}></div>
                       
-                      {/* Image Container - Smaller */}
+                      {/* Image Container */}
                       <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br ${card.gradient} p-1 shadow-md`}>
                         <div className="w-full h-full rounded-full bg-white flex items-center justify-center p-1.5">
                           <img 
@@ -453,26 +406,26 @@ function HeroActions({ user }) {
                         </div>
                       </div>
 
-                      {/* Floating Icon Overlay - Smaller */}
+                      {/* Floating Icon Overlay */}
                       <div className={`absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-r ${card.gradient} flex items-center justify-center shadow-md`}>
                         <IconComponent className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
                       </div>
                     </div>
 
-                    {/* Title - Smaller text */}
+                    {/* Title */}
                     <h3 className={`${playfair.className} text-xs sm:text-sm font-bold text-gray-800 mb-1 text-center line-clamp-1`}>
                       {card.title}
                     </h3>
 
-                    {/* Description - Smaller text */}
+                    {/* Description */}
                     <p className="text-[10px] sm:text-xs text-gray-600 text-center mb-2 line-clamp-1">
                       {card.description}
                     </p>
 
-                    {/* Decorative Line - Smaller */}
-                    <div className={`w-8 h-0.5 bg-gradient-to-r from-transparent via-${card.borderColor}-500 to-transparent mb-2`}></div>
+                    {/* Decorative Line - Using static via color */}
+                    <div className={`w-8 h-0.5 bg-gradient-to-r from-transparent ${card.viaColor} to-transparent mb-2`}></div>
 
-                    {/* Action Button - Smaller */}
+                    {/* Action Button */}
                     {card.isLink ? (
                       <Link
                         href={user ? card.action === 'stall' ? "/stall" : `/${card.action}` : "#"}
@@ -507,7 +460,7 @@ function HeroActions({ user }) {
           })}
         </div>
 
-        {/* Login Prompt Modal - Using PortalModal */}
+        {/* Login Prompt Modal */}
         <PortalModal isOpen={showLoginPrompt} onClose={() => setShowLoginPrompt(false)}>
           <div className="p-6">
             <div className="flex justify-center mb-4">
@@ -591,12 +544,36 @@ function HeroActions({ user }) {
         /> 
       </div>
 
+      {/* Combined Style Tag */}
       <style jsx>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(20px, -30px) scale(1.1); }
           66% { transform: translate(-15px, 15px) scale(0.9); }
           100% { transform: translate(0px, 0px) scale(1); }
+        }
+        
+        @keyframes float-particle {
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.2;
+          }
+          25% {
+            transform: translate(8px, -12px) scale(1.2);
+            opacity: 0.5;
+          }
+          50% {
+            transform: translate(-5px, -20px) scale(1.4);
+            opacity: 0.7;
+          }
+          75% {
+            transform: translate(10px, -12px) scale(1.2);
+            opacity: 0.5;
+          }
+          100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.2;
+          }
         }
         
         .animate-blob {
@@ -614,9 +591,38 @@ function HeroActions({ user }) {
         .animation-delay-4000 {
           animation-delay: 4s;
         }
+        
+        .particle {
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          background-color: rgba(250, 204, 21, 0.3);
+          border-radius: 9999px;
+          box-shadow: 0 0 10px rgba(250, 204, 21, 0.3);
+          animation: float-particle infinite ease-in-out;
+          will-change: transform, opacity;
+        }
+        
+        .particle-large {
+          width: 8px;
+          height: 8px;
+          background-color: rgba(250, 204, 21, 0.4);
+          box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+        }
+        
+        .particle-small {
+          width: 4px;
+          height: 4px;
+          background-color: rgba(250, 204, 21, 0.2);
+          box-shadow: 0 0 8px rgba(250, 204, 21, 0.2);
+        }
+        
+        .animation-paused {
+          animation-play-state: paused;
+        }
       `}</style>
 
-      {/* Corner Design - overflow only in y-direction */}
+      {/* Corner Design */}
       <div className="absolute -bottom-5 left-[-20px] md:-bottom-14 md:left-[-30px] w-28 h-28 md:w-56 md:h-56 z-20 pointer-events-none">
         <Image
           src="/greencorner.png"
