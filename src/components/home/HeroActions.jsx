@@ -1,6 +1,6 @@
 // HeroActions.jsx
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Heart, Star, Users, Mic, Calendar, Sparkles, Award, Crown, Sparkle } from 'lucide-react';
@@ -11,7 +11,6 @@ import SponsorModal from "../sponsor-perfomer/SponsorModal";
 import PerformerModal from "../sponsor-perfomer/PerformerModal";
 import ToastNotification from "../sponsor-perfomer/ToastNotification";
 import PortalModal from "./PortalModal";
-import StarField from "./StarField";
 
 const playfair = Playfair_Display({ 
   subsets: ['latin'],
@@ -29,6 +28,7 @@ function HeroActions({ user }) {
   const [isShowModalOpen, setIsShowModalOpen] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [isScrolling, setIsScrolling] = useState(false);
   
   // Sponsor Modal State
   const [showSponsorModal, setShowSponsorModal] = useState(false);
@@ -62,6 +62,22 @@ function HeroActions({ user }) {
   // Toast State
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // Handle scroll to optimize animations
+  useEffect(() => {
+    let timeoutId;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => setIsScrolling(false), 150);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const showToastMessage = (message) => {
     setToastMessage(message);
@@ -262,18 +278,24 @@ function HeroActions({ user }) {
     }
   ];
 
+  // Generate random values for particles that stay consistent
+  const particles = [...Array(6)].map(() => ({
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    duration: 4 + Math.random() * 4,
+    delay: Math.random() * 2,
+    size: 0.8 + Math.random() * 1.2
+  }));
+
   return (
     <div className="relative w-full py-10 md:py-14 px-4 overflow-x-clip overflow-y-visible bg-gradient-to-br from-teal-300 via-white to-emerald-400">
       
-      {/* Star Field Effect */}
-      <StarField count={40} />
-
-      {/* Bubble Background */}
+      {/* Bubble Background - Optimized */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 -left-4 w-34 h-34 bg-purple-300 rounded-full opacity-80  animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-22 h-22 bg-yellow-300 rounded-full opacity-70  animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-        <div className="absolute bottom-20 right-20 w-56 h-56 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-3000"></div>
+        <div className="absolute top-10 -left-4 w-34 h-34 bg-purple-300 rounded-full opacity-80 animate-blob will-change-transform"></div>
+        <div className="absolute top-0 -right-4 w-22 h-22 bg-yellow-300 rounded-full opacity-70 animate-blob animation-delay-2000 will-change-transform"></div>
+        <div className="absolute -bottom-8 left-20 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000 will-change-transform"></div>
+        <div className="absolute bottom-20 right-20 w-56 h-56 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-3000 will-change-transform"></div>
       </div>
 
       {/* Top Border */}
@@ -285,26 +307,74 @@ function HeroActions({ user }) {
         }}
       />
 
-      {/* Floating Particles */}
+      {/* Optimized Floating Particles - CSS Animations instead of Framer Motion */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
+        <style jsx>{`
+          @keyframes float-particle {
+            0% {
+              transform: translate(0, 0) scale(1);
+              opacity: 0.2;
+            }
+            25% {
+              transform: translate(8px, -12px) scale(1.2);
+              opacity: 0.5;
+            }
+            50% {
+              transform: translate(-5px, -20px) scale(1.4);
+              opacity: 0.7;
+            }
+            75% {
+              transform: translate(10px, -12px) scale(1.2);
+              opacity: 0.5;
+            }
+            100% {
+              transform: translate(0, 0) scale(1);
+              opacity: 0.2;
+            }
+          }
+          
+          .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: rgba(250, 204, 21, 0.3);
+            border-radius: 9999px;
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.3);
+            animation: float-particle infinite ease-in-out;
+            will-change: transform, opacity;
+          }
+          
+          .particle-large {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(250, 204, 21, 0.4);
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+          }
+          
+          .particle-small {
+            width: 4px;
+            height: 4px;
+            background-color: rgba(250, 204, 21, 0.2);
+            box-shadow: 0 0 8px rgba(250, 204, 21, 0.2);
+          }
+          
+          .animation-paused {
+            animation-play-state: paused;
+          }
+        `}</style>
+        
+        {particles.map((particle, i) => (
+          <div
             key={i}
-            className="absolute w-1.5 h-1.5 bg-yellow-400/30 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"
+            className={`particle ${
+              particle.size > 1.5 ? 'particle-large' : 
+              particle.size < 1 ? 'particle-small' : ''
+            } ${isScrolling ? 'animation-paused' : ''}`}
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, Math.random() * 20 - 10, 0],
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.7, 0.3],
-            }}
-            transition={{
-              duration: 4 + Math.random() * 4,
-              repeat: Infinity,
-              delay: Math.random() * 3,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              animationDuration: `${particle.duration}s`,
+              animationDelay: `${particle.delay}s`,
             }}
           />
         ))}
