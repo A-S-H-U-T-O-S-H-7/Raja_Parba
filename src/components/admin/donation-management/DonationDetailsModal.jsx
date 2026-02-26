@@ -1,27 +1,32 @@
+// components/admin/donation-management/DonationDetailsModal.jsx
 "use client";
 import { useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { 
-  XMarkIcon, 
-  HeartIcon, 
-  UserIcon, 
-  CurrencyRupeeIcon,
-  CreditCardIcon,
-  IdentificationIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  BanknotesIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  HomeIcon,
-  ShieldCheckIcon
-} from '@heroicons/react/24/outline';
+  X, 
+  Heart, 
+  User, 
+  IndianRupee,
+  CreditCard,
+  Fingerprint,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Landmark,
+  Phone,
+  Mail,
+  Home,
+  Shield,
+  Calendar,
+  Hash,
+  MapPin
+} from 'lucide-react';
 import useThemeStore from '@/lib/stores/useThemeStore';
+import useDonationStore from '@/lib/stores/useDonationStore';
 import { format, isValid } from 'date-fns';
 
 export default function DonationDetailsModal({ donation, isOpen, onClose, onRefresh }) {
   const { isDarkMode } = useThemeStore();
+  const { updateDonationStatus } = useDonationStore();
   const [updating, setUpdating] = useState(false);
 
   if (!isOpen || !donation) return null;
@@ -33,7 +38,6 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
     try {
       let dateObj;
       if (date && typeof date.toDate === 'function') {
-        // Firestore Timestamp
         dateObj = date.toDate();
       } else if (date instanceof Date) {
         dateObj = date;
@@ -43,7 +47,6 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
         return 'Invalid date';
       }
       
-      // Check if date is valid
       if (!isValid(dateObj)) {
         return 'Invalid date';
       }
@@ -56,38 +59,24 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
   };
 
   // Update donation status
-  const updateDonationStatus = async (newStatus) => {
-    try {
-      setUpdating(true);
-      const { db } = await import('@/lib/firebase');
-      const { doc, updateDoc, serverTimestamp } = await import('firebase/firestore');
-      
-      const donationRef = doc(db, 'donations', donation.id);
-      await updateDoc(donationRef, {
-        status: newStatus,
-        updatedAt: serverTimestamp(),
-        ...(newStatus === 'confirmed' && { confirmedAt: serverTimestamp() })
-      });
-
-      toast.success(`Donation status updated to ${newStatus}`);
+  const handleUpdateStatus = async (newStatus) => {
+    setUpdating(true);
+    const result = await updateDonationStatus(donation.id, newStatus);
+    if (result.success) {
       onRefresh();
       onClose();
-    } catch (error) {
-      console.error('Error updating donation status:', error);
-      toast.error('Failed to update donation status');
-    } finally {
-      setUpdating(false);
     }
+    setUpdating(false);
   };
 
   // Get status info
   const getStatusInfo = (status) => {
     const statusConfig = {
-      'confirmed': { color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-100 dark:bg-green-900/30', icon: CheckCircleIcon, label: 'Confirmed' },
-      'completed': { color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-100 dark:bg-green-900/30', icon: CheckCircleIcon, label: 'Completed' },
-      'pending_payment': { color: 'text-yellow-600 dark:text-yellow-400', bgColor: 'bg-yellow-100 dark:bg-yellow-900/30', icon: ClockIcon, label: 'Pending Payment' },
-      'failed': { color: 'text-red-600 dark:text-red-400', bgColor: 'bg-red-100 dark:bg-red-900/30', icon: XCircleIcon, label: 'Failed' },
-      'cancelled': { color: 'text-gray-600 dark:text-gray-400', bgColor: 'bg-gray-100 dark:bg-gray-900/30', icon: XCircleIcon, label: 'Cancelled' }
+      'confirmed': { color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-100 dark:bg-green-900/30', icon: CheckCircle, label: 'Confirmed' },
+      'completed': { color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-100 dark:bg-green-900/30', icon: CheckCircle, label: 'Completed' },
+      'pending_payment': { color: 'text-yellow-600 dark:text-yellow-400', bgColor: 'bg-yellow-100 dark:bg-yellow-900/30', icon: Clock, label: 'Pending Payment' },
+      'failed': { color: 'text-red-600 dark:text-red-400', bgColor: 'bg-red-100 dark:bg-red-900/30', icon: XCircle, label: 'Failed' },
+      'cancelled': { color: 'text-gray-600 dark:text-gray-400', bgColor: 'bg-gray-100 dark:bg-gray-900/30', icon: XCircle, label: 'Cancelled' }
     };
     return statusConfig[status] || statusConfig['pending_payment'];
   };
@@ -111,7 +100,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="p-2 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 mr-3">
-                  <HeartIcon className="h-5 w-5 text-white" />
+                  <Heart className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">Donation Details</h3>
@@ -124,7 +113,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
                 onClick={onClose}
                 className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}
               >
-                <XMarkIcon className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -136,7 +125,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
             <div className={`p-5 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm`}>
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-lg font-semibold flex items-center">
-                  <BanknotesIcon className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
+                  <Landmark className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
                   Amount & Status
                 </h4>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${statusInfo.bgColor} ${statusInfo.color}`}>
@@ -148,7 +137,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <div className="flex items-center justify-center text-2xl font-bold text-green-600 dark:text-green-400">
-                    <CurrencyRupeeIcon className="h-6 w-6 mr-1" />
+                    <IndianRupee className="h-6 w-6 mr-1" />
                     {(donation.amount || 0).toLocaleString('en-IN')}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Amount</div>
@@ -184,13 +173,13 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
             {/* Donor Information Section */}
             <div className={`p-5 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm`}>
               <h4 className="text-lg font-semibold flex items-center mb-4">
-                <UserIcon className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
+                <User className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
                 Donor Information
               </h4>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <IdentificationIcon className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
+                  <Fingerprint className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</div>
                     <div className="font-semibold truncate">{donation.donorDetails?.name || 'Anonymous'}</div>
@@ -198,7 +187,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
                 </div>
                 
                 <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
+                  <Mail className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</div>
                     <div className="font-semibold truncate">{donation.donorDetails?.email || 'Not provided'}</div>
@@ -206,7 +195,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
                 </div>
                 
                 <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <PhoneIcon className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
+                  <Phone className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Mobile</div>
                     <div className="font-semibold">{donation.donorDetails?.mobile || 'Not provided'}</div>
@@ -214,7 +203,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
                 </div>
                 
                 <div className="flex items-start p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <HomeIcon className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0 mt-0.5" />
+                  <Home className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Address</div>
                     {donation.donorDetails?.address ? (
@@ -240,7 +229,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
             {/* Payment Details Section */}
             <div className={`p-5 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm`}>
               <h4 className="text-lg font-semibold flex items-center mb-4">
-                <CreditCardIcon className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
+                <CreditCard className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
                 Payment Details
               </h4>
               
@@ -283,7 +272,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
                 <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
                       <span className="font-medium text-green-800 dark:text-green-400">Confirmed On</span>
                     </div>
                     <div className="text-right">
@@ -302,7 +291,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
               {donation.paymentDetails?.failure_message && (
                 <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                   <div className="flex items-start">
-                    <XCircleIcon className="h-5 w-5 text-red-600 dark:text-red-400 mr-2 mt-0.5 flex-shrink-0" />
+                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="font-medium text-red-800 dark:text-red-400 mb-1">Failure Reason</div>
                       <div className="text-sm text-red-700 dark:text-red-300">
@@ -317,7 +306,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
             {/* System Information Section */}
             <div className={`p-5 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm`}>
               <h4 className="text-lg font-semibold flex items-center mb-4">
-                <ShieldCheckIcon className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
+                <Shield className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
                 System Information
               </h4>
               
@@ -349,7 +338,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
               <div className="flex space-x-3">
                 {donation.status === 'pending_payment' && (
                   <button
-                    onClick={() => updateDonationStatus('confirmed')}
+                    onClick={() => handleUpdateStatus('confirmed')}
                     disabled={updating}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all duration-200 font-medium"
                   >
@@ -358,7 +347,7 @@ export default function DonationDetailsModal({ donation, isOpen, onClose, onRefr
                 )}
                 {donation.status !== 'cancelled' && donation.status !== 'failed' && (
                   <button
-                    onClick={() => updateDonationStatus('cancelled')}
+                    onClick={() => handleUpdateStatus('cancelled')}
                     disabled={updating}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-all duration-200 font-medium"
                   >

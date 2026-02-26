@@ -1,10 +1,10 @@
-import ShowSeatsPage from '@/components/admin/show-seat/ShowSeatManagement'
+import PricingPage from '@/components/admin/price-components/Pricing'
 import React from 'react'
 
 function page() {
   return (
     <div>
-      <ShowSeatsPage/>
+      <PricingPage/>
     </div>
   )
 }

@@ -4,4 +4,4 @@ import StallBookingManagement from '@/components/admin/stall-bookings/StallBooki
 
 export default function AdminStallBookingsPage() {
   return <StallBookingManagement />;
-}
+} 

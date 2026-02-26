@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Cinzel } from "next/font/google";
 
@@ -122,7 +121,7 @@ const HeroContent = () => {
       ))}
 
       {/* Swing Girl */}
-      <div className="absolute left-0 bottom-[50px] sm:bottom-[-40px] md:bottom-[-50px] z-10 md:z-20">
+      <div className="absolute left-0 bottom-[50px] sm:bottom-[-40px] md:bottom-[-50px] z-40 md:z-30">
         <div className="relative opacity-80 md:opacity-100 ml-[80px] sm:ml-[120px] md:ml-[150px] w-[190px] sm:w-[130px] md:w-[260px] swing-animation">
           <Image
             src="/rajadoli.png"
@@ -167,7 +166,7 @@ const HeroContent = () => {
       </div>
 
       {/* Center Content */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8 gap-2 sm:gap-3">
+      <div className="relative z-40 h-full flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-8 gap-2 sm:gap-3">
         
         {/* Title */}
         <h1
@@ -192,8 +191,7 @@ const HeroContent = () => {
         <div className="flex flex-col sm:flex-row items-center gap-3 mt-1 sm:mt-2">
           
           {/* Join the Celebration Button */}
-          <Link
-            href="/join"
+          <div 
             className="inline-block px-6 sm:px-8 py-2 bg-white text-[#8B0000]
             text-sm sm:text-base font-semibold rounded-full
             transition-all duration-300
@@ -201,7 +199,7 @@ const HeroContent = () => {
             hover:shadow-[0_0_25px_rgba(255,215,0,0.7)]"
           >
             Join the Celebration
-          </Link>
+          </div>
 
           {/* ✨ Audio Play Button with Glow */}
           <button
@@ -268,13 +266,13 @@ const HeroContent = () => {
       <style>{`
         /* Hero height responsive */
         .hero-height {
-          height: 340px;
+          height: 375px;
         }
         @media (min-width: 640px) {
-          .hero-height { height: 370px; }
+          .hero-height { height: 395px; }
         }
         @media (min-width: 768px) {
-          .hero-height { height: 390px; }
+          .hero-height { height: 425px; }
         }
 
         /* ─── Sparkle ─── */
@@ -367,106 +365,93 @@ const HeroContent = () => {
         /* ─────────────────────────────────────────
            MUSIC BUTTON
         ───────────────────────────────────────── */
-        .music-btn {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 18px;
-          border-radius: 9999px;
-          border: 1.5px solid rgba(255, 215, 0, 0.55);
-          background: rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(8px);
-          cursor: pointer;
-          transition: all 0.3s ease;
-          overflow: hidden;
-          /* ✨ Glow effect */
-          box-shadow:
-            0 0 10px rgba(255, 215, 0, 0.35),
-            0 0 22px rgba(255, 140, 0, 0.2),
-            inset 0 0 8px rgba(255, 215, 0, 0.07);
-          animation: musicBtnPulse 2.5s ease-in-out infinite;
-        }
+       /* ✨ MUSIC BUTTON - Simple Clean Design */
+.music-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255, 215, 0, 0.55);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  
+  /* Simple glow effect */
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
 
-        /* Pulsing glow animation */
-        @keyframes musicBtnPulse {
-          0%, 100% {
-            box-shadow:
-              0 0 10px rgba(255, 215, 0, 0.35),
-              0 0 22px rgba(255, 140, 0, 0.2),
-              inset 0 0 8px rgba(255, 215, 0, 0.07);
-            border-color: rgba(255, 215, 0, 0.55);
-          }
-          50% {
-            box-shadow:
-              0 0 18px rgba(255, 215, 0, 0.7),
-              0 0 40px rgba(255, 140, 0, 0.45),
-              inset 0 0 12px rgba(255, 215, 0, 0.15);
-            border-color: rgba(255, 215, 0, 0.9);
-          }
-        }
+.music-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+  border-color: #ffd700;
+}
 
-        .music-btn:hover {
-          background: rgba(255, 255, 255, 0.16);
-          transform: scale(1.05);
-          box-shadow:
-            0 0 22px rgba(255, 215, 0, 0.75),
-            0 0 48px rgba(255, 140, 0, 0.5),
-            inset 0 0 14px rgba(255, 215, 0, 0.2);
-          border-color: #ffd700;
-          animation: none;
-        }
+/* Simple rotating ring */
+.music-btn-glow-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
+  background: linear-gradient(90deg, #ffd700, #ff8c00, #ffd700) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotateSlow 3s linear infinite;
+  pointer-events: none;
+}
 
-        /* When actively playing — stronger glow */
-        .music-btn--playing {
-          background: rgba(255, 215, 0, 0.12);
-          border-color: #ffd700;
-          animation: musicBtnPlayingPulse 1.5s ease-in-out infinite;
-        }
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
-        @keyframes musicBtnPlayingPulse {
-          0%, 100% {
-            box-shadow:
-              0 0 14px rgba(255, 215, 0, 0.5),
-              0 0 32px rgba(255, 140, 0, 0.35),
-              inset 0 0 10px rgba(255, 215, 0, 0.12);
-          }
-          50% {
-            box-shadow:
-              0 0 24px rgba(255, 215, 0, 0.9),
-              0 0 56px rgba(255, 140, 0, 0.55),
-              inset 0 0 18px rgba(255, 215, 0, 0.22);
-          }
-        }
+/* Simple equalizer bars */
+.equalizer-bar-small {
+  width: 3px;
+  height: 12px;
+  background: #ffd700;
+  border-radius: 2px;
+  animation: bounce 0.6s infinite alternate;
+  box-shadow: 0 0 8px #ffd700;
+}
 
-        /* Error state — red tones */
-        .music-btn--error {
-          border-color: rgba(239, 68, 68, 0.5);
-          background: rgba(239, 68, 68, 0.1);
-          box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
-          cursor: not-allowed;
-          animation: none;
-        }
+.equalizer-bar-small:nth-child(2) {
+  animation-delay: 0.2s;
+}
 
-        /* Rotating glow ring (decorative) */
-        .music-btn-glow-ring {
-          position: absolute;
-          inset: -3px;
-          border-radius: 9999px;
-          background: conic-gradient(
-            transparent 30%,
-            rgba(255, 215, 0, 0.45) 50%,
-            transparent 70%
-          );
-          animation: rotatRing 3s linear infinite;
-          pointer-events: none;
-          z-index: -1;
-        }
+.equalizer-bar-small:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
-        @keyframes rotatRing {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
+@keyframes bounce {
+  from { transform: scaleY(0.5); }
+  to { transform: scaleY(1.2); }
+}
+
+/* Playing state */
+.music-btn--playing {
+  background: rgba(255, 215, 0, 0.12);
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.music-btn--playing .music-btn-glow-ring {
+  animation-duration: 2s;
+}
+
+/* Error state */
+.music-btn--error {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+  cursor: not-allowed;
+  animation: none;
+}
       `}</style>
     </div>
   );

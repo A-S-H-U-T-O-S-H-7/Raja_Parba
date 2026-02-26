@@ -1,194 +1,71 @@
+// components/admin/donation-management/DonationManagement.jsx
 "use client";
-import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
+import { useEffect } from 'react';
 import { 
-  HeartIcon, 
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ArrowDownTrayIcon,
-  EyeIcon,
-  CalendarDaysIcon,
-  BanknotesIcon,
-  MapPinIcon,
-  UserIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  CurrencyRupeeIcon,
-  ArrowPathIcon
-} from '@heroicons/react/24/outline';
+  Heart, 
+  Search,
+  Filter,
+  Download,
+  Eye,
+  Calendar,
+  Landmark,
+  MapPin,
+  User,
+  CheckCircle,
+  XCircle,
+  Clock,
+  IndianRupee,
+  RefreshCw,
+  FileText,
+  Mail,
+  Phone
+} from 'lucide-react';
 import useThemeStore from '@/lib/stores/useThemeStore';
+import useDonationStore from '@/lib/stores/useDonationStore';
 import DonationDetailsModal from './DonationDetailsModal';
 import DocumentViewerModal from '../DocumentViewerModal';
-import { format, isWithinInterval, subDays, startOfDay } from 'date-fns';
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { format } from 'date-fns';
 
 export default function DonationManagement() {
   const { isDarkMode } = useThemeStore();
-  const [donations, setDonations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
-  const [selectedDonation, setSelectedDonation] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [documentModal, setDocumentModal] = useState({
-    isOpen: false,
-    donation: null
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const { 
+    loading,
+    searchTerm,
+    statusFilter,
+    dateFilter,
+    currentPage,
+    itemsPerPage,
+    selectedDonation,
+    modals,
+    setSearchTerm,
+    setStatusFilter,
+    setDateFilter,
+    setCurrentPage,
+    getPaginatedItems,
+    getTotalPages,
+    loadDonations,
+    applyFilters,
+    exportToCSV,
+    openModal,
+    closeModal,
+    getStatusConfig
+  } = useDonationStore();
 
-  // Load donations from Firebase
   useEffect(() => {
     loadDonations();
   }, []);
 
-  const loadDonations = async () => {
-    try {
-      setLoading(true);
-      const donationsRef = collection(db, 'donations');
-      const donationsQuery = query(donationsRef, orderBy('createdAt', 'desc'));
-      const snapshot = await getDocs(donationsQuery);
-      
-      const donationsData = snapshot.docs.map(doc => {
-        const data = doc.data();
-        let createdAt = data.createdAt;
-        
-        // Convert Firestore Timestamp to Date if needed
-        if (createdAt && typeof createdAt.toDate === 'function') {
-          createdAt = createdAt.toDate();
-        } else if (typeof createdAt === 'string') {
-          createdAt = new Date(createdAt);
-        }
-        
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: createdAt || new Date()
-        };
-      });
-
-      setDonations(donationsData);
-    } catch (error) {
-      console.error('Error loading donations:', error);
-      toast.error('Failed to load donations');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Filter donations based on search and filters
-  const filteredDonations = donations.filter(donation => {
-    const matchesSearch = !searchTerm || 
-      donation.donorDetails?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.donorDetails?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      donation.donationId?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = statusFilter === 'all' || donation.status === statusFilter;
-
-    const matchesDate = dateFilter === 'all' || (() => {
-      const donationDate = donation.createdAt;
-      if (!donationDate) return false;
-      
-      const now = new Date();
-      const today = startOfDay(now);
-      
-      switch (dateFilter) {
-        case 'today':
-          return format(donationDate, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
-        case 'week':
-          return isWithinInterval(donationDate, {
-            start: subDays(today, 7),
-            end: now
-          });
-        case 'month':
-          return isWithinInterval(donationDate, {
-            start: subDays(today, 30),
-            end: now
-          });
-        default:
-          return true;
-      }
-    })();
-
-    return matchesSearch && matchesStatus && matchesDate;
-  });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredDonations.length / itemsPerPage);
-  const currentItems = filteredDonations.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Export to CSV
-  const exportToCSV = () => {
-    const headers = [
-      'Donation ID',
-      'Donor Name',
-      'Email',
-      'Mobile',
-      'Amount (₹)',
-      'Status',
-      'Donor Type',
-      'City',
-      'State',
-      'Country',
-      'Payment Gateway',
-      'Tax Exemption',
-      'Created Date',
-      'Tracking ID'
-    ];
-
-    const csvData = filteredDonations.map(donation => [
-      donation.donationId || donation.id || '',
-      donation.donorDetails?.name || '',
-      donation.donorDetails?.email || '',
-      donation.donorDetails?.mobile || '',
-      donation.amount || 0,
-      donation.status || '',
-      donation.donorType || '',
-      donation.donorDetails?.city || '',
-      donation.donorDetails?.state || '',
-      donation.donorDetails?.country || '',
-      donation.paymentGateway || '',
-      donation.taxExemption?.eligible ? 'Yes' : 'No',
-      donation.createdAt ? format(donation.createdAt, 'yyyy-MM-dd HH:mm:ss') : '',
-      donation.paymentDetails?.tracking_id || donation.paymentDetails?.bank_ref_no || ''
-    ]);
-
-    const csvContent = [headers, ...csvData]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `donations_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    
-    toast.success('Donations exported to CSV successfully!');
-  };
+  const currentItems = getPaginatedItems();
+  const totalPages = getTotalPages();
 
   // Status badge
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      'confirmed': { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircleIcon, label: 'Confirmed' },
-      'completed': { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircleIcon, label: 'Completed' },
-      'pending_payment': { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: ClockIcon, label: 'Pending' },
-      'failed': { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircleIcon, label: 'Failed' },
-      'cancelled': { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: XCircleIcon, label: 'Cancelled' }
-    };
-
-    const config = statusConfig[status] || statusConfig['pending_payment'];
-    const IconComponent = config.icon;
+  const StatusBadge = ({ status }) => {
+    const config = getStatusConfig(status);
+    const IconComponent = {
+      'CheckCircle': CheckCircle,
+      'Clock': Clock,
+      'XCircle': XCircle
+    }[config.icon] || CheckCircle;
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.color}`}>
@@ -196,11 +73,6 @@ export default function DonationManagement() {
         {config.label}
       </span>
     );
-  };
-
-  const handleViewDetails = (donation) => {
-    setSelectedDonation(donation);
-    setShowDetailsModal(true);
   };
 
   if (loading) {
@@ -220,7 +92,7 @@ export default function DonationManagement() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center mb-4 sm:mb-0">
           <div className="p-2 rounded-lg bg-pink-100 dark:bg-pink-900/30 mr-3">
-            <HeartIcon className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+            <Heart className="h-6 w-6 text-pink-600 dark:text-pink-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Donation Management</h1>
@@ -239,14 +111,14 @@ export default function DonationManagement() {
                 : 'border-gray-300 bg-white hover:bg-gray-50'
             }`}
           >
-            <ArrowPathIcon className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </button>
           <button
             onClick={exportToCSV}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center"
           >
-            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4 mr-2" />
             Export CSV
           </button>
         </div>
@@ -257,11 +129,13 @@ export default function DonationManagement() {
         <div className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
           <div className="flex items-center">
             <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 mr-3">
-              <BanknotesIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <Landmark className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Donations</p>
-              <p className="text-xl font-bold">₹{donations.reduce((sum, d) => sum + (d.amount || 0), 0).toLocaleString('en-IN')}</p>
+              <p className="text-xl font-bold">
+                ₹{useDonationStore.getState().donations.reduce((sum, d) => sum + (d.amount || 0), 0).toLocaleString('en-IN')}
+              </p>
             </div>
           </div>
         </div>
@@ -269,11 +143,13 @@ export default function DonationManagement() {
         <div className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
           <div className="flex items-center">
             <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 mr-3">
-              <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Confirmed</p>
-              <p className="text-xl font-bold">{donations.filter(d => ['confirmed', 'completed'].includes(d.status)).length}</p>
+              <p className="text-xl font-bold">
+                {useDonationStore.getState().donations.filter(d => ['confirmed', 'completed'].includes(d.status)).length}
+              </p>
             </div>
           </div>
         </div>
@@ -281,11 +157,13 @@ export default function DonationManagement() {
         <div className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
           <div className="flex items-center">
             <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 mr-3">
-              <ClockIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
             </div>
             <div>
               <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pending</p>
-              <p className="text-xl font-bold">{donations.filter(d => d.status === 'pending_payment').length}</p>
+              <p className="text-xl font-bold">
+                {useDonationStore.getState().donations.filter(d => d.status === 'pending_payment').length}
+              </p>
             </div>
           </div>
         </div>
@@ -293,11 +171,13 @@ export default function DonationManagement() {
         <div className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
           <div className="flex items-center">
             <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 mr-3">
-              <UserIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
               <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Donors</p>
-              <p className="text-xl font-bold">{new Set(donations.map(d => d.donorDetails?.email)).size}</p>
+              <p className="text-xl font-bold">
+                {new Set(useDonationStore.getState().donations.map(d => d.donorDetails?.email)).size}
+              </p>
             </div>
           </div>
         </div>
@@ -308,15 +188,12 @@ export default function DonationManagement() {
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search by name, email, or donation ID..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1); // Reset to first page when searching
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
                 isDarkMode 
                   ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
@@ -327,13 +204,10 @@ export default function DonationManagement() {
 
           {/* Status Filter */}
           <div className="flex items-center gap-2">
-            <FunnelIcon className="h-4 w-4 text-gray-400" />
+            <Filter className="h-4 w-4 text-gray-400" />
             <select
               value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
                 isDarkMode 
                   ? 'bg-gray-700 border-gray-600 text-white' 
@@ -351,13 +225,10 @@ export default function DonationManagement() {
 
           {/* Date Filter */}
           <div className="flex items-center gap-2">
-            <CalendarDaysIcon className="h-4 w-4 text-gray-400" />
+            <Calendar className="h-4 w-4 text-gray-400" />
             <select
               value={dateFilter}
-              onChange={(e) => {
-                setDateFilter(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setDateFilter(e.target.value)}
               className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
                 isDarkMode 
                   ? 'bg-gray-700 border-gray-600 text-white' 
@@ -377,7 +248,7 @@ export default function DonationManagement() {
       <div className={`rounded-lg border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
         {currentItems.length === 0 ? (
           <div className="text-center py-12">
-            <HeartIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <Heart className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <h3 className={`text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>No donations found</h3>
             <p className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-600'}`}>
               {searchTerm || statusFilter !== 'all' || dateFilter !== 'all'
@@ -426,7 +297,7 @@ export default function DonationManagement() {
                       <td className="px-4 py-4">
                         <div className="space-y-1">
                           <div className="flex items-center">
-                            <HeartIcon className="h-4 w-4 text-pink-600 mr-2" />
+                            <Heart className="h-4 w-4 text-pink-600 mr-2" />
                             <span className="font-medium text-sm">
                               {donation.donationId || donation.id}
                             </span>
@@ -444,13 +315,16 @@ export default function DonationManagement() {
                       
                       <td className="px-4 py-4">
                         <div className="space-y-1">
-                          <div className="font-medium text-sm">
+                          <div className="font-medium text-sm flex items-center">
+                            <User className="h-3 w-3 mr-1" />
                             {donation.donorDetails?.name || 'Anonymous'}
                           </div>
-                          <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <div className={`text-xs flex items-center ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <Mail className="h-3 w-3 mr-1" />
                             {donation.donorDetails?.email}
                           </div>
-                          <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <div className={`text-xs flex items-center ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <Phone className="h-3 w-3 mr-1" />
                             {donation.donorDetails?.mobile}
                           </div>
                         </div>
@@ -459,18 +333,18 @@ export default function DonationManagement() {
                       <td className="px-4 py-4">
                         <div className="space-y-2">
                           <div className="flex items-center">
-                            <CurrencyRupeeIcon className="h-4 w-4 text-green-600 mr-1" />
+                            <IndianRupee className="h-4 w-4 text-green-600 mr-1" />
                             <span className="font-bold text-lg text-green-600">
                               {(donation.amount || 0).toLocaleString('en-IN')}
                             </span>
                           </div>
-                          {getStatusBadge(donation.status)}
+                          <StatusBadge status={donation.status} />
                         </div>
                       </td>
                       
                       <td className="px-4 py-4">
                         <div className="flex items-center text-sm">
-                          <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" />
+                          <MapPin className="h-4 w-4 text-gray-400 mr-1" />
                           <div>
                             <div>{donation.donorDetails?.city || 'N/A'}</div>
                             <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -493,20 +367,17 @@ export default function DonationManagement() {
                       <td className="px-4 py-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => handleViewDetails(donation)}
+                            onClick={() => openModal('details', donation)}
                             className={`p-2 text-blue-600 hover:text-blue-700 rounded-full transition-colors ${
                               isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-50'
                             }`}
                             title="View Details"
                           >
-                            <EyeIcon className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </button>
                           {donation.status !== 'cancelled' && (
                             <button
-                              onClick={() => setDocumentModal({
-                                isOpen: true,
-                                donation: donation
-                              })}
+                              onClick={() => openModal('document', donation)}
                               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                                 isDarkMode 
                                   ? 'bg-blue-900/30 text-blue-300 border border-blue-700 hover:bg-blue-800/40' 
@@ -514,7 +385,8 @@ export default function DonationManagement() {
                               }`}
                               title="View Documents"
                             >
-                              📄 Documents
+                              <FileText className="h-3 w-3 mr-1 inline" />
+                              Documents
                             </button>
                           )}
                         </div>
@@ -530,11 +402,11 @@ export default function DonationManagement() {
               <div className={`px-4 py-3 border-t ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
                 <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
                   <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredDonations.length)} of {filteredDonations.length} donations
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, useDonationStore.getState().filteredDonations.length)} of {useDonationStore.getState().filteredDonations.length} donations
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
                       disabled={currentPage === 1}
                       className={`px-3 py-1 rounded border ${
                         currentPage === 1 
@@ -548,7 +420,7 @@ export default function DonationManagement() {
                       Page {currentPage} of {totalPages}
                     </span>
                     <button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
                       disabled={currentPage === totalPages}
                       className={`px-3 py-1 rounded border ${
                         currentPage === totalPages 
@@ -567,25 +439,24 @@ export default function DonationManagement() {
       </div>
 
       {/* Details Modal */}
-      {showDetailsModal && selectedDonation && (
+      {modals.details && selectedDonation && (
         <DonationDetailsModal
           donation={selectedDonation}
-          isOpen={showDetailsModal}
-          onClose={() => {
-            setShowDetailsModal(false);
-            setSelectedDonation(null);
-          }}
+          isOpen={modals.details}
+          onClose={() => closeModal('details')}
           onRefresh={loadDonations}
         />
       )}
 
       {/* Document Viewer Modal */}
-      <DocumentViewerModal
-        isOpen={documentModal.isOpen}
-        onClose={() => setDocumentModal({ isOpen: false, donation: null })}
-        booking={documentModal.donation}
-        isDarkMode={isDarkMode}
-      />
+      {modals.document && selectedDonation && (
+        <DocumentViewerModal
+          isOpen={modals.document}
+          onClose={() => closeModal('document')}
+          booking={selectedDonation}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 }

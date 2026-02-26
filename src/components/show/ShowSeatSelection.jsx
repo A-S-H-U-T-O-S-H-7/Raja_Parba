@@ -1,52 +1,25 @@
+// components/show/ShowSeatSelection.jsx
 "use client";
-import { useShowSeatBooking } from '@/context/ShowSeatBookingContext';
-import ShowAuditorium from './ShowAuditorium';
-import { toast } from 'react-hot-toast';
-import { Users, Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Users, ShoppingBag, Info, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import useUserShowBookingStore from '@/lib/stores/useUserShowBooking';
+import ShowAuditorium from './ShowAuditorium';
 
 export default function ShowSeatSelection() {
   const { 
     selectedDate, 
     selectedSeats,
-    totalPrice, 
-    totalCapacity, 
-    SEAT_TYPES 
-  } = useShowSeatBooking();
-  
-  const [showSettings, setShowSettings] = useState(null);
-  const [loading, setLoading] = useState(true);
+    getTotalAmount,
+    getDiscountAmount,
+    getBaseAmount,
+    getEarlyBirdDiscount,
+    getBulkDiscount,
+    getNextMilestone,
+    getCurrentDiscountInfo,
+    showSettings,
+    seats
+  } = useUserShowBookingStore();
 
-  // Real-time listener for show settings from Firebase
-  useEffect(() => {
-    setLoading(true);
-    
-    const showSettingsRef = doc(db, 'settings', 'shows');
-    
-    const unsubscribe = onSnapshot(
-      showSettingsRef,
-      (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          setShowSettings(data);
-        } else {
-          setShowSettings(null);
-        }
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Error listening to show settings:', error);
-        setLoading(false);
-      }
-    );
-    
-    return () => unsubscribe();
-  }, []);
-  
-  // Format time to AM/PM format
   const formatTime = (time) => {
     if (!time) return '';
     const [hours, minutes] = time.split(':');
@@ -55,14 +28,12 @@ export default function ShowSeatSelection() {
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;
   };
-  
-  // Get active shows
-  const activeShows = showSettings?.shows?.filter(show => 
-    show.active === true || show.isActive === true
-  ) || [];
-  
-  // Get the first active show for display
+
+  const activeShows = showSettings?.shows?.filter(show => show.active === true) || [];
   const currentShow = activeShows.length > 0 ? activeShows[0] : null;
+
+  // Get all seats for display
+  const allSeats = seats || {};
 
   return (
     <div className="space-y-6 p-0 md:p-2">
@@ -94,12 +65,7 @@ export default function ShowSeatSelection() {
           <div className="flex items-center gap-3">
             <Clock className="w-5 h-5 text-purple-600" />
             <div className="text-right">
-              {loading ? (
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-300 rounded w-16 mb-1"></div>
-                  <div className="h-3 bg-gray-300 rounded w-20"></div>
-                </div>
-              ) : currentShow ? (
+              {currentShow ? (
                 <>
                   <p className="text-gray-900 font-semibold">{currentShow.name}</p>
                   <p className="text-gray-600 text-sm">
@@ -122,7 +88,111 @@ export default function ShowSeatSelection() {
         <ShowAuditorium />
       </div>
 
-      
+      {/* Selected Seats Summary - RESTORED */}
+      {selectedSeats.length > 0 && (
+        <div className="bg-white border border-blue-200 rounded-xl p-4 md:py-2 md:px-6 shadow-lg sticky bottom-4 z-20">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex-1 w-full sm:w-auto">
+              <div className="flex items-center gap-2 mb-3">
+                <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                <h4 className="text-lg sm:text-xl font-semibold text-blue-800">
+                  Selected Seats ({selectedSeats.length})
+                </h4>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mb-3">
+                {selectedSeats.slice(0, 10).map(seatId => (
+                  <div key={seatId} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center">
+                    {seatId}
+                  </div>
+                ))}
+                {selectedSeats.length > 10 && (
+                  <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                    +{selectedSeats.length - 10} more
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="text-center sm:text-right bg-blue-50 rounded-lg p-2 border border-blue-200 w-full sm:w-auto min-w-[200px]">
+              {/* Current Total */}
+              <div className="text-xl sm:text-2xl font-bold text-blue-700 mb-1">
+                ₹{getTotalAmount().toLocaleString()}
+              </div>
+              
+              {/* Base calculation */}
+              {getDiscountAmount() > 0 ? (
+                <div className="text-xs text-gray-600 space-y-0.5 mb-1">
+                  <div className="line-through">
+                    ₹{getBaseAmount().toLocaleString()}
+                  </div>
+                  <div className="text-green-600 font-medium">
+                    -₹{getDiscountAmount().toLocaleString()}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xs text-gray-600 mb-1">
+                  {selectedSeats.length} seats
+                </div>
+              )}
+              
+              {/* Discount Badges */}
+              <div className="space-y-0.5">
+                {getEarlyBirdDiscount() > 0 && (
+                  <div className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    🎉 {getEarlyBirdDiscount()}% Early Bird!
+                  </div>
+                )}
+                
+                {getBulkDiscount() > 0 && (
+                  <div className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                    🎯 {getBulkDiscount()}% Bulk!
+                  </div>
+                )}
+                
+                {/* Next Milestone */}
+                {(() => {
+                  const milestone = getNextMilestone();
+                  if (milestone) {
+                    return (
+                      <div className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                        Add {milestone.quantityNeeded} more for {milestone.discountPercent}% discount
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            </div>
+          </div>
+          
+          {/* Scroll Down Section */}
+          <div className="mt-1 flex justify-end border-gray-200">
+            <div className="flex max-w-[200px] items-center gap-2 bg-rose-50 border border-rose-200 rounded px-2 py-1">
+              <div className="flex items-center gap-1">
+                <Info className="h-3 w-3 text-rose-500 flex-shrink-0" />
+                <span className="text-rose-800 text-xs font-medium">
+                  Scroll down to proceed next
+                </span>
+              </div>
+              <button 
+                onClick={() => {
+                  window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth'
+                  });
+                }}
+                className="relative focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-1 rounded-full transition-transform hover:scale-110"
+                aria-label="Scroll to bottom of page"
+              >
+                <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center animate-pulse shadow-lg cursor-pointer">
+                  <ChevronDown className="w-5 h-5 text-white animate-bounce" />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

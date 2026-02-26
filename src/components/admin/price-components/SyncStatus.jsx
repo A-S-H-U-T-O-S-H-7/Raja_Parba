@@ -1,49 +1,23 @@
+// components/admin/price/SyncStatus.jsx
 "use client";
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { useTheme } from '@/context/ThemeContext';
-import { 
-  WifiIcon, 
-  ExclamationTriangleIcon,
-  CheckCircleIcon 
-} from '@heroicons/react/24/outline';
+import { Wifi, WifiOff, CheckCircle, AlertCircle } from 'lucide-react';
+import useThemeStore from '@/lib/stores/useThemeStore';
+import usePriceStore from '@/lib/stores/usePriceStore';
 
-export default function RealTimeSyncStatus() {
-  const { isDarkMode } = useTheme();
-  const [syncStatus, setSyncStatus] = useState('connected');
-  const [lastSync, setLastSync] = useState(null);
-
-  useEffect(() => {
-    const pricingRef = doc(db, 'settings', 'pricing');
-    
-    // Set up real-time listener to track sync status
-    const unsubscribe = onSnapshot(pricingRef, 
-      (doc) => {
-        if (doc.exists()) {
-          setSyncStatus('connected');
-          setLastSync(new Date());
-        }
-      },
-      (error) => {
-        console.error('Sync status error:', error);
-        setSyncStatus('error');
-      }
-    );
-
-    return () => unsubscribe();
-  }, []);
+export default function SyncStatus() {
+  const { isDarkMode } = useThemeStore();
+  const { syncStatus, lastSync } = usePriceStore();
 
   const getStatusIcon = () => {
     switch (syncStatus) {
       case 'connected':
-        return <CheckCircleIcon className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
       case 'connecting':
-        return <WifiIcon className="w-4 h-4 text-yellow-500 animate-pulse" />;
+        return <Wifi className="w-4 h-4 text-yellow-500 animate-pulse" />;
       case 'error':
-        return <ExclamationTriangleIcon className="w-4 h-4 text-red-500" />;
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
       default:
-        return <WifiIcon className="w-4 h-4 text-gray-400" />;
+        return <WifiOff className="w-4 h-4 text-gray-400" />;
     }
   };
 
@@ -74,7 +48,7 @@ export default function RealTimeSyncStatus() {
   };
 
   return (
-    <div className={`inline-flex items-center space-x-2 px-3 py-2 rounded-lg border transition-all duration-200 ${
+    <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
       isDarkMode 
         ? 'bg-gray-800 border-gray-700' 
         : 'bg-white border-gray-200 shadow-sm'

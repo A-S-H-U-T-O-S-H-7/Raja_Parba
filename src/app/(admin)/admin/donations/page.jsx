@@ -1,17 +1,36 @@
+// app/admin/donations/page.jsx
+"use client";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import DonationManagement from '@/components/admin/donation-management/DonationManagement';
-import ProtectedAdminRoute from '@/components/admin/ProtectedAdminRoute';
-
-export const metadata = {
-  title: 'Donation Management | Admin Panel',
-  description: 'Manage and track all donations in the system',
-};
+import { Loader2 } from 'lucide-react';
 
 export default function DonationsPage() {
-  return (
-    <ProtectedAdminRoute>
-      <div className="p-6">
-        <DonationManagement />
+  const { admin, isAuthenticated, loading } = useAdminAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/admin/login');
+    }
+  }, [loading, isAuthenticated, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
       </div>
-    </ProtectedAdminRoute>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return (
+    <div className="p-6">
+      <DonationManagement />
+    </div>
   );
 }

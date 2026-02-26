@@ -4,4 +4,4 @@ import ShowBookingsPage from '@/components/admin/show-bookings/ShowBookingManage
 
 export default function AdminShowBookingsPage() {
   return <ShowBookingsPage />;
-}
+} 

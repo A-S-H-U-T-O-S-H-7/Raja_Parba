@@ -1,6 +1,8 @@
+// components/admin/price/EarlyBirdDiscounts.jsx
 "use client";
 import { useState } from 'react';
-import { ClockIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Clock, Plus, Trash2 } from 'lucide-react';
+import useThemeStore from '@/lib/stores/useThemeStore';
 
 export default function EarlyBirdDiscounts({ 
   title, 
@@ -8,25 +10,26 @@ export default function EarlyBirdDiscounts({
   discounts, 
   onAdd, 
   onRemove, 
-  onToggle, 
-  isDarkMode 
+  onToggle 
 }) {
+  const { isDarkMode } = useThemeStore();
   const [newDiscount, setNewDiscount] = useState({ daysBeforeEvent: '', discountPercent: '' });
 
   const handleAdd = () => {
+    if (!newDiscount.daysBeforeEvent || !newDiscount.discountPercent) return;
     onAdd(newDiscount);
     setNewDiscount({ daysBeforeEvent: '', discountPercent: '' });
   };
 
   return (
     <div className={`p-4 sm:p-6 rounded-xl border ${
-      isDarkMode ? 'bg-gray-750 border-gray-600' : 'bg-gray-50 border-gray-200'
+      isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'
     }`}>
       <h3 className={`text-base sm:text-lg font-semibold mb-2 flex items-center ${
         isDarkMode ? 'text-white' : 'text-gray-900'
       }`}>
-        <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500 flex-shrink-0" />
-        <span className="truncate">{title}</span>
+        <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500 flex-shrink-0" />
+        <span>{title}</span>
       </h3>
       
       {subtitle && (
@@ -39,7 +42,7 @@ export default function EarlyBirdDiscounts({
       <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 max-h-48 overflow-y-auto">
         {discounts.length === 0 ? (
           <div className={`text-center py-6 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            <ClockIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
             No early bird discounts configured
           </div>
         ) : (
@@ -54,13 +57,12 @@ export default function EarlyBirdDiscounts({
                   type="checkbox"
                   checked={discount.isActive}
                   onChange={(e) => onToggle(index, e.target.checked)}
-                  className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded flex-shrink-0"
+                  className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 rounded border-gray-300 focus:ring-green-500 flex-shrink-0"
                 />
                 <span className={`text-xs sm:text-sm font-medium truncate ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
-                  <span className="hidden sm:inline">{discount.daysBeforeEvent} days before: {discount.discountPercent}% off</span>
-                  <span className="sm:hidden">{discount.daysBeforeEvent}d: {discount.discountPercent}%</span>
+                  {discount.daysBeforeEvent} days before: {discount.discountPercent}% off
                 </span>
               </div>
               <button
@@ -68,7 +70,7 @@ export default function EarlyBirdDiscounts({
                 className="text-red-500 hover:text-red-700 p-1 flex-shrink-0"
                 title="Remove discount"
               >
-                <TrashIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
             </div>
           ))
@@ -76,19 +78,19 @@ export default function EarlyBirdDiscounts({
       </div>
 
       {/* Add New Discount Form */}
-      <div className={`border-t pt-3 sm:pt-4 ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+      <div className={`border-t pt-3 sm:pt-4 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <h4 className={`text-xs sm:text-sm font-medium mb-2 sm:mb-3 ${
           isDarkMode ? 'text-white' : 'text-gray-900'
         }`}>
           ➕ Add New Early Bird Discount
         </h4>
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="number"
-            placeholder="Days"
+            placeholder="Days before event"
             value={newDiscount.daysBeforeEvent}
             onChange={(e) => setNewDiscount(prev => ({ ...prev, daysBeforeEvent: e.target.value }))}
-            className={`flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+            className={`flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border focus:ring-2 focus:ring-green-500 ${
               isDarkMode 
                 ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                 : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -99,7 +101,7 @@ export default function EarlyBirdDiscounts({
             placeholder="Discount %"
             value={newDiscount.discountPercent}
             onChange={(e) => setNewDiscount(prev => ({ ...prev, discountPercent: e.target.value }))}
-            className={`flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+            className={`flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border focus:ring-2 focus:ring-green-500 ${
               isDarkMode 
                 ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                 : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -107,10 +109,10 @@ export default function EarlyBirdDiscounts({
           />
           <button
             onClick={handleAdd}
-            className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors flex-shrink-0"
+            className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition-colors"
           >
-            <PlusIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="ml-1 hidden sm:inline">Add</span>
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            Add
           </button>
         </div>
       </div>

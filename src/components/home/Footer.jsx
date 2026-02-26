@@ -162,14 +162,7 @@ function Footer() {
                     <Users size={16} className="text-amber-400 group-hover:scale-110 transition-transform" />
                     <span>Our Guests</span>
                   </Link>
-                  <Link href="/sponsor" className="flex items-center gap-2 text-gray-200 text-sm lg:text-base hover:text-amber-300 hover:translate-x-1 transition-all duration-300 group">
-                    <Star size={16} className="text-amber-400 group-hover:scale-110 transition-transform" />
-                    <span>Become a Sponsor</span>
-                  </Link>
-                  <Link href="/performer" className="flex items-center gap-2 text-gray-200 text-sm lg:text-base hover:text-amber-300 hover:translate-x-1 transition-all duration-300 group">
-                    <Mic size={16} className="text-amber-400 group-hover:scale-110 transition-transform" />
-                    <span>Join as a Performer</span>
-                  </Link>
+                  
                 </div>
               </div>
 

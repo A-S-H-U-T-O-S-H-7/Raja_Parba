@@ -1,235 +1,211 @@
-import { MagnifyingGlassIcon as SearchIcon, FunnelIcon as FilterIcon, CalendarDaysIcon as CalendarIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+// components/admin/show-bookings/ShowBookingFilters.jsx
+"use client";
+import { useState, useEffect } from 'react';
+import { Search, Filter, Calendar, X } from 'lucide-react';
+import useThemeStore from '@/lib/stores/useThemeStore';
 
 export default function ShowBookingFilters({
   searchTerm,
-  setSearchTerm,
+  onSearchChange,
   statusFilter,
-  setStatusFilter,
+  onStatusChange,
   participationFilter,
-  setParticipationFilter,
+  onParticipationChange,
   dateFilter,
-  setDateFilter,
+  onDateChange,
   selectedDate,
-  setSelectedDate,
+  onSelectedDateChange,
   bookingDate,
-  setBookingDate,
-  onSearch,
-  loading,
-  isDarkMode
+  onBookingDateChange,
+  loading
 }) {
-  
+  const { isDarkMode } = useThemeStore();
+  const [localSearch, setLocalSearch] = useState(searchTerm || '');
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSearchChange(localSearch);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [localSearch, onSearchChange]);
+
   const formatDateForInput = (date) => {
     if (!date) return '';
     const d = new Date(date);
     return d.toISOString().split('T')[0];
   };
-  
+
   const handleDateChange = (value) => {
-    setSelectedDate(value ? new Date(value) : null);
+    onSelectedDateChange(value ? new Date(value) : null);
   };
-  
+
   const handleBookingDateChange = (value) => {
-    setBookingDate(value ? new Date(value) : null);
+    onBookingDateChange(value ? new Date(value) : null);
   };
+
+  const clearSearch = () => {
+    setLocalSearch('');
+    onSearchChange('');
+  };
+
   return (
-    <div className={`rounded-xl p-4 mb-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border shadow-sm`}>
+    <div className={`rounded-xl p-4 border shadow-sm ${
+      isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+    }`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Search */}
         <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <SearchIcon className="h-5 w-5 text-gray-400" />
-          </div>
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+          }`} />
           <input
             type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search bookings by ID, customer name, email or seat..."
-            className={`block w-full pl-10 pr-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="Search by ID, customer name, email or seat..."
+            className={`w-full pl-9 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
               isDarkMode 
                 ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                 : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
             }`}
           />
+          {localSearch && (
+            <button
+              onClick={clearSearch}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full ${
+                isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
+              }`}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
         </div>
-        
-        <div className="flex flex-wrap gap-3 items-end">
+
+        <div className="flex flex-wrap gap-3">
           {/* Status Filter */}
-          <div className="flex flex-col">
-            <label className={`text-xs font-medium mb-1 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
-              Status
-            </label>
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className={`appearance-none pl-10 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
-              >
-                <option value="all">All Statuses</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FilterIcon className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => onStatusChange(e.target.value)}
+              className={`appearance-none pl-9 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+            >
+              <option value="all">All Status</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="pending">Pending</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`} />
           </div>
-          
+
           {/* Participation Filter */}
-          <div className="flex flex-col">
-            <label className={`text-xs font-medium mb-1 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
-              Participation
-            </label>
-            <div className="relative">
-              <select
-                value={participationFilter}
-                onChange={(e) => setParticipationFilter(e.target.value)}
-                className={`appearance-none pl-10 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
-              >
-                <option value="all">All</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FilterIcon className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
+          <div className="relative">
+            <select
+              value={participationFilter}
+              onChange={(e) => onParticipationChange(e.target.value)}
+              className={`appearance-none pl-9 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+            >
+              <option value="all">All Participation</option>
+              <option value="yes">Participated</option>
+              <option value="no">Not Participated</option>
+            </select>
+            <Filter className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`} />
           </div>
-          
+
           {/* Date Range Filter */}
-          <div className="flex flex-col">
-            <label className={`text-xs font-medium mb-1 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
-              Date Range
-            </label>
-            <div className="relative">
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className={`appearance-none pl-10 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
+          <div className="relative">
+            <select
+              value={dateFilter}
+              onChange={(e) => onDateChange(e.target.value)}
+              className={`appearance-none pl-9 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="week">Past 7 Days</option>
+              <option value="month">Past 30 Days</option>
+              <option value="3months">Past 3 Months</option>
+            </select>
+            <Calendar className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`} />
+          </div>
+
+          {/* Show Date Filter */}
+          <div className="relative">
+            <input
+              type="date"
+              value={formatDateForInput(selectedDate)}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className={`pl-9 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+              title="Filter by show date"
+            />
+            <Calendar className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`} />
+            {selectedDate && (
+              <button
+                onClick={() => handleDateChange('')}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full ${
+                  isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
                 }`}
               >
-                <option value="all">All Dates</option>
-                <option value="today">Today</option>
-                <option value="week">Past 7 Days</option>
-                <option value="month">Past 30 Days</option>
-                <option value="3months">Past 3 Months</option>
-              </select>
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <CalendarIcon className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
-          </div>
-          
-          {/* Show Date Filter */}
-          <div className="flex flex-col">
-            <label className={`text-xs font-medium mb-1 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
-              Show Date
-            </label>
-            <div className="relative">
-              <input
-                type="date"
-                value={formatDateForInput(selectedDate)}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className={`pl-10 pr-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
-                title="Filter by show date"
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <CalendarIcon className="h-5 w-5 text-gray-400" />
-              </div>
-              {selectedDate && (
-                <button
-                  onClick={() => setSelectedDate(null)}
-                  className={`absolute inset-y-0 right-0 pr-3 flex items-center ${
-                    isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                  title="Clear show date filter"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
-          
-          {/* Booking Date Filter */}
-          <div className="flex flex-col">
-            <label className={`text-xs font-medium mb-1 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
-              Booking Date
-            </label>
-            <div className="relative">
-              <input
-                type="date"
-                value={formatDateForInput(bookingDate)}
-                onChange={(e) => handleBookingDateChange(e.target.value)}
-                className={`pl-10 pr-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                }`}
-                title="Filter by booking date"
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <CalendarIcon className="h-5 w-5 text-gray-400" />
-              </div>
-              {bookingDate && (
-                <button
-                  onClick={() => setBookingDate(null)}
-                  className={`absolute inset-y-0 right-0 pr-3 flex items-center ${
-                    isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                  title="Clear booking date filter"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
-          
-          <button
-            onClick={onSearch}
-            disabled={loading}
-            className={`px-4 py-2 rounded-lg flex items-center transition-colors duration-150 ${
-              isDarkMode 
-                ? 'bg-purple-700 hover:bg-purple-600 text-white' 
-                : 'bg-purple-600 hover:bg-purple-700 text-white'
-            }`}
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                Searching...
-              </>
-            ) : (
-              'Apply Filters'
+                <X className="w-3 h-3" />
+              </button>
             )}
-          </button>
+          </div>
+
+          {/* Booking Date Filter */}
+          <div className="relative">
+            <input
+              type="date"
+              value={formatDateForInput(bookingDate)}
+              onChange={(e) => handleBookingDateChange(e.target.value)}
+              className={`pl-9 pr-8 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600 text-white' 
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+              title="Filter by booking date"
+            />
+            <Calendar className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`} />
+            {bookingDate && (
+              <button
+                onClick={() => handleBookingDateChange('')}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full ${
+                  isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
+                }`}
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
-      
-      {/* Show selected filters info */}
+
+      {/* Active Filters Info */}
       {(selectedDate || bookingDate) && (
         <div className={`mt-3 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
           {selectedDate && (

@@ -14,9 +14,9 @@ const SponsorModal = ({
     <PortalModal
       isOpen={showSponsorModal}
       onClose={() => setShowSponsorModal(false)}
-      className="!bg-transparent !border-0 !shadow-none !max-w-none !w-auto !max-h-[95vh] !overflow-visible"
+      className="!bg-transparent !border-0 !shadow-none !max-w-none !w-auto !max-h-[90vh] !overflow-visible"
     >
-<div className="relative bg-gradient-to-br from-red-50 via-white to-amber-50 rounded-3xl max-w-md w-full p-8 shadow-2xl border border-amber-200 transform animate-slideUp overflow-hidden">
+<div className="relative bg-gradient-to-br from-red-50 via-white to-amber-50 rounded-3xl max-w-md w-full p-4 shadow-2xl border border-amber-200 transform animate-slideUp overflow-hidden">
   
         
         {/* Top Golden Border */}

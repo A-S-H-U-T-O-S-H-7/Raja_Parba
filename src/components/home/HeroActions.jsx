@@ -99,7 +99,7 @@ function HeroActions({ user }) {
     } else {
       if (action === 'sponsor') openSponsorModal();
       else if (action === 'performer') openPerformerModal();
-      else if (action === 'show') openShowModal();
+      else if (action === 'show') window.location.href = '/show';
       else if (action === 'stall') window.location.href = '/stall';
       else if (action === 'awards') window.location.href = '/awards';
       else if (action === 'kumari') window.location.href = '/raja-kumari';
@@ -305,14 +305,7 @@ function HeroActions({ user }) {
         <div className="absolute bottom-20 right-20 w-56 h-56 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-3000 will-change-transform"></div>
       </div>
 
-      {/* Top Border */}
-      <div
-        className="absolute top-0 left-0 w-full h-4 bg-repeat-x bg-center opacity-95"
-        style={{
-          backgroundImage: 'url(/goldenborder.png)',
-          backgroundSize: 'auto 100%',
-        }}
-      />
+      
 
       {/* Optimized Floating Particles - CSS Animations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

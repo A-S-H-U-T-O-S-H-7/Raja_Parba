@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import useAuthStore from "@/lib/stores/useAuthStore";
-import { ChevronDown, User, LogOut, Ticket, X } from 'lucide-react';
+import { ChevronDown, User, LogOut, Ticket, X, Menu } from 'lucide-react';
 import { useRouter } from "next/navigation";
 
 export default function Header() {
@@ -13,6 +13,7 @@ export default function Header() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef(null);
+  const sidebarRef = useRef(null);
   const router = useRouter();
   const { user, signOut } = useAuthStore();
 
@@ -27,9 +28,20 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Prevent body scroll when modal is open
+  // Close sidebar when clicking outside
   useEffect(() => {
-    if (showLogoutModal) {
+    function handleClickOutside(event) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMobileMenuOpen]);
+
+  // Prevent body scroll when modal or sidebar is open
+  useEffect(() => {
+    if (showLogoutModal || isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -37,7 +49,7 @@ export default function Header() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [showLogoutModal]);
+  }, [showLogoutModal, isMobileMenuOpen]);
 
   const handleLogoutClick = () => {
     setDropdownOpen(false);
@@ -73,8 +85,8 @@ export default function Header() {
     <>
       <header className="w-full relative sticky top-0 z-50">
 
-        {/* Corner Design */}
-        <div className="absolute overflow-x-hidden top-0 left-0 md:top-[-5px] md:left-0 w-24 h-24 md:w-42 md:h-42 z-20">
+        {/* Corner Design - Now with overflow for logo */}
+        <div className="absolute overflow-visible top-0 left-0 md:top-[-5px] md:left-0 w-24 h-24 md:w-42 md:h-42 z-20">
           <Image
             src="/headercorner.png"
             alt="corner design"
@@ -93,64 +105,59 @@ export default function Header() {
 
         {/* Decorative Top Border with Marigold Pattern */}
         <div className="bg-[url('/samborder.png')] bg-repeat-x w-full h-6 bg-[size:auto_24px]" />
-        <div className="bg-linear-to-r from-green-800 via-green-700 to-green-800 h-7 w-full"></div>
+        <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-rose-700 h-7 w-full shadow-inner"></div>
 
         {/* Main Navbar */}
-        <div className="bg-gradient-to-b from-amber-50 to-amber-100 shadow-lg ">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
-            <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-b from-amber-50 via-orange-50 to-amber-100 shadow-lg border-b border-amber-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="flex items-center justify-between h-18">
               
-              {/* Logo Section with Decorative Border */}
-              <div className="flex-shrink-0">
-                <div className="flex items-center gap-3 bg-white border-1 border-red-800 rounded-full pl-2 pr-6 py-1 shadow-md">
-                  <div className="w-14 h-14 relative bg-white rounded-full p-1 border-2 border-yellow-500">
+              {/* Logo Section - Now with overflow downward */}
+              <div className="flex-shrink-0 relative group">
+                <div className="w-20 h-20 md:w-24 md:h-24 relative bg-gradient-to-br from-rose-400 to-red-500 rounded-full p-0.5 border border-rose-300 shadow-md transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
+                  <div className="relative w-full h-full rounded-full bg-white overflow-hidden">
                     <Image
-                      src="/logo.png"
+                      src="/raja-logo.png"
                       alt="Raja Mahotsav Logo"
                       fill
-                      className="object-contain rounded-full"
+                      className="object-contain rounded-full p-1"
                     />
                   </div>
-                  <div className="leading-tight">
-                    <h1 className="text-xl sm:text-2xl font-bold text-red-800 tracking-tight">
-                      Raja Mahotsav
-                    </h1>
-                    <p className="text-sm sm:text-base text-green-700 font-semibold">
-                      2026
-                    </p>
-                  </div>
                 </div>
+                
+                {/* Glow effect */}
+                <div className="absolute -inset-2 bg-amber-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
 
               {/* Desktop Navigation */}
-              <nav className="hidden lg:flex items-center gap-1 xl:gap-3">
+              <nav className="hidden lg:flex items-center gap-1 xl:gap-3 bg-white/50 backdrop-blur-sm px-2 py-1 rounded-full shadow-inner">
                 <Link 
                   href="/" 
-                  className="px-4 py-2 text-red-800 hover:text-red-600 font-bold text-base xl:text-lg transition-colors"
+                  className="px-4 py-2 text-amber-900 hover:text-amber-700 font-semibold text-base xl:text-lg transition-all duration-300 hover:bg-amber-100/50 rounded-full"
                 >
                   Home
                 </Link>
                 <Link 
                   href="/about-raja" 
-                  className="px-4 py-2 text-red-800 hover:text-red-600 font-bold text-base xl:text-lg transition-colors"
+                  className="px-4 py-2 text-amber-900 hover:text-amber-700 font-semibold text-base xl:text-lg transition-all duration-300 hover:bg-amber-100/50 rounded-full"
                 >
                   About Raja
                 </Link>
                 <Link 
                   href="/events" 
-                  className="px-4 py-2 text-red-800 hover:text-red-600 font-bold text-base xl:text-lg transition-colors"
+                  className="px-4 py-2 text-amber-900 hover:text-amber-700 font-semibold text-base xl:text-lg transition-all duration-300 hover:bg-amber-100/50 rounded-full"
                 >
                   Events
                 </Link>
                 <Link 
                   href="/gallery" 
-                  className="px-4 py-2 text-red-800 hover:text-red-600 font-bold text-base xl:text-lg transition-colors"
+                  className="px-4 py-2 text-amber-900 hover:text-amber-700 font-semibold text-base xl:text-lg transition-all duration-300 hover:bg-amber-100/50 rounded-full"
                 >
                   Gallery
                 </Link>
                 <Link 
                   href="/guests" 
-                  className="px-4 py-2 text-red-800 hover:text-red-600 font-bold text-base xl:text-lg transition-colors"
+                  className="px-4 py-2 text-amber-900 hover:text-amber-700 font-semibold text-base xl:text-lg transition-all duration-300 hover:bg-amber-100/50 rounded-full"
                 >
                   Our Guests
                 </Link>
@@ -163,38 +170,38 @@ export default function Header() {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className="flex items-center gap-3 bg-gradient-to-r from-orange-100 to-amber-100 hover:from-orange-200 hover:to-amber-200 px-4 py-2 rounded-lg border border-orange-200 shadow-sm hover:shadow-md transition-all duration-200"
+                      className="flex items-center gap-3 bg-gradient-to-r from-amber-100 to-orange-100 hover:from-amber-200 hover:to-orange-200 px-4 py-2 rounded-full border border-amber-300 shadow-md hover:shadow-lg transition-all duration-300"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full flex items-center justify-center shadow-sm">
+                      <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-md">
                         <span className="text-sm text-white font-bold">
                           {user.email?.charAt(0).toUpperCase() || 'U'}
                         </span>
                       </div>
                       <div className="flex flex-col text-left">
-                        <span className="text-xs font-medium text-gray-700">Welcome</span>
-                        <span className="text-sm font-semibold text-orange-700 truncate max-w-[150px]">
+                        <span className="text-xs font-medium text-amber-800">Welcome</span>
+                        <span className="text-sm font-semibold text-amber-900 truncate max-w-[150px]">
                           {user.email}
                         </span>
                       </div>
                       <ChevronDown 
-                        className={`w-4 h-4 text-orange-600 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 text-amber-700 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
                       />
                     </button>
 
                     {/* Dropdown Menu */}
                     {dropdownOpen && (
-                      <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-3 z-50">
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-amber-200 py-3 z-50">
                         {/* User Info Header */}
-                        <div className="px-4 py-2 border-b border-gray-100">
+                        <div className="px-4 py-2 border-b border-amber-100">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full flex items-center justify-center shadow-sm">
+                            <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-md">
                               <span className="text-sm text-white font-bold">
                                 {user.email?.charAt(0).toUpperCase() || 'U'}
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-gray-900 truncate">{user.email}</p>
-                              <p className="text-xs text-gray-500">Account Menu</p>
+                              <p className="text-sm font-semibold text-amber-900 truncate">{user.email}</p>
+                              <p className="text-xs text-amber-600">Account Menu</p>
                             </div>
                           </div>
                         </div>
@@ -205,10 +212,10 @@ export default function Header() {
                           <Link
                             href="/profile"
                             onClick={() => setDropdownOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 transition-all duration-200 group"
+                            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 hover:text-amber-800 transition-all duration-200 group"
                           >
-                            <div className="w-8 h-8 bg-blue-100 group-hover:bg-blue-200 rounded-lg flex items-center justify-center">
-                              <User className="w-4 h-4 text-blue-600" />
+                            <div className="w-8 h-8 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center">
+                              <User className="w-4 h-4 text-amber-600" />
                             </div>
                             <div className="flex-1">
                               <p className="text-sm font-medium">My Profile</p>
@@ -222,7 +229,7 @@ export default function Header() {
                             onClick={() => setDropdownOpen(false)}
                             className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-700 transition-all duration-200 group"
                           >
-                            <div className="w-8 h-8 bg-green-100 group-hover:bg-green-200 rounded-lg flex items-center justify-center">
+                            <div className="w-8 h-8 bg-green-100 group-hover:bg-green-200 rounded-xl flex items-center justify-center">
                               <Ticket className="w-4 h-4 text-green-600" />
                             </div>
                             <div className="flex-1">
@@ -231,14 +238,14 @@ export default function Header() {
                             </div>
                           </Link>
 
-                          <div className="border-t border-gray-100 my-2"></div>
+                          <div className="border-t border-amber-100 my-2"></div>
 
                           {/* Logout Button */}
                           <button
                             onClick={handleLogoutClick}
                             className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-rose-50 hover:text-red-700 transition-all duration-200 group w-full text-left"
                           >
-                            <div className="w-8 h-8 bg-red-100 group-hover:bg-red-200 rounded-lg flex items-center justify-center">
+                            <div className="w-8 h-8 bg-red-100 group-hover:bg-red-200 rounded-xl flex items-center justify-center">
                               <LogOut className="w-4 h-4 text-red-600" />
                             </div>
                             <div className="flex-1">
@@ -255,13 +262,13 @@ export default function Header() {
                   <>
                     <Link
                       href="/register"
-                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+                      className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
                       Register
                     </Link>
                     <button
                       onClick={handleGetTickets}
-                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
                     >
                       Get Tickets
                     </button>
@@ -269,132 +276,184 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu Button - Now on right side */}
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-md text-red-800 hover:bg-red-100 transition-colors"
-                aria-label="Toggle menu"
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="lg:hidden p-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                aria-label="Open menu"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  {isMobileMenuOpen ? (
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
+                <Menu className="w-6 h-6" />
               </button>
             </div>
-
-            {/* Mobile Menu */}
-            {isMobileMenuOpen && (
-              <div className="lg:hidden mt-4 pb-4 border-t-2 border-red-200 pt-4">
-                <nav className="flex flex-col gap-2">
-                  <Link 
-                    href="/" 
-                    className="px-4 py-3 text-red-800 hover:bg-red-100 font-bold text-lg rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Home
-                  </Link>
-                  <Link 
-                    href="/about-raja" 
-                    className="px-4 py-3 text-red-800 hover:bg-red-100 font-bold text-lg rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    About Raja
-                  </Link>
-                  <Link 
-                    href="/events" 
-                    className="px-4 py-3 text-red-800 hover:bg-red-100 font-bold text-lg rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Events
-                  </Link>
-                  <Link 
-                    href="/gallery" 
-                    className="px-4 py-3 text-red-800 hover:bg-red-100 font-bold text-lg rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Gallery
-                  </Link>
-                  <Link 
-                    href="/guests" 
-                    className="px-4 py-3 text-red-800 hover:bg-red-100 font-bold text-lg rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Our Guests
-                  </Link>
-                  
-                  {/* Mobile CTA Buttons - Conditional based on login */}
-                  <div className="flex flex-col gap-3 mt-4 px-4">
-                    {user ? (
-                      // Mobile Logged In State
-                      <>
-                        <Link
-                          href="/profile"
-                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg text-center transition-all duration-300"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          My Profile
-                        </Link>
-                        <Link
-                          href="/tickets"
-                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg text-center transition-all duration-300"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Get Tickets
-                        </Link>
-                        <button
-                          onClick={() => {
-                            setIsMobileMenuOpen(false);
-                            handleLogoutClick();
-                          }}
-                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold px-6 py-3 rounded-lg shadow-lg text-center transition-all duration-300"
-                        >
-                          Logout
-                        </button>
-                      </>
-                    ) : (
-                      // Mobile Logged Out State
-                      <>
-                        <Link
-                          href="/register"
-                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg text-center transition-all duration-300"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Register
-                        </Link>
-                        <Link
-                          href="/register?redirect=tickets"
-                          className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold px-6 py-3 rounded-lg shadow-lg text-center transition-all duration-300"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          Get Tickets
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </nav>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Decorative Bottom Border */}
-        <div className="bg-gradient-to-r from-red-700 via-red-800 to-red-700 h-1 w-full" />
+        {/* Mobile Sidebar - Slides from left */}
+        <div 
+          className={`fixed inset-0 z-[100] transition-opacity duration-300 lg:hidden ${
+            isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+          }`}
+        >
+          {/* Backdrop */}
+          <div 
+            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+              isMobileMenuOpen ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Sidebar */}
+          <div 
+            ref={sidebarRef}
+            className={`absolute top-0 left-0 h-full w-80 bg-gradient-to-b from-amber-50 via-orange-50 to-amber-100 shadow-2xl transform transition-transform duration-300 ease-out ${
+              isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+          >
+            {/* Sidebar Header with Close Button */}
+            <div className="relative h-32 bg-gradient-to-r from-amber-600 to-orange-600 overflow-hidden">
+              {/* Decorative Pattern */}
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
+                <div className="absolute bottom-0 right-0 w-32 h-32 bg-white rounded-full translate-x-16 translate-y-16"></div>
+              </div>
+              
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="absolute bottom-4 left-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <span className="text-xl text-white font-bold">🎪</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-lg">Raja Mahotsav</p>
+                    <p className="text-amber-100 text-sm">Festival Menu</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
+            <nav className="p-6">
+              <div className="space-y-2">
+                <Link 
+                  href="/" 
+                  className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🏠</span>
+                  Home
+                </Link>
+                <Link 
+                  href="/about-raja" 
+                  className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">📖</span>
+                  About Raja
+                </Link>
+                <Link 
+                  href="/events" 
+                  className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🎉</span>
+                  Events
+                </Link>
+                <Link 
+                  href="/gallery" 
+                  className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🖼️</span>
+                  Gallery
+                </Link>
+                <Link 
+                  href="/guests" 
+                  className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🌟</span>
+                  Our Guests
+                </Link>
+              </div>
+
+              {/* Divider */}
+              <div className="my-6 border-t border-amber-200"></div>
+
+              {/* Mobile CTA Buttons */}
+              <div className="space-y-3 px-4">
+                {user ? (
+                  // Mobile Logged In State
+                  <>
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5" />
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/tickets"
+                      className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Ticket className="w-5 h-5" />
+                      Get Tickets
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleLogoutClick();
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  // Mobile Logged Out State
+                  <>
+                    <Link
+                      href="/register"
+                      className="block px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-center rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Register
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleGetTickets();
+                      }}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-center rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                    >
+                      Get Tickets
+                    </button>
+                  </>
+                )}
+              </div>
+            </nav>
+
+            {/* Footer */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-center text-sm text-amber-700 border-t border-amber-200 bg-amber-50/50">
+              <p>© 2024 Raja Mahotsav</p>
+              <p className="text-xs text-amber-600 mt-1">Celebrate the spirit of Raja</p>
+            </div>
+          </div>
+        </div>
+
       </header>
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Confirmation Modal (same as before) */}
       {showLogoutModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"

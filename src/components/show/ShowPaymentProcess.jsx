@@ -1,153 +1,140 @@
+// components/show/ShowPaymentProcess.jsx
 "use client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useShowSeatBooking } from '@/context/ShowSeatBookingContext';
-import { useAuth } from '@/context/AuthContext';
-import { toast } from 'react-hot-toast';
+import { CreditCard, CheckCircle, Shield, Calendar, Users, Clock, Loader2, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
-import { CreditCard, Calendar, Users, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import useUserShowBookingStore from '@/lib/stores/useUserShowBooking';
+import useAuthStore from '@/lib/stores/useAuthStore';
+import { toast } from 'react-hot-toast';
 
-const ShowPaymentProcess = () => {
+export default function ShowPaymentProcess({ onBack }) {
   const [processing, setProcessing] = useState(false);
   const router = useRouter();
-  
-  const { user } = useAuth();
-  const {
+  const { user } = useAuthStore();
+  const { 
     selectedDate,
     selectedSeats,
-    totalPrice,
+    userDetails,
     getTotalAmount,
     getDiscountAmount,
     getBaseAmount,
     getEarlyBirdDiscount,
     getBulkDiscount,
     getCurrentDiscountInfo,
-    clearSelection,
     processBooking,
-    bookingData
-  } = useShowSeatBooking();
-  
-  const userDetails = bookingData.userDetails || {};
+    showSettings,
+    seats
+  } = useUserShowBookingStore();
 
-  const completeBooking = async () => {
+  // Format time to AM/PM format
+  const formatTime = (time) => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  // Get active shows
+  const activeShows = showSettings?.shows?.filter(show => 
+    show.active === true || show.isActive === true
+  ) || [];
+  
+  const currentShow = activeShows.length > 0 ? activeShows[0] : null;
+
+  // SAFE: Group selected seats by type with error handling
+  const seatsByType = selectedSeats.reduce((acc, seatId) => {
+    // Safely access seats object
+    const seat = seats && seats[seatId] ? seats[seatId] : null;
     
-    // Validate that all required user details are filled
-    const requiredFields = ['name', 'email', 'phone', 'aadhar', 'address'];
-    if (requiredFields.some(field => !userDetails[field])) {
-      toast.error('Please fill all required details before completing booking');
-      return;
+    // Determine seat type based on ID pattern if seat object is not available
+    let type = 'REGULAR';
+    if (seat?.type) {
+      type = seat.type;
+    } else if (seatId) {
+      if (seatId.startsWith('A-') || seatId.startsWith('B-')) {
+        type = 'VIP';
+      } else if (seatId.startsWith('C-')) {
+        type = 'REGULAR_C';
+      } else if (seatId.startsWith('D-')) {
+        type = 'REGULAR_D';
+      }
     }
     
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(seatId);
+    return acc;
+  }, {});
+
+  const handlePayment = async () => {
+    if (!user) {
+      toast.error('Please login to continue');
+      router.push('/login');
+      return;
+    }
+
+    const requiredFields = ['name', 'email', 'phone', 'aadhar', 'address'];
+    if (requiredFields.some(field => !userDetails[field])) {
+      toast.error('Please fill all required details');
+      return;
+    }
+
+    const finalAmount = getTotalAmount();
+    if (!finalAmount || finalAmount <= 0) {
+      toast.error('Choose a valid amount');
+      return;
+    }
+
     setProcessing(true);
-    
+
     try {
-      
-      // Create pending booking first
-      const result = await processBooking(userDetails, {
+      const result = await processBooking({
         method: 'pending_payment',
         transactionId: 'pending_' + Date.now()
       });
-        
+
       if (result.success) {
-        const bookingId = result.bookingId;
-        
-        // Use discounted total amount for payment
-        const finalAmount = getTotalAmount();
-        
-        // Prepare payment data for CCAvenue
         const paymentData = {
-          order_id: bookingId,
-          purpose: 'show', // Required to identify payment type
+          order_id: result.bookingId,
+          purpose: 'show',
           amount: finalAmount.toString(),
           name: userDetails.name,
           email: userDetails.email,
           phone: userDetails.phone,
           address: userDetails.address || 'Delhi, India'
         };
-        
-        // Send request to CCAvenue API
+
         const response = await fetch('/api/payment/ccavenue-request', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(paymentData)
         });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
+
         const data = await response.json();
-        
+
         if (!data.status) {
-          const errorMessage = data.errors ? data.errors.join(', ') : 'Payment request failed';
-          throw new Error(errorMessage);
+          throw new Error(data.errors?.join(', ') || 'Payment failed');
         }
-        
-        if (!data.encRequest || !data.access_code) {
-          throw new Error('Invalid response from payment API');
-        }
-        
-        // Redirect to CCAvenue
-        submitToCCAvenue(data.encRequest, data.access_code, bookingId);
-        
-      } else {
-        toast.error(result.error || 'Booking failed. Please try again.');
+
+        // Submit to CCAvenue
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://secure.ccavenue.com/transaction/transaction.do?command=initiateTransaction';
+        form.innerHTML = `
+          <input type="hidden" name="encRequest" value="${data.encRequest}" />
+          <input type="hidden" name="access_code" value="${data.access_code}" />
+        `;
+        document.body.appendChild(form);
+        form.submit();
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to initiate payment. Please try again.');
-    } finally {
+      toast.error(error.message);
       setProcessing(false);
     }
   };
 
-  // Submit form to CCAvenue payment gateway
-  const submitToCCAvenue = (encRequest, accessCode, bookingId) => {
-    
-    try {
-      // Create form dynamically
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = 'https://secure.ccavenue.com/transaction/transaction.do?command=initiateTransaction';
-      form.target = '_self';
-      form.style.display = 'none';
-      
-      // Add encrypted request input
-      const encInput = document.createElement('input');
-      encInput.type = 'hidden';
-      encInput.name = 'encRequest';
-      encInput.value = encRequest;
-      form.appendChild(encInput);
-      
-      // Add access code input
-      const accInput = document.createElement('input');
-      accInput.type = 'hidden';
-      accInput.name = 'access_code';
-      accInput.value = accessCode;
-      form.appendChild(accInput);
-      
-      // Append form to body and submit
-      document.body.appendChild(form);
-      
-      // Submit form
-      form.submit();
-      
-      // Clean up
-      setTimeout(() => {
-        if (document.body.contains(form)) {
-          document.body.removeChild(form);
-        }
-      }, 1000);
-      
-    } catch (error) {
-      toast.error('Failed to redirect to payment gateway');
-      setProcessing(false);
-    }
-  };
-
-
-  // Main payment screen
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 flex flex-col justify-center items-center px-2 sm:px-4 py-4 sm:py-8">
       <div className="bg-white shadow-xl rounded-xl sm:rounded-2xl max-w-4xl w-full overflow-hidden">
@@ -193,7 +180,7 @@ const ShowPaymentProcess = () => {
                       ? format(new Date(selectedDate), 'MMM dd, yyyy')
                       : format(selectedDate, 'MMM dd, yyyy')
                   ) : 'N/A'}</p>
-                  <p><span className="font-medium text-gray-900">Time:</span> 5:00 PM - 10:00 PM</p>
+                  <p><span className="font-medium text-gray-900">Time:</span> {currentShow ? formatTime(currentShow.timeFrom || currentShow.startTime) : '5:00 PM'} - {currentShow ? formatTime(currentShow.timeTo || currentShow.endTime) : '10:00 PM'}</p>
                   <p><span className="font-medium text-gray-900">Seats:</span> {selectedSeats.length} seat{selectedSeats.length > 1 ? 's' : ''}</p>
                   <p><span className="font-medium text-gray-900">Seat Numbers:</span><span className="font-bold text-gray-900">  {selectedSeats.slice(0, 5).join(', ')}{selectedSeats.length > 5 ? ` +${selectedSeats.length - 5} more` : ''}</span></p>
                 </div>
@@ -204,16 +191,39 @@ const ShowPaymentProcess = () => {
             <div className="bg-gradient-to-r from-pink-100 via-white to-rose-100 border border-pink-300 rounded-lg sm:rounded-xl p-3 sm:p-4">
               <div className="flex flex-col sm:flex-row justify-between items-start text-center sm:text-left gap-4">
                 <div className="flex-1">
-                  
-                 
-                        
-                       
+                  {/* Discount Badges */}
+                  <div className="space-y-1 mb-2">
+                    {getEarlyBirdDiscount() > 0 && (
+                      <div className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mr-1">
+                        🎉 {getEarlyBirdDiscount()}% Early Bird!
+                      </div>
+                    )}
                     
-                    <div className="flex justify-between items-center font-bold text-lg">
-                      <span className="text-rose-800">Total Amount:</span>
-                      {/* <span className="text-rose-800">₹{getTotalAmount()?.toLocaleString('en-IN') || 0}</span> */}
-                    </div>
-                
+                    {getBulkDiscount() > 0 && (
+                      <div className="inline-block text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                        🎯 {getBulkDiscount()}% Bulk!
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Show seat type breakdown */}
+                  <div className="text-xs text-gray-600 mt-2">
+                    {(() => {
+                      const breakdown = { vip: 0, blockC: 0, blockD: 0 };
+                      selectedSeats.forEach(seatId => {
+                        if (seatId.startsWith('A-') || seatId.startsWith('B-')) breakdown.vip++;
+                        else if (seatId.startsWith('C-')) breakdown.blockC++;
+                        else if (seatId.startsWith('D-')) breakdown.blockD++;
+                      });
+                      
+                      const parts = [];
+                      if (breakdown.vip > 0) parts.push(`${breakdown.vip} Premium`);
+                      if (breakdown.blockC > 0) parts.push(`${breakdown.blockC} Block C`);
+                      if (breakdown.blockD > 0) parts.push(`${breakdown.blockD} Block D`);
+                      
+                      return parts.join(' • ');
+                    })()}
+                  </div>
                   
                   <p className="text-xs max-w-lg mt-3 text-orange-600">All payments made for Havan seats, stalls, and show seats will be considered <span className="font-bold text-sm">Donations</span> to <span className="font-bold text-sm">SVS</span>. With your contribution, you will become a valued member of SVS, and your donation will be eligible for exemption under <span className="font-bold text-sm">Section 80G</span> of the Income Tax Act.</p>
                 </div>
@@ -227,12 +237,11 @@ const ShowPaymentProcess = () => {
                     {getDiscountAmount() > 0 && (
                       <div className="mt-2 space-y-1">
                         <p className="text-xs text-gray-500 line-through">
-                          Price ₹{(getBaseAmount() || 0).toLocaleString('en-IN')}
+                          ₹{(getBaseAmount() || 0).toLocaleString('en-IN')}
                         </p>
                         <p className="text-sm text-green-600 font-semibold">
                           You saved ₹{(getDiscountAmount() || 0).toLocaleString('en-IN')}!
                         </p>
-                        
                       </div>
                     )}
                   </div>
@@ -253,7 +262,7 @@ const ShowPaymentProcess = () => {
             {/* Security Info */}
             <div className="mb-3 sm:mb-4">
               <div className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-rose-200">
-                <div className="text-blue-600 mr-3 text-xl sm:text-2xl">🔒</div>
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mr-3" />
                 <div className="text-xs sm:text-sm">
                   <p className="font-semibold text-rose-800">Bank Grade Security</p>
                   <p className="text-rose-600">Powered by CCAvenue - India's leading payment gateway</p>
@@ -263,7 +272,7 @@ const ShowPaymentProcess = () => {
 
             {/* Payment Button */}
             <button
-              onClick={completeBooking}
+              onClick={handlePayment}
               disabled={processing}
               className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-base sm:text-lg transition-all duration-300 transform ${
                 processing
@@ -273,10 +282,7 @@ const ShowPaymentProcess = () => {
             >
               {processing ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin h-5 w-5 sm:h-6 sm:w-6 text-white mr-2 sm:mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
+                  <Loader2 className="animate-spin w-5 h-5 sm:w-6 sm:h-6 text-white mr-2 sm:mr-3" />
                   Processing Booking...
                 </span>
               ) : (
@@ -291,10 +297,21 @@ const ShowPaymentProcess = () => {
               By clicking "Complete Booking", you agree to our Terms of Service and Privacy Policy
             </p>
           </div>
+
+          {/* Back Button - Added back to step 3 */}
+          {onBack && (
+            <div className="flex justify-start">
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Details
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-export default ShowPaymentProcess;
+}

@@ -51,7 +51,7 @@ const navigation = [
   },
   {
     name: 'Show Seats',
-    href: '/admin/seats/shows',
+    href: '/admin/show-seats',
     icon: MapPin,
     permission: 'manage_show_seats'
   },
@@ -100,13 +100,13 @@ const navigation = [
   },
   {
     name: 'Price Setting',
-    href: '/admin/settings/pricing',
+    href: '/admin/price-settings',
     icon: IndianRupee,
     permission: 'manage_pricing'
   },
   {
     name: 'System Settings',
-    href: '/admin/settings/system',
+    href: '/admin/settings',
     icon: Settings,
     permission: 'manage_settings'
   },
