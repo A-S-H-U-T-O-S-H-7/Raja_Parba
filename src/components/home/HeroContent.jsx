@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Cinzel } from "next/font/google";
+import Link from "next/link";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -191,6 +192,7 @@ const HeroContent = () => {
         <div className="flex flex-col sm:flex-row items-center gap-3 mt-1 sm:mt-2">
           
           {/* Join the Celebration Button */}
+          <Link href="/donate">
           <div 
             className="inline-block px-6 sm:px-8 py-2 bg-white text-[#8B0000]
             text-sm sm:text-base font-semibold rounded-full
@@ -198,8 +200,9 @@ const HeroContent = () => {
             hover:scale-105
             hover:shadow-[0_0_25px_rgba(255,215,0,0.7)]"
           >
-            Join the Celebration
+            Donate for a Smile 😊
           </div>
+          </Link>
 
           {/* ✨ Audio Play Button with Glow */}
           <button

@@ -161,6 +161,12 @@ export default function Header() {
                 >
                   Our Guests
                 </Link>
+                <Link 
+                  href="/donate" 
+                  className="px-4 py-2 text-amber-900 hover:text-amber-700 font-semibold text-base xl:text-lg transition-all duration-300 hover:bg-amber-100/50 rounded-full"
+                >
+                  Donate
+                </Link>
               </nav>
 
               {/* Desktop Right Section - User Dropdown or Auth Buttons */}
@@ -379,6 +385,14 @@ export default function Header() {
                 >
                   <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🌟</span>
                   Our Guests
+                </Link>
+                <Link 
+                  href="/donate" 
+                  className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🌟</span>
+                  Donate
                 </Link>
               </div>
 
