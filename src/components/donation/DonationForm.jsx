@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '@/context/AuthContext';
+import useAuthStore from '@/lib/stores/useAuthStore';
 import { useLocationData } from '@/hooks/useLocationData';
 
 export default function DonationForm({ donorType = 'indian', setDonorType }) {
@@ -25,7 +25,7 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   const [errors, setErrors] = useState({});
 
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   
   // Use location data hook similar to delegate form
   const { countries, states, cities, loading } = useLocationData(formData);
