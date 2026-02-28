@@ -1,65 +1,68 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { Minus, Plus, ArrowLeft } from "lucide-react";
 
 const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState(null);
   const router = useRouter();
-  
+
   const faqs = [
     {
-      question: "What is INTERNATIONAL SRI JAGANNATH PANCH RATRA?",
-      answer: "INTERNATIONAL SRI JAGANNATH PANCH RATRA is an international event focused on Sri Jagannath Sanskriti. It will take place on (November-December) exact date to be declared soon at RAM LILA GROUND, SECTOR-21A, NOIDA STADIUM, NOIDA."
+      question: "What is Raja Parba 2026?",
+      answer:
+        "Raja Parba 2026 is a grand Odia cultural celebration honoring womanhood and tradition. The festival will be celebrated from 13th June to 15th June 2026 with music, dance, melody programs, drawing competitions, award ceremony, and celebrity appearances."
     },
     {
-      question: "How do I register for the event?",
-      answer: "You can register for INTERNATIONAL SRI JAGANNATH PANCH RATRA by visiting our official website at www.svsamiti.com. Please complete the registration form and submit your payment to secure your spot."
+      question: "Where is the event venue?",
+      answer:
+        "The event will take place at Ram Leela Ground, Sector 21A, Noida, Uttar Pradesh."
     },
     {
-      question: "What are the registration fees?",
-      answer: "Registration fees is RS.1100. However for booking Havan Kund Puja seat it vary based on the category (e.g., early bird, standard) and can be found on the registration page of our website."
+      question: "Is entry free?",
+      answer:
+        "Yes, entry is FREE for all visitors."
     },
     {
-      question: "Is there a deadline for registration?",
-      answer: "Yes, the deadline for registration is 10 days before the event. We recommend registering early, as spaces may be limited."
+      question: "Is a pass required for entry?",
+      answer:
+        "Yes, entry is free but a mandatory entry pass is required. Visitors must book their free pass from the website."
     },
     {
-      question: "Can I cancel my registration?",
-      answer: "If you need to cancel your registration, please refer to our Cancellation and Refund Policy outlined in the Terms and Conditions. Generally, registration fees are non-refundable."
+      question: "How will I receive my entry pass?",
+      answer:
+        "After booking your free pass online, a QR code will be generated in your profile section. You must show this QR code at the entry gate for verification."
     },
     {
-      question: "Will there be accommodations available?",
-      answer: "Yes, we have partnered with local hotels to offer discounted rates for attendees. A list of recommended accommodations can be found on our website under the 'Accommodation' section."
+      question: "Are show seats free?",
+      answer:
+        "General entry is free. However, reserved show seating has a separate price. You can check pricing and availability in the 'Book Your Show' section."
     },
     {
-      question: "What is the event schedule?",
-      answer: "The event schedule, including sessions, speakers, and activities, will be available on our website closer to the event date. Participants will receive updates via email as well."
+      question: "What activities will happen during the festival?",
+      answer:
+        "The celebration includes drawing competition, award ceremony, traditional music, dance performances, melody shows, Raja swing activities, and celebrity guest appearances."
     },
     {
-      question: "Will meals be provided?",
-      answer: "Yes, on paid basis and will be included in your Delegation fee. Please inform us of any dietary restrictions during registration."
+      question: "Is participation in performances free?",
+      answer:
+        "Yes, participation in cultural performances and competitions is free. Prior registration through the website is required."
     },
     {
-      question: "What is the dress code for the event?",
-      answer: "The dress code for INTERNATIONAL SRI JAGANNATH PANCH RATRA is Dhoti Kurta. We recommend dressing comfortably while maintaining a professional appearance."
+      question: "What is the stall booking price?",
+      answer:
+        "Currently, stall booking starts from ₹5000. Prices may change depending on stall category and availability."
     },
     {
-      question: "Is there a virtual attendance option?",
-      answer: "Yes, Please select the virtual option during registration to receive access to live-streamed sessions and recordings."
+      question: "Will food be provided by the organizers?",
+      answer:
+        "No, food will not be provided by the organizers. However, multiple food stalls will be available at the venue."
     },
     {
-      question: "How do I get to the event venue?",
-      answer: "Yes by Air, Metro, Rail, buses, Taxi etc."
-    },
-    {
-      question: "Who can I contact for more information?",
-      answer: "For any further questions or inquiries, please contact us at 0120-4348458, 9999589202 or visit our website's 'Contact Us' page."
-    },
-    {
-      question: "What health and safety measures will be in place?",
-      answer: "We are committed to ensuring the health and safety of all participants."
+      question: "How can I contact the organizers?",
+      answer:
+        "You can contact us at 0120-4348458 or +91 730 339 7090 for any inquiries."
     }
   ];
 
@@ -68,68 +71,77 @@ const FAQ = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="relative min-h-screen bg-gradient-to-br from-[#FFF6ED] via-[#FDE6D6] to-[#FAD2C3] py-12 px-4 sm:px-6 lg:px-8">
+
+      {/* Mandala Background (add mandala.png inside public folder) */}
+      <div className="absolute inset-0 bg-[url('/mandala.png')] bg-center bg-no-repeat bg-contain opacity-5 pointer-events-none"></div>
+
+      <div className="relative max-w-6xl mx-auto">
+
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="mb-6 flex items-center text-purple-600 hover:text-purple-800 transition-colors"
+          className="mb-6 flex items-center text-red-700 hover:text-red-900 transition-colors font-medium"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 shadow-lg mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">
-            Frequently Asked Questions
+        <div className="bg-gradient-to-r from-red-700 to-red-500 rounded-2xl p-8 shadow-xl mb-10 text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white">
+            Raja Parba 2026 – FAQs
           </h1>
-          <p className="text-purple-100 text-center mt-2">
-            INTERNATIONAL SRI JAGANNATH PANCH RATRA
+          <p className="text-red-100 mt-2">
+            13th June – 15th June 2026
+          </p>
+          <p className="text-red-100 text-sm mt-1">
+            Ram Leela Ground, Sector 21A, Noida
           </p>
         </div>
-      {faqs.length > 0 ? (
-        <div className="space-y-4 max-w-4xl mx-auto">
+
+        {/* FAQ Items */}
+        <div className="space-y-5">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="border border-purple-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-all duration-300 bg-white"
+              className="rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 border border-red-100"
             >
               <div
-                className="flex justify-between items-center cursor-pointer"
+                className="flex justify-between items-center p-5 cursor-pointer"
                 onClick={() => toggleFAQ(index)}
               >
-                <h3 className="text-md md:text-lg font-medium font-body text-gray-700">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800">
                   {faq.question}
                 </h3>
 
-                <span
-                  className={`text-md md:text-lg text-gray-700 font-bold transform transition-transform duration-300 ${
-                    activeIndex === index ? "rotate-180" : ""
-                  }`}
-                >
-                  {activeIndex === index ? <Minus size={18} /> : <Plus size={18} />}
-                </span>
+                <div className="text-red-600">
+                  {activeIndex === index ? (
+                    <Minus size={20} />
+                  ) : (
+                    <Plus size={20} />
+                  )}
+                </div>
               </div>
+
               <div
                 className={`overflow-hidden transition-all duration-300 ${
                   activeIndex === index
-                    ? "max-h-[300px] opacity-100"
-                    : "max-h-0 opacity-0"
+                    ? "max-h-96 opacity-100 px-5 pb-5"
+                    : "max-h-0 opacity-0 px-5"
                 }`}
               >
-                <p className="mt-4 font-body text-gray-600">
+                <p className="text-gray-600 leading-relaxed">
                   {faq.answer}
                 </p>
               </div>
             </div>
           ))}
         </div>
-      ) : (
-        <p className="text-center text-gray-600">No FAQs available.</p>
-      )}
-        <p className="text-center mt-8 font-medium text-gray-700">
-          SVS Team
+
+        {/* Footer Text */}
+        <p className="text-center mt-12 font-medium text-red-700">
+          Raja Parba Organizing Team
         </p>
       </div>
     </div>

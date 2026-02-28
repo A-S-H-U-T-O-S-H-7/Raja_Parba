@@ -1,5 +1,16 @@
-// Next.js App Router API route to proxy CCAvenue requests and avoid CORS issues
 import { NextResponse } from 'next/server';
+
+function getBaseUrl(request) {
+  const origin = request.headers.get('origin');
+  if (origin) return origin;
+
+  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
+
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://donate.svsamiti.com';
+}
 
 export async function POST(request) {
   try {
@@ -41,8 +52,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    // Get origin from headers
-    const origin = request.headers.get('origin') || 'http://localhost:3000';
+    const baseUrl = getBaseUrl(request);
 
     // Prepare data for CCAvenue API with proper formatting
     const paymentData = {
@@ -55,16 +65,8 @@ export async function POST(request) {
       address: (address || 'Delhi, India').trim(),
       donor_type: body.donor_type || 'indian',
       country: body.country || 'india',
-      redirect_url: purpose === 'donation' 
-        ? `https://donate.svsamiti.com/api/payment/donation-response`
-        : purpose === 'delegate_booking'
-        ? `https://donate.svsamiti.com/api/payment/ccavenue-response`
-        : `https://donate.svsamiti.com/api/payment/ccavenue-response`,
-      cancel_url: purpose === 'donation'
-        ? `https://donate.svsamiti.com/api/payment/donation-cancel`
-        : purpose === 'delegate_booking'
-        ? `https://donate.svsamiti.com/api/payment/ccavenue-cancel`
-        : `https://donate.svsamiti.com/api/payment/ccavenue-cancel`
+      redirect_url: `${baseUrl}/api/payment/ccavenue-response`,
+      cancel_url: `${baseUrl}/api/payment/ccavenue-cancel`
     };
 
     console.log('🚀 Proxying payment request to CCAvenue:', {
@@ -73,7 +75,7 @@ export async function POST(request) {
     });
 
     // Make request to CCAvenue PHP API
-    const response = await fetch('https://svsamiti.com/havan-booking/ccavenueRequest.php', {
+    const response = await fetch('https://svsamiti.com/rajaparba/ccavenueRequest.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

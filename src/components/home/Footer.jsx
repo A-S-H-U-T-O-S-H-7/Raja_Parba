@@ -72,8 +72,9 @@ function Footer() {
               {/* Company Logo and About - Takes 2 columns on large screens */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Logo - Fixed size issue */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="relative w-48 h-16 md:w-56 md:h-20">
+                <a href="https://www.svsamiti.com/" target="_blank" rel="noopener noreferrer">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="relative w-56 h-16 md:w-68 md:h-20">
                     <img 
                       src="/header-logo.png" 
                       alt="Samudayik Vikas Samiti Logo" 
@@ -86,6 +87,7 @@ function Footer() {
                     <span className={`${cinzel.className} text-white font-bold text-lg md:text-xl hidden absolute inset-0 flex items-center`}>SVS</span>
                   </div>
                 </div>
+                </a>
                 
                 {/* About Company - Enhanced typography */}
                 <div>
@@ -162,6 +164,10 @@ function Footer() {
                     <Users size={16} className="text-amber-400 group-hover:scale-110 transition-transform" />
                     <span>Our Guests</span>
                   </Link>
+                  <Link href="/donate" className="flex items-center gap-2 text-gray-200 text-sm lg:text-base hover:text-amber-300 hover:translate-x-1 transition-all duration-300 group">
+                    <Users size={16} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                    <span>Donate</span>
+                  </Link>
                   
                 </div>
               </div>
@@ -173,14 +179,14 @@ function Footer() {
                 </h4>
                 <div className="space-y-4">
                   <Link 
-                    href="/book-stall" 
+                    href="/stall" 
                     className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <ShoppingBag size={20} />
                     Book Your Stall
                   </Link>
                   <Link 
-                    href="/book-seat" 
+                    href="/show" 
                     className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-armchair"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H7v-2a2 2 0 0 0-4 0Z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg>
@@ -189,7 +195,7 @@ function Footer() {
                   
                   {/* Decorative element */}
                   <div className="mt-4 p-3 bg-white/10 rounded-lg border border-amber-500/30 backdrop-blur-sm">
-                    <p className={`${cinzel.className} text-xs text-amber-200 text-center`}>
+                    <p className={`${cinzel.className} text-xs text-white text-center`}>
                       Limited seats available!<br />Book now to avoid disappointment.
                     </p>
                   </div>

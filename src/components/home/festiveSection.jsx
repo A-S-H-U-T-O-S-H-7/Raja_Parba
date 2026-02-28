@@ -129,7 +129,7 @@ const ExperienceSection = () => {
         </div>
 
         {/* Corner Design - Fixed to overlap outside */}
-        <div className="absolute bottom-[-30px] left-[-15px] md:bottom-[-60px] md:left-[-50px] w-32 h-32 md:w-72 md:h-72 z-20">
+        <div className="absolute bottom-[-30px] left-[-15px] md:bottom-[-60px] md:left-[-50px] w-32 h-32 sm:w-42 sm:h-42 md:w-52 md:h-52   2xl:w-72 2xl:h-72 z-20">
           <Image
             src="/greencorner.png"
             alt="corner design"
@@ -137,7 +137,7 @@ const ExperienceSection = () => {
             className="object-contain transform "
           />
         </div>
-        <div className="absolute   bottom-[-30px] right-[-15px] md:bottom-[-60px] md:right-[-50px] w-32 h-32 md:w-72 md:h-72 z-20">
+        <div className="absolute   bottom-[-30px] right-[-15px] md:bottom-[-60px] md:right-[-50px] w-32 h-32 sm:w-42 sm:h-42 md:w-52 md:h-52   2xl:w-72 2xl:h-72 z-20">
           <Image
             src="/greencorner.png"
             alt="corner design"

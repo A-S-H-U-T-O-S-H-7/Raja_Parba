@@ -2,6 +2,18 @@
 // Updated: 2025-08-25 - Fixed black screen issue for failed payments
 import { NextResponse } from 'next/server';
 
+function getBaseUrl(request) {
+  const origin = request.headers.get('origin');
+  if (origin) return origin;
+
+  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
+
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://donate.svsamiti.com';
+}
+
 export async function POST(request) {
   try {
     let encResp;
@@ -46,7 +58,7 @@ export async function POST(request) {
     });
 
     // Send encrypted response to CCAvenue response handler
-    const response = await fetch('https://svsamiti.com/havan-booking/ccavResponseHandler.php', {
+    const response = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -112,9 +124,7 @@ export async function POST(request) {
       });
       
       // Always redirect to failed page when JSON parsing fails (this means payment failed)
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : 'https://donate.svsamiti.com';
+      const baseUrl = getBaseUrl(request);
         
       const redirectUrl = new URL('/payment/failed', baseUrl);
       redirectUrl.searchParams.set('order_id', extractedOrderId);
@@ -237,9 +247,7 @@ export async function POST(request) {
       
       // Create redirect URL based on payment status
       // Determine base URL (for local development vs production)
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : 'https://donate.svsamiti.com';
+      const baseUrl = getBaseUrl(request);
       
       let redirectUrl;
       
@@ -371,7 +379,7 @@ export async function GET(request) {
     });
 
     // Send encrypted response to CCAvenue response handler
-    const response = await fetch('https://svsamiti.com/havan-booking/ccavResponseHandler.php', {
+    const response = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -403,13 +411,13 @@ export async function GET(request) {
       let redirectUrl;
       
       if (paymentInfo.order_status === 'Success') {
-        redirectUrl = new URL('/payment/success', 'https://donate.svsamiti.com');
+        redirectUrl = new URL('/payment/success', getBaseUrl(request));
         redirectUrl.searchParams.set('order_id', paymentInfo.order_id || 'unknown');
         redirectUrl.searchParams.set('status', 'success');
         redirectUrl.searchParams.set('amount', paymentInfo.amount || '0');
         redirectUrl.searchParams.set('tracking_id', paymentInfo.tracking_id || '');
       } else {
-        redirectUrl = new URL('/payment/failed', 'https://donate.svsamiti.com');
+        redirectUrl = new URL('/payment/failed', getBaseUrl(request));
         redirectUrl.searchParams.set('order_id', paymentInfo.order_id || 'unknown');
         redirectUrl.searchParams.set('status', 'failed');
         redirectUrl.searchParams.set('message', encodeURIComponent(paymentInfo.failure_message || 'Payment failed'));
@@ -440,7 +448,7 @@ export async function GET(request) {
     console.error('❌ CCAvenue GET response processing error:', error);
     
     // Redirect to error page
-    const errorUrl = new URL('/payment/success', 'https://donate.svsamiti.com');
+    const errorUrl = new URL('/payment/success', getBaseUrl(request));
     errorUrl.searchParams.set('status', 'error');
     errorUrl.searchParams.set('message', encodeURIComponent(error.message || 'Payment processing failed'));
     

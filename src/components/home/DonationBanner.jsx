@@ -6,7 +6,7 @@ const DonationBanner = ({ user }) => {
   return (
     <>
     {user && (
-    <div className="mx-3  md:mx-10 mb-2 md:mb-10 bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100 border-2 border-rose-100/50 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 relative group">
+    <div className="mx-3  md:mx-10 my-2 md:my-8 bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100 border-2 border-rose-100/50 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 relative group">
       {/* Shine Effect */}
       <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none"></div>
       
@@ -51,7 +51,7 @@ const DonationBanner = ({ user }) => {
           
           <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 md:p-4 border border-white/50 space-y-3">
             <p className="text-sm leading-relaxed text-slate-600">
-              Payment made for participating in <span className="font-bold text-rose-700">Havan</span>, 
+              Payment made for participating in 
               <span className="font-bold text-pink-700"> Show</span>, and 
               <span className="font-bold text-purple-700"> Reserve Stall</span> for your business will be treated as{' '}
               <span className="font-bold text-xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">

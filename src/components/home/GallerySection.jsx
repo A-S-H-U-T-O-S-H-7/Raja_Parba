@@ -55,7 +55,6 @@ const GallerySection = () => {
         const snapshot = await getDocs(q);
         let fetchedImages = normalizeDocs(snapshot);
 
-        // Fallback for legacy docs or if showcase query returns only invalid URLs.
         if (fetchedImages.length === 0) {
           const fallbackQ = query(
             collection(db, 'gallery'),
@@ -126,34 +125,80 @@ const GallerySection = () => {
   }
 
   if (images.length === 0) {
-    return null; // Don't show section if no showcase images
+    return null;
   }
 
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-6 md:py-6 overflow-hidden"
+      className="relative w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-5 md:py-6 overflow-hidden"
     >
-      {/* ... rest of your existing JSX (same as your current GallerySection) ... */}
-      {/* Replace the static galleryImages with the dynamic 'images' state */}
-      
-      <div className="relative z-10 container mx-auto px-4">
-        <div className="text-center mb-12">
+      {/* ── GOLDEN CORNERS ── */}
+
+      {/* Top-left */}
+      <div className="absolute top-0 left-0 w-20 h-20  md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner.jpg"
+          alt="corner design"
+          fill
+          className="object-contain"
+        />
+      </div>
+
+      {/* Top-right */}
+      <div className="absolute top-0 right-0 w-20 h-20  md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner.jpg"
+          alt="corner design"
+          fill
+          className="object-contain scale-x-[-1]"
+        />
+      </div>
+
+      {/* Bottom-left */}
+      <div className="absolute bottom-0 left-0 w-20 h-20  md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner.jpg"
+          alt="corner design"
+          fill
+          className="object-contain scale-y-[-1]"
+        />
+      </div>
+
+      {/* Bottom-right */}
+      <div className="absolute bottom-0 right-0 w-20 h-20  md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner.jpg"
+          alt="corner design"
+          fill
+          className="object-contain scale-x-[-1] scale-y-[-1]"
+        />
+      </div>
+
+      {/* ── CONTENT ── */}
+      <div className="relative z-10 container mx-auto px-4 max-w-6xl">
+        
+        {/* Heading */}
+        <div className="text-center mb-6 sm:mb-8 md:mb-10">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="w-16 h-0.5 bg-gradient-to-r from-transparent to-purple-400"></div>
-            <span className="text-purple-300 text-sm font-semibold tracking-widest uppercase">Memories</span>
-            <div className="w-16 h-0.5 bg-gradient-to-l from-transparent to-purple-400"></div>
+            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent to-purple-400"></div>
+            <span className="text-purple-300 text-xs sm:text-sm font-semibold tracking-widest uppercase">Memories</span>
+            <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-purple-400"></div>
           </div>
-          <h2 className={`${playfair.className} text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3`}>
+          <h2 className={`${playfair.className} text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2`}>
             Festival Gallery
           </h2>
-          <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto">
+          <p className="text-gray-300 text-sm sm:text-base max-w-xl mx-auto">
             Relive the vibrant moments from Raja Festival
           </p>
         </div>
 
         {/* 3D Coverflow Gallery */}
-        <div className="relative h-[260px] sm:h-[340px] md:h-[400px] mb-8">
+        {/* 
+          Key fix: use a fixed viewport-relative height so that at 100% browser zoom
+          the container doesn't balloon. clamp-style responsive heights via Tailwind.
+        */}
+        <div className="relative h-48 sm:h-64 md:h-72 lg:h-80 mb-5 sm:mb-6">
           <div className="gallery-container">
             {images.map((image, index) => {
               const style = getCardStyle(index);
@@ -175,8 +220,8 @@ const GallerySection = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
                     {isCenterCard && (
-                      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white">
-                        <h3 className={`${cinzel.className} text-base md:text-xl lg:text-2xl font-semibold drop-shadow-lg`}>
+                      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5 text-white">
+                        <h3 className={`${cinzel.className} text-sm md:text-lg lg:text-xl font-semibold drop-shadow-lg`}>
                           {image.title || 'Raja Festival Moment'}
                         </h3>
                       </div>
@@ -189,32 +234,37 @@ const GallerySection = () => {
         </div>
 
         {/* Progress Indicators */}
-        <div className="flex justify-center gap-2 mb-4 md:mb-8">
+        <div className="flex justify-center gap-1.5 mb-4 sm:mb-6">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`transition-all duration-300 rounded-full ${
                 index === currentIndex
-                  ? 'w-8 h-2 md:w-12 md:h-3 bg-gradient-to-r from-purple-500 to-pink-500'
-                  : 'w-3 h-3 bg-white/30 hover:bg-white/50'
+                  ? 'w-6 h-2 sm:w-8 sm:h-2.5 bg-gradient-to-r from-purple-500 to-pink-500'
+                  : 'w-2 h-2 sm:w-2.5 sm:h-2.5 bg-white/30 hover:bg-white/50'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
 
+        {/* CTA Button */}
         <div className="flex justify-center">
-          <Link href="/gallery" className="group relative inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transform hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+          <Link
+            href="/gallery"
+            className="group relative inline-flex items-center gap-2 px-6 py-2.5 sm:px-8 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <span className="relative flex items-center gap-2">
-              <span className={`${cinzel.className} text-sm md:text-base`}>View Full Gallery</span>
-              <svg className="w-4 h-4 md:w-5 md:h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className={`${cinzel.className} text-xs sm:text-sm md:text-base`}>View Full Gallery</span>
+              <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </span>
           </Link>
         </div>
+
       </div>
 
       <style jsx>{`
@@ -230,23 +280,30 @@ const GallerySection = () => {
 
         .gallery-card {
           position: absolute;
-          width: 320px;
-          height: 330px;
+          width: min(280px, 55vw);
+          height: min(290px, 57vw);
           transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
           transform-style: preserve-3d;
         }
 
         @media (max-width: 640px) {
           .gallery-card {
-            width: 200px;
-            height: 210px;
+            width: min(170px, 50vw);
+            height: min(180px, 52vw);
           }
         }
 
         @media (min-width: 641px) and (max-width: 768px) {
           .gallery-card {
-            width: 240px;
-            height: 260px;
+            width: min(210px, 40vw);
+            height: min(230px, 42vw);
+          }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .gallery-card {
+            width: min(260px, 32vw);
+            height: min(270px, 34vw);
           }
         }
 

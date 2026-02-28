@@ -6,223 +6,166 @@ export default function TermsAndConditions() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="mb-6 flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
+          className="mb-6 flex items-center text-orange-600 hover:text-orange-800 transition-colors"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl p-6 shadow-lg mb-8">
+        <div className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-6 shadow-lg mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">
             Terms and Conditions
           </h1>
-          <p className="text-purple-100 text-center mt-2">
-            for INTERNATIONAL SRI JAGANNATH PANCH RATRA
+          <p className="text-orange-100 text-center mt-2">
+            Raja Parba 2026
           </p>
-          <p className="text-purple-50 text-sm text-center mt-4">
-            Effective Date: NOVEMBER AND DECEMBER, 2025
+          <p className="text-orange-50 text-sm text-center mt-4">
+            Event Date: 13th – 15th June 2026
+          </p>
+          <p className="text-orange-50 text-sm text-center">
+            Venue: Ram Leela Ground, Sector 21A, Noida, Uttar Pradesh
           </p>
         </div>
 
         {/* Content */}
         <div className="bg-white rounded-xl shadow-md p-6 sm:p-8">
-          {/* Section 1 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              1. Introduction
-            </h2>
-            <p className="text-gray-700">
-              These Terms and Conditions govern the participation in and attendance at INTERNATIONAL SRI JAGANNATH PANCH RATRA.
-              INTERNATIONAL SRI JAGANNATH PANCH RATRA
-              hosted by SAMUDAYIK VIKAS SAMITI ("Organizer"). By registering for or attending the Event, you agree to comply with these Terms and Conditions.
-            </p>
-          </div>
 
-          {/* Section 2 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              2. Registration
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                All participants must register for the Event through the official website or designated registration platform.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Registration fees, if applicable, must be paid in full at the time of registration.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Registration is non-transferable unless explicitly permitted by the Organizer.
-              </li>
-            </ul>
-          </div>
+          {/* 1 */}
+          <Section
+            title="1. Introduction"
+            content="These Terms and Conditions govern participation in Raja Parba 2026 organized by Samudayik Vikas Samiti (“Organizer”). By booking a pass, reserving a stall, or attending the event, you agree to comply with these terms."
+          />
 
-          {/* Section 3 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              3. Payment
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Payment for registration is due upon registration.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Accepted payment methods include credit card, bank transfer, UPI.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                All fees are non-refundable unless the Event is canceled by the Organizer.
-              </li>
-            </ul>
-          </div>
+          {/* 2 */}
+          <Section
+            title="2. Entry & Registration"
+            list={[
+              "Entry to the event is FREE for all visitors.",
+              "A mandatory entry pass must be booked through the official website.",
+              "A QR code will be generated in your profile after booking.",
+              "Entry will only be allowed upon QR code verification at the venue gate."
+            ]}
+          />
 
-          {/* Section 4 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              4. Code of Conduct
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Participants are expected to behave professionally and respectfully towards others.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Harassment, discrimination, or any form of inappropriate behavior will not be tolerated.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                The Organizer reserves the right to remove any participant who violates this code of conduct.
-              </li>
-            </ul>
-          </div>
+          {/* 3 */}
+          <Section
+            title="3. Show Seating"
+            list={[
+              "General entry is free.",
+              "Reserved show seating is paid and pricing is available under 'Book Your Show'.",
+              "Seat bookings are subject to availability.",
+              "Show seat bookings are non-transferable."
+            ]}
+          />
 
-          {/* Section 5 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              5. Cancellation and Refund Policy
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                The Organizer reserves the right to cancel the Event for any reason, including but not limited to unforeseen circumstances.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                In the event of cancellation, participants will be notified promptly, and registration fees will be refunded in full.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                No refunds will be issued for no-shows or cancellations made by participants after event date or before 10 days of the event for cancellation.
-              </li>
-            </ul>
-          </div>
+          {/* 4 */}
+          <Section
+            title="4. Stall Booking"
+            list={[
+              "Stall booking starts from ₹5000 (price subject to change).",
+              "Full payment must be completed at the time of booking.",
+              "Stall allocation will be done by the Organizer.",
+              "Stall fees are non-refundable unless the event is canceled by the Organizer."
+            ]}
+          />
 
-          {/* Section 6 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              6. Intellectual Property
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                All content shared during the Event, including presentations, materials, and recordings, is the intellectual property of the Organizer or the respective speakers.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Participants may not record or distribute any materials without prior written consent from the Organizer.
-              </li>
-            </ul>
-          </div>
+          {/* 5 */}
+          <Section
+            title="5. Payment Terms"
+            list={[
+              "Payments can be made via UPI, credit/debit card, or bank transfer.",
+              "All payments must be completed online through the official website.",
+              "Transaction charges (if applicable) will be borne by the participant."
+            ]}
+          />
 
-          {/* Section 7 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              7. Liability
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                The Organizer is not responsible for any loss, damage, or injury incurred during the Event.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Participants are responsible for their own travel arrangements, accommodations, and any associated costs.
-              </li>
-            </ul>
-          </div>
+          {/* 6 */}
+          <Section
+            title="6. Event Activities"
+            content="The event includes drawing competitions, award ceremonies, music performances, dance programs, melody shows, and celebrity appearances. Participation in competitions is free but requires prior registration."
+          />
 
-          {/* Section 8 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              8. Privacy Policy
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Personal information collected during registration will be used in accordance with the Organizer's Privacy Policy.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Participants consent to the collection and use of their information as outlined in the Privacy Policy.
-              </li>
-            </ul>
-          </div>
+          {/* 7 */}
+          <Section
+            title="7. Code of Conduct"
+            list={[
+              "All attendees must maintain respectful and disciplined behavior.",
+              "Any misconduct, harassment, or disruptive behavior will lead to removal from the venue.",
+              "The Organizer reserves the right to deny entry or remove any individual violating event rules."
+            ]}
+          />
 
-          {/* Section 9 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              9. Governing Law
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                These Terms and Conditions shall be governed by and construed in accordance with the laws of India.
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Any disputes arising from these Terms and Conditions shall be resolved in the courts of G B Nagar.
-              </li>
-            </ul>
-          </div>
+          {/* 8 */}
+          <Section
+            title="8. Cancellation & Refund Policy"
+            list={[
+              "The Organizer reserves the right to cancel or reschedule the event due to unforeseen circumstances.",
+              "In case of event cancellation, stall or show seat payments will be refunded.",
+              "No refund will be provided for no-shows or late cancellations."
+            ]}
+          />
 
-          {/* Section 10 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              10. Amendments
-            </h2>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                The Organizer reserves the right to amend these Terms and Conditions at any time. Participants will be notified of significant changes.
-              </li>
-            </ul>
-          </div>
+          {/* 9 */}
+          <Section
+            title="9. Liability"
+            list={[
+              "The Organizer is not responsible for any personal injury, loss, or damage during the event.",
+              "Attendees are responsible for their personal belongings."
+            ]}
+          />
 
-          {/* Section 11 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-purple-100 pb-2">
-              11. Contact Information
-            </h2>
-            <p className="text-gray-700 mb-4">
-              For questions regarding these Terms and Conditions, please contact at 0120-4348458 www.svsamiti.com
-            </p>
-            <p className="text-gray-700 font-medium">
-              SVS TEAM
-            </p>
-          </div>
+          {/* 10 */}
+          <Section
+            title="10. Governing Law"
+            list={[
+              "These Terms shall be governed by the laws of India.",
+              "Any disputes shall fall under the jurisdiction of courts in G B Nagar, Uttar Pradesh."
+            ]}
+          />
+
+          {/* 11 */}
+          <Section
+            title="11. Contact Information"
+            content="For any queries, please contact: 0120-4348458 or +91 730 339 7090. Official website: www.svsamiti.com"
+          />
+
+          <p className="text-center mt-8 font-semibold text-orange-600">
+            Raja Parba 2026 Organizing Team
+          </p>
+
         </div>
       </div>
+    </div>
+  );
+}
+
+/* Reusable Section Component */
+function Section({ title, content, list }) {
+  return (
+    <div className="mb-8">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-orange-100 pb-2">
+        {title}
+      </h2>
+
+      {content && <p className="text-gray-700">{content}</p>}
+
+      {list && (
+        <ul className="space-y-2 text-gray-700">
+          {list.map((item, index) => (
+            <li key={index} className="flex items-start">
+              <span className="text-orange-500 mr-2">•</span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

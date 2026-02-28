@@ -8,11 +8,13 @@ import TicketSection from './TicketSection';
 import DonationBanner from './DonationBanner';
 import BookingSection from './BookingSection';
 import GallerySection from './GallerySection';
+import EventParticipation from './EventParticipation';
 
 function HeroSection({ user }) {
   return (
     <>
     <HeroContent />
+    <EventParticipation/>
     <HeroActions user={user} />
 
     <CardSection/>
