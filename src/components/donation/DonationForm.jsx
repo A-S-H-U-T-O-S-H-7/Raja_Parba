@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import useAuthStore from '@/lib/stores/useAuthStore';
+import { useAuth } from '@/context/AuthContext';
 import { useLocationData } from '@/hooks/useLocationData';
+import { Heart, Mail, Phone, MapPin, Globe, Building2, MapPinned, Lock, Shield, IndianRupee } from 'lucide-react';
 
 export default function DonationForm({ donorType = 'indian', setDonorType }) {
   // Use props if provided, otherwise fallback to local state
@@ -25,7 +26,7 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   const [errors, setErrors] = useState({});
 
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   
   // Use location data hook similar to delegate form
   const { countries, states, cities, loading } = useLocationData(formData);
@@ -134,7 +135,7 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
           state: formData.state,
           country: formData.country,
           pincode: formData.pincode,
-        donorType: currentDonorType
+          donorType: currentDonorType
         },
         amount: parseFloat(formData.amount),
         currency: 'INR',
@@ -210,9 +211,6 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   
   const submitToCCAvenue = (encRequest, accessCode) => {
     try {
-      const sanitizedEncRequest = typeof encRequest === 'string' ? encRequest.trim() : encRequest;
-      const sanitizedAccessCode = typeof accessCode === 'string' ? accessCode.trim() : accessCode;
-
       // Create form dynamically - same pattern as existing PaymentProcess.jsx
       const form = document.createElement('form');
       form.method = 'POST';
@@ -224,14 +222,14 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
       const encInput = document.createElement('input');
       encInput.type = 'hidden';
       encInput.name = 'encRequest';
-      encInput.value = sanitizedEncRequest;
+      encInput.value = encRequest;
       form.appendChild(encInput);
       
       // Add access code input
       const accInput = document.createElement('input');
       accInput.type = 'hidden';
       accInput.name = 'access_code';
-      accInput.value = sanitizedAccessCode;
+      accInput.value = accessCode;
       form.appendChild(accInput);
       
       // Append form to body and submit
@@ -252,47 +250,58 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   };
 
   return (
-    <div className="lg:col-span-3 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 rounded-xl shadow-lg p-4 border-2 border-pink-200 h-fit">
-      <h2 className="text-2xl py-6 font-bold text-pink-700 mb-4 text-center">
-        💝 Make a Difference Today
-      </h2>
+    <div className="lg:col-span-3 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 rounded-2xl shadow-xl p-6 border border-pink-200 h-fit">
+      {/* Decorative Header */}
+      <div className="flex items-center justify-center gap-2 mb-6">
+        <Heart className="w-8 h-8 text-pink-500 fill-pink-500" />
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-amber-600 bg-clip-text text-transparent">
+          Make a Difference Today
+        </h2>
+        <Heart className="w-8 h-8 text-pink-500 fill-pink-500" />
+      </div>
       
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* Donor Type and Amount in same row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <Globe className="w-3.5 h-3.5 text-purple-500" />
               Donor Type*
             </label>
             <select
               value={currentDonorType}
               onChange={(e) => currentSetDonorType(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 text-sm"
+              className="w-full px-4 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 text-sm shadow-sm hover:shadow-md"
             >
-              <option value="indian">Indian Donors</option>
-              <option value="foreign">NRI/Foreign Donors</option>
+              <option value="indian">🇮🇳 Indian Donors</option>
+              <option value="foreign">🌍 NRI/Foreign Donors</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <IndianRupee className="w-3.5 h-3.5 text-blue-500" />
               Donation Amount*
             </label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleInputChange}
-              placeholder="Enter amount"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
-              required
-            />
-            {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleInputChange}
+                placeholder="Enter amount"
+                className="w-full pl-8 pr-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm shadow-sm hover:shadow-md"
+                required
+              />
+            </div>
+            {errors.amount && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><span className="w-1 h-1 bg-red-500 rounded-full"></span>{errors.amount}</p>}
           </div>
         </div>
 
-        {/* Full Name - No dropdown */}
+        {/* Full Name */}
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+            <Building2 className="w-3.5 h-3.5 text-green-500" />
             Full Name*
           </label>
           <input
@@ -301,16 +310,17 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
             value={formData.fullName}
             onChange={handleInputChange}
             placeholder="Enter your full name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
+            className="w-full px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl focus:ring-2 focus:ring-green-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm shadow-sm hover:shadow-md"
             required
           />
-          {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
+          {errors.fullName && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><span className="w-1 h-1 bg-red-500 rounded-full"></span>{errors.fullName}</p>}
         </div>
 
         {/* Email and Mobile in same row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <Mail className="w-3.5 h-3.5 text-yellow-500" />
               Email Address*
             </label>
             <input
@@ -319,13 +329,14 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="your@email.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
+              className="w-full px-4 py-3 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm shadow-sm hover:shadow-md"
               required
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><span className="w-1 h-1 bg-red-500 rounded-full"></span>{errors.email}</p>}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <Phone className="w-3.5 h-3.5 text-orange-500" />
               Mobile Number*
             </label>
             <input
@@ -334,16 +345,17 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
               value={formData.mobile}
               onChange={handleInputChange}
               placeholder="+91 9876543210"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 text-sm"
+              className="w-full px-4 py-3 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm shadow-sm hover:shadow-md"
               required
             />
-            {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
+            {errors.mobile && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><span className="w-1 h-1 bg-red-500 rounded-full"></span>{errors.mobile}</p>}
           </div>
         </div>
 
-        {/* Address - Smaller */}
+        {/* Address */}
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5 text-teal-500" />
             Address*
           </label>
           <textarea
@@ -351,71 +363,93 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
             value={formData.address}
             onChange={handleInputChange}
             placeholder="Enter your complete address"
-            rows="2"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500 resize-none text-sm"
+            rows="3"
+            className="w-full px-4 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 placeholder-gray-400 resize-none text-sm shadow-sm hover:shadow-md"
             required
           />
-          {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+          {errors.address && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><span className="w-1 h-1 bg-red-500 rounded-full"></span>{errors.address}</p>}
         </div>
 
         {/* Country, State, City, Pincode in grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <Globe className="w-3.5 h-3.5 text-violet-500" />
               Country*
             </label>
             <select 
               name="country"
               value={formData.country}
               onChange={handleInputChange}
-              className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent text-gray-900 text-xs"
+              className="w-full px-3 py-3 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-xl focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none text-gray-900 text-xs shadow-sm hover:shadow-md"
               disabled={loading.countries}
             >
               <option value="">Select Country</option>
-              {countries.map(country => (
-                <option key={country.iso2} value={country.name}>{country.name}</option>
-              ))}
+              {countries && countries.length > 0 ? (
+                countries.map(country => (
+                  <option key={country.iso2 || country.name} value={country.name}>
+                    {country.name}
+                  </option>
+                ))
+              ) : (
+                <option value="India">🇮🇳 India</option>
+              )}
             </select>
             {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <Building2 className="w-3.5 h-3.5 text-fuchsia-500" />
               State*
             </label>
             <select
               name="state"
               value={formData.state}
               onChange={handleInputChange}
-              className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent text-gray-900 text-xs"
-              disabled={!states.length || loading.states}
+              className="w-full px-3 py-3 bg-gradient-to-r from-fuchsia-50 to-pink-50 border border-fuchsia-200 rounded-xl focus:ring-2 focus:ring-fuchsia-400 focus:border-transparent focus:outline-none text-gray-900 text-xs shadow-sm hover:shadow-md"
+              disabled={!states || !states.length || loading.states}
             >
               <option value="">Select State</option>
-              {states.map(state => (
-                <option key={state.iso2} value={state.name}>{state.name}</option>
-              ))}
+              {states && states.length > 0 ? (
+                states.map(state => (
+                  <option key={state.iso2 || state.name} value={state.name}>
+                    {state.name}
+                  </option>
+                ))
+              ) : (
+                <option value="">Select country first</option>
+              )}
             </select>
             {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <MapPinned className="w-3.5 h-3.5 text-rose-500" />
               City*
             </label>
             <select
               name="city"
               value={formData.city}
               onChange={handleInputChange}
-              className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent text-gray-900 text-xs"
-              disabled={!cities.length || loading.cities}
+              className="w-full px-3 py-3 bg-gradient-to-r from-rose-50 to-red-50 border border-rose-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:border-transparent focus:outline-none text-gray-900 text-xs shadow-sm hover:shadow-md"
+              disabled={!cities || !cities.length || loading.cities}
             >
               <option value="">Select City</option>
-              {cities.map(city => (
-                <option key={city.id} value={city.name}>{city.name}</option>
-              ))}
+              {cities && cities.length > 0 ? (
+                cities.map(city => (
+                  <option key={city.id || city.name} value={city.name}>
+                    {city.name}
+                  </option>
+                ))
+              ) : (
+                <option value="">Select state first</option>
+              )}
             </select>
             {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-sky-500" />
               Pincode*
             </label>
             <input
@@ -425,38 +459,44 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
               onChange={handleInputChange}
               placeholder="PIN"
               maxLength="6"
-              className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 text-xs"
+              className="w-full px-3 py-3 bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-xl focus:ring-2 focus:ring-sky-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 placeholder-gray-400 text-xs shadow-sm hover:shadow-md"
               required
             />
             {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>}
           </div>
         </div>
 
-        {/* Submit Button - Proper Color */}
+        {/* Security Badges */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-4 text-[10px] text-gray-500">
+          <span className="flex items-center gap-1"><Lock className="w-3 h-3 text-green-500" /> 256-bit Secure</span>
+          <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-blue-500" /> PCI Compliant</span>
+          <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-pink-500" /> 80G Certified</span>
+        </div>
+
+        {/* Submit Button */}
         <button
           onClick={handleSubmit}
           disabled={processing}
-          className={`w-full font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.01] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 mt-4 ${
+          className={`w-full font-bold py-4 px-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 mt-2 relative overflow-hidden group ${
             processing 
               ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 cursor-pointer'
-          } text-white`}
+              : 'bg-gradient-to-r from-orange-500 via-pink-500 to-rose-500 hover:from-orange-600 hover:via-pink-600 hover:to-rose-600 cursor-pointer'
+          } text-white shadow-lg`}
         >
-          <span className="flex items-center justify-center">
+          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></span>
+          <span className="relative z-10 flex items-center justify-center gap-2 text-lg">
             {processing ? (
               <>
-                <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                 </svg>
-                Processing...
+                Processing Donation...
               </>
             ) : (
               <>
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-                </svg>
-                Donate
+                <Heart className="w-5 h-5 fill-white animate-pulse" />
+                Donate Now 
               </>
             )}
           </span>

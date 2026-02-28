@@ -41,7 +41,7 @@ export default function EventBanner() {
 
   return (
     <div
-      className="w-full relative overflow-hidden"
+      className="w-full py-4 relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #312e81 65%, #1e1b4b 100%)',
         minHeight: '165px',
@@ -271,7 +271,20 @@ export default function EventBanner() {
             <ArrowRight className="w-4 h-4 relative z-10" />
           </button>
         </Link>
-      </div>
+      </div> 
+      
+      {/* Footer Border */}
+      <div
+        className="absolute w-full h-5 md:h-8 mt-[-2px] md:mt-[-10] rotate-180 z-10 bg-repeat-x bg-center"
+        style={{
+          backgroundImage: 'url(/footerborder.png)',
+          backgroundSize: 'auto 100%'
+        }}
+        onError={(e) => {
+          e.target.style.display = 'none';
+        }}
+      ></div>
+
 
       {/* Bottom shimmer accent */}
       <div className="absolute bottom-0 left-0 right-0 h-[3px] overflow-hidden">

@@ -22,7 +22,7 @@ export default function NabaKalebarSection() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden py-16 px-4"
+      className="relative overflow-hidden py-8 px-4"
       style={{
         background:
           "linear-gradient(145deg, #0e0d18 0%, #1a0818 30%, #0a0e14 60%, #0e0d18 100%)",
@@ -74,7 +74,7 @@ export default function NabaKalebarSection() {
             >
               <Image
                 src="/nabakalebara.png"
-                alt="Nabakalebar — The Film"
+                alt="Nabakalebar — The Blockbuster Film"
                 fill
                 className="object-cover"
                 style={{ filter: "brightness(0.88) saturate(1.05)" }}
@@ -85,7 +85,7 @@ export default function NabaKalebarSection() {
               <div className="absolute inset-x-0 bottom-0 h-8"
                 style={{ background: "rgba(0,0,0,0.6)" }} />
 
-              {/* Film badge */}
+              {/* Film badge - Updated */}
               <div
                 className="absolute bottom-12 left-4 right-4 rounded-lg px-4 py-3"
                 style={{
@@ -96,24 +96,37 @@ export default function NabaKalebarSection() {
               >
                 <p className={cinzel.className}
                   style={{ fontSize: "0.6rem", letterSpacing: "0.2em", color: "#e8a87c", textTransform: "uppercase", marginBottom: "4px" }}>
-                  Main Attraction · 14 June 2026
+                  Blockbuster Hit · Now on Big Screen
                 </p>
                 <p className={cormorant.className}
                   style={{ fontSize: "1.1rem", fontWeight: 700, color: "#f5e8f0", fontStyle: "italic" }}>
-                  Exclusive preview + star cast on stage
+                  ⭐⭐⭐⭐⭐ "A masterpiece of Odia cinema"
                 </p>
+              </div>
+              
+              {/* Hit Badge - New */}
+              <div
+                className="absolute top-4 right-4 rounded-full px-3 py-1.5"
+                style={{
+                  background: "rgba(232,168,124,0.9)",
+                  backdropFilter: "blur(4px)",
+                }}
+              >
+                <span className={cinzel.className} style={{ fontSize: "0.7rem", fontWeight: 700, color: "#0e0d18" }}>
+                  SUPER HIT 🔥
+                </span>
               </div>
             </div>
           </motion.div>
 
-          {/* Content side */}
+          {/* Content side - Updated */}
           <div className="flex flex-col gap-5">
 
             <motion.div {...fadeUp(0.1)} className="flex items-center gap-3">
               <div className="h-px w-8" style={{ background: "#e8a87c" }} />
               <span className={cinzel.className}
                 style={{ fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#e8a87c" }}>
-                Special Attraction
+                Blockbuster Celebration
               </span>
             </motion.div>
 
@@ -124,6 +137,7 @@ export default function NabaKalebarSection() {
                 style={{ background: "linear-gradient(90deg, #e8a87c, #c0392b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 Kalebara
               </span>
+              <span style={{ fontSize: "1.2rem", marginLeft: "10px", color: "#e8a87c" }}>★</span>
             </motion.h2>
 
             <motion.div {...fadeUp(0.24)}
@@ -132,25 +146,27 @@ export default function NabaKalebarSection() {
 
             <motion.p {...fadeUp(0.3)} className={lora.className}
               style={{ fontSize: "1rem", lineHeight: 1.8, color: "rgba(245,232,240,0.78)" }}>
-              The most awaited Odia film of 2026 — a cinematic retelling of the sacred{" "}
+              <span style={{ color: "#e8a87c", fontWeight: 700 }}>The biggest Odia blockbuster of 2025</span> — 
+              a cinematic masterpiece retelling the sacred{" "}
               <span style={{ color: "#e8a87c", fontWeight: 500 }}>Nabakalebar</span> ritual of Lord Jagannath.
-              A story of devotion, transformation, and the eternal bond between god and land.
+              The film has taken the box office by storm and captured hearts worldwide.
             </motion.p>
 
             <motion.p {...fadeUp(0.36)} className={lora.className}
               style={{ fontSize: "1rem", lineHeight: 1.8, color: "rgba(245,232,240,0.6)" }}>
-              On the night of <span style={{ color: "#e8a87c" }}>14th June</span>, the star cast of Nabakalebar
-              will join us live on stage at Ram Leela Ground — for an exclusive preview screening,
-              interactions, and a celebration of Odia cinema at its finest.
+              On <span style={{ color: "#e8a87c" }}>14th June at Raja Mahotsav</span>, the entire star cast of Nabakalebar
+              will join us on stage at Ram Leela Ground to celebrate Raja with the community!
+              Enjoy a special screening of this cinematic gem, followed by an exclusive{" "}
+              <span style={{ color: "#e8a87c" }}>Meet & Greet</span> with your favorite stars.
             </motion.p>
 
-            {/* Highlight pills */}
+            {/* Updated highlight pills */}
             <motion.div {...fadeUp(0.44)} className="flex flex-wrap gap-3 mt-2">
               {[
-                { icon: "🎬", text: "Exclusive Preview" },
-                { icon: "🌟", text: "Star Cast Live" },
-                { icon: "📸", text: "Meet & Greet" },
-                { icon: "🏛️", text: "Odia Cinema Night" },
+                { icon: "🎬", text: "Special Screening" },
+                { icon: "⭐", text: "Star Cast Live on Stage" },
+                { icon: "📸", text: "Photo & Selfie Session" },
+                { icon: "🎉", text: "Raja Celebration" },
               ].map((pill, i) => (
                 <div key={i}
                   className="flex items-center gap-2 rounded-full px-3 py-1.5"
@@ -168,19 +184,23 @@ export default function NabaKalebarSection() {
               ))}
             </motion.div>
 
-            {/* Quote */}
+           
+            {/* Quote - Updated */}
             <motion.blockquote {...fadeUp(0.52)}
               className="rounded-xl p-5 mt-2"
               style={{
-                background: "rgba(255,255,255,0.04)",
+                background: "rgba(232,168,124,0.08)",
                 borderLeft: "3px solid #e8a87c",
                 paddingLeft: "1.2rem",
               }}
             >
               <p className={cormorant.className}
-                style={{ fontSize: "1.1rem", fontStyle: "italic", lineHeight: 1.7, color: "#d4c0b0" }}>
-                "When the chariot moves, the whole world moves with it —
-                and Nabakalebar captures that moment for eternity."
+                style={{ fontSize: "1.1rem", fontStyle: "italic", lineHeight: 1.7, color: "#e8a87c" }}>
+                "We're coming to Noida to celebrate Raja with all of you!
+              </p>
+              <p className={cormorant.className}
+                style={{ fontSize: "0.9rem", lineHeight: 1.6, color: "#d4c0b0", marginTop: "8px" }}>
+                — Entire Cast of Nabakalebar
               </p>
             </motion.blockquote>
           </div>

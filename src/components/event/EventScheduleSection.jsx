@@ -13,16 +13,15 @@ const days = [
     date: "13 June",
     day: "Saturday",
     label: "Pahili Raja",
-    theme: "Opening Night",
+    theme: "Opening Day",
     accent: "#c0392b",
     bg: "#fdf2f0",
     events: [
-      { time: "6:00 PM", title: "Grand Inauguration", desc: "Official lamp lighting & welcome ceremony", icon: "🪔" },
-      { time: "6:45 PM", title: "Odia Stall Bazaar Opens", desc: "50+ stalls — food, clothes, handicrafts from Odisha", icon: "🏪" },
-      { time: "7:30 PM", title: "Raja Doli — The Sacred Swing", desc: "Traditional swing experience & photo zone opens", icon: "🌿" },
-      { time: "8:00 PM", title: "Cultural Dance Performances", desc: "Odissi & folk dance by renowned troupes", icon: "💃" },
-      { time: "9:00 PM", title: "Stand-up Comedy Night", desc: "Odia comedians bring the laughs", icon: "🎤" },
-      { time: "10:00 PM", title: "Fancy Dress Competition", desc: "Day 1 heats — prizes for best Odia cultural costume", icon: "👗" },
+      { time: "10:00 AM", title: "Odia Stall Bazaar Opens", desc: "50+ stalls — food, clothes, handicrafts from Odisha", icon: "🏪" },
+      { time: "10:30 AM", title: "Raja Doli — The Sacred Swing", desc: "Traditional swing experience & photo zone opens", icon: "🌿" },
+      { time: "5:00 PM", title: "Grand Inauguration Ceremony", desc: "Official lamp lighting & welcome ceremony by dignitaries", icon: "🪔" },
+      { time: "6:00 PM", title: "Live Cultural Performances", desc: "Odissi & folk dance by renowned troupes", icon: "💃" },
+      { time: "7:00 PM", title: "Melodious Evening - Live Songs", desc: "Soulful Odia songs by popular singers", icon: "🎤" },
     ],
   },
   {
@@ -33,12 +32,13 @@ const days = [
     accent: "#8b3a8f",
     bg: "#f8eef8",
     events: [
-      { time: "5:00 PM", title: "Raja Kumari — Round 1", desc: "Girls compete in cultural talent, attire & grace", icon: "👑" },
-      { time: "6:00 PM", title: "Speeches from Odia Delegates", desc: "Leaders & cultural ambassadors from Odisha speak", icon: "🎙️" },
-      { time: "7:00 PM", title: "Live Music — Odia Folk & Film", desc: "Popular Odia singers perform live on stage", icon: "🎵" },
+      { time: "10:00 AM", title: "Odia Stall Bazaar Opens", desc: "Explore authentic Odia handicrafts, textiles & food", icon: "🏪" },
+      { time: "10:30 AM", title: "Raja Doli — The Sacred Swing", desc: "Traditional swing experience continues", icon: "🌿" },
+      { time: "5:00 PM", title: "Lamp Lighting Ceremony", desc: "Traditional inauguration of evening events", icon: "🪔" },
+      { time: "5:30 PM", title: "Speeches from Odia Delegates", desc: "Leaders & cultural ambassadors from Odisha address the gathering", icon: "🎙️" },
+      { time: "6:00 PM", title: "Live Music — Odia Folk & Film", desc: "Popular Odia singers perform live on stage", icon: "🎵" },
       { time: "8:00 PM", title: "Nabakalebar Special Screening", desc: "Exclusive preview of the upcoming Jagannath film", icon: "🎬" },
-      { time: "9:00 PM", title: "Star Cast Meet & Greet", desc: "Nabakalebar stars join the stage — selfies & interaction", icon: "🌟" },
-      { time: "10:30 PM", title: "Grand Fireworks Display", desc: "Celebrating Mithuna Sankranti in the sky", icon: "🎆" },
+      { time: "9:00 PM", title: "Award Ceremony", desc: "Honoring cultural contributors & competition winners", icon: "🏆" },
     ],
   },
   {
@@ -49,12 +49,13 @@ const days = [
     accent: "#2d6a4f",
     bg: "#eef7f2",
     events: [
-      { time: "5:30 PM", title: "Fancy Dress — Grand Finale", desc: "Finals & prize ceremony for best costumes", icon: "🏆" },
-      { time: "6:30 PM", title: "Raja Kumari — Grand Finale", desc: "Top contestants compete for the crown", icon: "👑" },
-      { time: "7:30 PM", title: "Raja Kumari Crowning", desc: "The winner is crowned in a grand ceremony", icon: "🎀" },
-      { time: "8:00 PM", title: "Live Concert — Headline Singer", desc: "Biggest Odia music star closes the festival", icon: "🎶" },
-      { time: "9:30 PM", title: "Nabakalebar Premiere Event", desc: "Stars back on stage — film promotion & celebration", icon: "🎥" },
-      { time: "10:30 PM", title: "Closing Ceremony & Aarti", desc: "Traditional farewell with diyas and blessings", icon: "🪔" },
+      { time: "10:00 AM", title: "Odia Stall Bazaar Opens", desc: "Last day to shop from Odisha's finest", icon: "🏪" },
+      { time: "10:30 AM", title: "Raja Doli — The Sacred Swing", desc: "Final day for the traditional swing experience", icon: "🌿" },
+      { time: "5:00 PM", title: "Lamp Lighting Ceremony", desc: "Traditional start to the finale evening", icon: "🪔" },
+      { time: "6:00 PM", title: "Prize Distribution Ceremony", desc: "Winners announced for Raja Kumari, Raja Queen, Drawing Competition & more", icon: "🏆" },
+      { time: "7:00 PM", title: "Melody Night - Songs & Dance", desc: "Grand musical evening with dance performances", icon: "🎶" },
+      { time: "9:30 PM", title: "Grand Closing Ceremony", desc: "Traditional farewell with aarti and heartfelt wishes for next Raja", icon: "🪔" },
+      { time: "10:00 PM", title: "Wishing Everyone - Happy Raja", desc: "A long wait begins for next year's celebration", icon: "🌸" },
     ],
   },
 ];
@@ -103,11 +104,11 @@ export default function EventScheduleSection() {
           <h2 className={`${cormorant.className} text-[clamp(2rem,4vw,2.75rem)] font-bold text-[#2c1810]`}>
             Three Days of{" "}
             <span className="italic bg-gradient-to-r from-[#c0392b] to-[#8b3a8f] bg-clip-text text-transparent">
-              Magic
+              Celebration
             </span>
           </h2>
           <p className={`${lora.className} text-[1rem] leading-[1.75] text-[#7a5040] max-w-[32rem] mx-auto mt-2`}>
-            Every evening at Ram Leela Ground transforms into Odisha for three unforgettable nights.
+            Join us from morning to evening as Ram Leela Ground transforms into Odisha for three unforgettable days.
           </p>
         </motion.div>
 
@@ -163,47 +164,107 @@ export default function EventScheduleSection() {
           </div>
         </motion.div>
 
-        {/* Events list */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {day.events.map((event, i) => (
-            <motion.div
-              key={`${activeDay}-${i}`}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.07 }}
-              className="flex gap-4 rounded-xl p-4 bg-[rgba(255,252,248,0.9)]"
-              style={{
-                border: `1px solid ${day.accent}18`,
-                boxShadow: "0 2px 10px rgba(44,24,16,0.05)",
-              }}
-            >
-              {/* Time */}
-              <div className="flex-shrink-0 text-center min-w-[60px]">
-                <div
-                  className="rounded-lg px-2 py-1 mb-1"
-                  style={{ background: day.accent }}
+        {/* Morning Events Section */}
+        <div className="mb-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-6 w-1 rounded-full bg-amber-500"></div>
+            <h4 className={`${cinzel.className} text-sm tracking-wider uppercase text-amber-700`}>Morning Schedule</h4>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {day.events
+              .filter(e => e.time.includes("AM"))
+              .map((event, i) => (
+                <motion.div
+                  key={`${activeDay}-morning-${i}`}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.07 }}
+                  className="flex gap-4 rounded-xl p-4 bg-[rgba(255,252,248,0.9)] border-l-4"
+                  style={{
+                    borderLeftColor: day.accent,
+                    border: `1px solid ${day.accent}18`,
+                    boxShadow: "0 2px 10px rgba(44,24,16,0.05)",
+                  }}
                 >
-                  <p className={`${cinzel.className} text-[0.6rem] font-semibold text-white tracking-[0.05em]`}>
-                    {event.time}
-                  </p>
-                </div>
-                <span className="text-2xl">{event.icon}</span>
-              </div>
+                  {/* Time */}
+                  <div className="flex-shrink-0 text-center min-w-[70px]">
+                    <div
+                      className="rounded-lg px-2 py-1 mb-1"
+                      style={{ background: day.accent }}
+                    >
+                      <p className={`${cinzel.className} text-[0.6rem] font-semibold text-white tracking-[0.05em]`}>
+                        {event.time}
+                      </p>
+                    </div>
+                    <span className="text-2xl">{event.icon}</span>
+                  </div>
 
-              {/* Divider */}
-              <div className="w-[2px] flex-shrink-0 rounded-[2px]" style={{ background: `${day.accent}25` }} />
+                  {/* Divider */}
+                  <div className="w-[2px] flex-shrink-0 rounded-[2px]" style={{ background: `${day.accent}25` }} />
 
-              {/* Content */}
-              <div>
-                <h4 className={`${cormorant.className} text-[1.1rem] font-bold text-[#2c1810] mb-1`}>
-                  {event.title}
-                </h4>
-                <p className={`${lora.className} text-[0.82rem] leading-[1.6] text-[#7a5040]`}>
-                  {event.desc}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                  {/* Content */}
+                  <div>
+                    <h4 className={`${cormorant.className} text-[1.1rem] font-bold text-[#2c1810] mb-1`}>
+                      {event.title}
+                    </h4>
+                    <p className={`${lora.className} text-[0.82rem] leading-[1.6] text-[#7a5040]`}>
+                      {event.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+          </div>
+        </div>
+
+        {/* Evening Events Section */}
+        <div className="mb-4">
+          <div className="flex items-center gap-3 mb-3 mt-6">
+            <div className="h-6 w-1 rounded-full bg-indigo-500"></div>
+            <h4 className={`${cinzel.className} text-sm tracking-wider uppercase text-indigo-700`}>Evening Schedule</h4>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {day.events
+              .filter(e => e.time.includes("PM"))
+              .map((event, i) => (
+                <motion.div
+                  key={`${activeDay}-evening-${i}`}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.07 + 0.2 }}
+                  className="flex gap-4 rounded-xl p-4 bg-[rgba(255,252,248,0.9)]"
+                  style={{
+                    border: `1px solid ${day.accent}18`,
+                    boxShadow: "0 2px 10px rgba(44,24,16,0.05)",
+                  }}
+                >
+                  {/* Time */}
+                  <div className="flex-shrink-0 text-center min-w-[70px]">
+                    <div
+                      className="rounded-lg px-2 py-1 mb-1"
+                      style={{ background: day.accent }}
+                    >
+                      <p className={`${cinzel.className} text-[0.6rem] font-semibold text-white tracking-[0.05em]`}>
+                        {event.time}
+                      </p>
+                    </div>
+                    <span className="text-2xl">{event.icon}</span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-[2px] flex-shrink-0 rounded-[2px]" style={{ background: `${day.accent}25` }} />
+
+                  {/* Content */}
+                  <div>
+                    <h4 className={`${cormorant.className} text-[1.1rem] font-bold text-[#2c1810] mb-1`}>
+                      {event.title}
+                    </h4>
+                    <p className={`${lora.className} text-[0.82rem] leading-[1.6] text-[#7a5040]`}>
+                      {event.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+          </div>
         </div>
 
         {/* Venue note */}
@@ -216,7 +277,7 @@ export default function EventScheduleSection() {
           <div className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 bg-white/75 border border-[rgba(192,57,43,0.15)] backdrop-blur-[8px]">
             <span>📍</span>
             <p className={`${lora.className} text-[0.88rem] text-[#7a5040]`}>
-              <span className="font-semibold text-[#c0392b]">Ram Leela Ground, Noida</span> · Free Entry · All 3 Days
+              <span className="font-semibold text-[#c0392b]">Ram Leela Ground, Noida</span> · Free Entry · Morning 10AM - Evening 10:30PM
             </p>
           </div>
         </motion.div>

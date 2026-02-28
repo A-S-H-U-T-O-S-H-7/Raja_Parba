@@ -11,7 +11,6 @@ const lora = Lora({ subsets: ["latin"], weight: ["400", "500"], display: "swap" 
 const faqs = [
   { q: "Is entry free?", a: "Yes — all 3 days are completely free to attend. Some competitions may have nominal registration fees." },
   { q: "Who can participate in Raja Kumari?", a: "Girls of Odia heritage aged 16–30, residing in Delhi NCR. Open registrations from 1st June 2026." },
-  { q: "Who can join the Fancy Dress?", a: "Anyone! Open to all ages. Dress as an Odia deity, festival character, or folk tradition." },
   { q: "Are stalls open all 3 days?", a: "Yes. The Odia Stall Bazaar runs all 3 evenings from 5:00 PM to 11:00 PM." },
 ];
 

@@ -63,15 +63,15 @@ const attractions = [
     tagBg: "#edf6fa",
   },
   {
-    title: "Fancy Dress",
-    subtitle: "Dress as Odisha",
-    desc: "Come dressed as your favourite Odia deity, folk character, or festival tradition. Exciting prizes await.",
-    image: "/mandala.png",
-    icon: "🎭",
-    tag: "Competition",
-    accent: "#9a6b1a",
-    tagBg: "#fdf0e0",
-  },
+  title: "Folk Dance",
+  subtitle: "Celebrate with Rhythm",
+  desc: "Perform traditional Raja songs and Odissi or Sambalpuri dance. Winners will perform on the grand finale night.",
+  image: "/folk.jpg",
+  icon: "💃",
+  tag: "Performance",
+  accent: "#9f1239",
+  tagBg: "#ffe4e6",
+}
 ];
 
 function AttractionCard({ item, idx, isInView }) {

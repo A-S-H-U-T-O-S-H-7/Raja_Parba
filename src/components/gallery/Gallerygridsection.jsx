@@ -1,4 +1,3 @@
-// app/gallery/page.jsx (UPDATE)
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -9,7 +8,7 @@ import { collection, query, orderBy, getDocs, limit, startAfter } from 'firebase
 
 const PAGE_SIZE = 24;
 
-// Lightbox Component (keep as is)
+// Lightbox Component
 function Lightbox({ img, images, onClose, onNav }) {
   const idx = images.findIndex((i) => i.id === img.id);
 
@@ -35,13 +34,13 @@ function Lightbox({ img, images, onClose, onNav }) {
       {/* Close */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-lg border border-amber-400/40 text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 transition-colors"
+        className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-lg border border-amber-400/40 text-amber-400 bg-amber-400/10 hover:bg-amber-400/20 transition-colors z-[70]"
       >
         ✕
       </button>
 
       {/* Counter */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full px-4 py-1.5 bg-amber-400/10 border border-amber-400/25">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full px-4 py-1.5 bg-amber-400/10 border border-amber-400/25 z-[70]">
         <span className="text-amber-400 text-xs tracking-widest">
           {idx + 1} / {images.length}
         </span>
@@ -51,7 +50,7 @@ function Lightbox({ img, images, onClose, onNav }) {
       <button
         onClick={(e) => { e.stopPropagation(); if (idx > 0) onNav(idx - 1); }}
         disabled={idx === 0}
-        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-2xl border border-amber-400/30 text-amber-400 bg-amber-400/10 disabled:opacity-20 hover:bg-amber-400/20 transition-colors"
+        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-2xl border border-amber-400/30 text-amber-400 bg-amber-400/10 disabled:opacity-20 hover:bg-amber-400/20 transition-colors z-[70]"
       >
         ‹
       </button>
@@ -60,7 +59,7 @@ function Lightbox({ img, images, onClose, onNav }) {
       <button
         onClick={(e) => { e.stopPropagation(); if (idx < images.length - 1) onNav(idx + 1); }}
         disabled={idx === images.length - 1}
-        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-2xl border border-amber-400/30 text-amber-400 bg-amber-400/10 disabled:opacity-20 hover:bg-amber-400/20 transition-colors"
+        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center text-2xl border border-amber-400/30 text-amber-400 bg-amber-400/10 disabled:opacity-20 hover:bg-amber-400/20 transition-colors z-[70]"
       >
         ›
       </button>
@@ -71,12 +70,19 @@ function Lightbox({ img, images, onClose, onNav }) {
         initial={{ opacity: 0, scale: 0.93, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
-        className="relative max-w-2xl w-full"
+        className="relative max-w-2xl w-full z-50"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-white p-2.5 pb-14 shadow-2xl mx-auto max-w-xl">
           <div className="relative w-full bg-amber-50 overflow-hidden" style={{ height: "clamp(240px, 52vh, 500px)" }}>
-            <Image src={img.url} alt={img.title || 'Gallery image'} fill className="object-contain" />
+            <Image 
+              src={img.url} 
+              alt={img.title || 'Gallery image'} 
+              fill 
+              className="object-contain"
+              quality={90}
+              priority={true}
+            />
           </div>
           <div className="flex items-center justify-center h-14">
             <p className="text-sm italic text-amber-900/60 text-center" style={{ fontFamily: "'Lora', serif" }}>
@@ -89,7 +95,7 @@ function Lightbox({ img, images, onClose, onNav }) {
   );
 }
 
-// Gallery Card Component (keep as is)
+// Gallery Card Component
 function GalleryCard({ img, idx, onClick }) {
   return (
     <motion.div
@@ -100,12 +106,13 @@ function GalleryCard({ img, idx, onClick }) {
       onClick={() => onClick(img)}
     >
       <Image
-        src={img.url}
+        src={img.thumbnailUrl || img.url}
         alt={img.title || 'Gallery image'}
         fill
         loading="lazy"
         className="object-cover transition-transform duration-500 group-hover:scale-105"
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        quality={75}
       />
 
       {/* Overlay on hover */}
@@ -181,7 +188,7 @@ export default function GalleryPage() {
       });
       setHasMore(snapshot.docs.length === PAGE_SIZE);
       
-      // Get total count (you might want a separate count query)
+      // Get total count
       if (total === 0) {
         const countSnapshot = await getDocs(collection(db, 'gallery'));
         setTotal(countSnapshot.size);
@@ -216,7 +223,6 @@ export default function GalleryPage() {
 
   return (
     <main>
-      
       <section className="bg-amber-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-3 sm:px-5 py-8">
 

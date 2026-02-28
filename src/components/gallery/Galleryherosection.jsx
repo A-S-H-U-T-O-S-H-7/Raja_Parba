@@ -25,45 +25,86 @@ const satisfy = Satisfy({
 export default function GalleryHeroSection() {
   const frames = [
     {
-      src: "/path-to-image-1.jpg",
+      src: "/frame1.jpeg",
       rotate: "-rotate-6",
       x: "-translate-x-24",
       y: "-translate-y-6",
       z: "z-10",
-      caption: "Monsoon '94",
+      caption: "Raja doli",
       filter: "sepia",
     },
     {
-      src: "/path-to-image-2.jpg",
+      src: "/frame2.jpg",
       rotate: "rotate-3",
       x: "translate-x-12",
       y: "translate-y-4",
       z: "z-20",
-      caption: "Raja's smile",
+      caption: "Devine grace",
       filter: "grayscale",
     },
     {
-      src: "/path-to-image-3.jpg",
+      src: "/frame3.JPG",
       rotate: "-rotate-2",
       x: "-translate-x-8",
       y: "-translate-y-12",
       z: "z-30",
-      caption: "Evening chai",
+      caption: "Dance",
       filter: "sepia brightness-90",
     },
     {
-      src: "/path-to-image-4.jpg",
+      src: "/frame5.JPG",
       rotate: "rotate-8",
       x: "translate-x-20",
       y: "-translate-y-2",
       z: "z-40",
-      caption: "First rain",
+      caption: "Song & Music",
       filter: "contrast-125 saturate-50",
     },
   ];
 
   return (
     <section className="relative overflow-hidden py-10 px-4 text-center min-h-[430px] flex items-center">
+      {/* Golden Corner Designs */}
+      {/* Top-left */}
+      <div className="absolute top-0 left-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner2.png"
+          alt="corner design"
+          fill
+          className="object-contain"
+        />
+      </div>
+
+      {/* Top-right */}
+      <div className="absolute top-0 right-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner2.png"
+          alt="corner design"
+          fill
+          className="object-contain scale-x-[-1]"
+        />
+      </div>
+
+      {/* Bottom-left */}
+      <div className="absolute bottom-0 left-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner2.png"
+          alt="corner design"
+          fill
+          className="object-contain scale-y-[-1]"
+        />
+      </div>
+
+      {/* Bottom-right */}
+      <div className="absolute bottom-0 right-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+        <Image
+          src="/goldencorner2.png"
+          alt="corner design"
+          fill
+          className="object-contain scale-x-[-1] scale-y-[-1]"
+        />
+      </div>
+
       {/* Deep Monsoon Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0f0b14] via-[#1a0f1d] to-[#140b18]" />
 
@@ -184,12 +225,21 @@ export default function GalleryHeroSection() {
                     
                     {/* Image Container with Vintage Filters */}
                     <div className={`relative w-full h-28 overflow-hidden ${f.filter}`}>
-                      {/* Replace with your actual Image component */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-amber-800/20 to-amber-600/20" />
+                      {/* ACTUAL IMAGE - FIXED */}
+                      <Image
+                        src={f.src}
+                        alt={f.caption}
+                        fill
+                        className="object-cover"
+                        sizes="160px"
+                      />
+                      
+                      {/* Vintage Overlays */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-800/20 to-amber-600/20 mix-blend-overlay" />
                       
                       {/* Vintage Light Leak Animation */}
                       <motion.div 
-                        className="absolute inset-0 bg-gradient-to-tr from-amber-400/0 via-amber-400/0 to-amber-400/30"
+                        className="absolute inset-0 bg-gradient-to-tr from-amber-400/0 via-amber-400/0 to-amber-400/30 mix-blend-overlay"
                         animate={{
                           opacity: [0, 0.4, 0],
                         }}
