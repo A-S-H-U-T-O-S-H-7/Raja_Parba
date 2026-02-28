@@ -93,15 +93,21 @@ export async function POST(request) {
     }
 
     const data = await response.json();
-    console.log('✅ CCAvenue API response:', {
-      status: data.status,
-      hasEncRequest: !!data.encRequest,
-      hasAccessCode: !!data.access_code,
-      errors: data.errors || 'none'
+    const sanitizedData = {
+      ...data,
+      encRequest: typeof data?.encRequest === 'string' ? data.encRequest.trim() : data?.encRequest,
+      access_code: typeof data?.access_code === 'string' ? data.access_code.trim() : data?.access_code
+    };
+
+    console.log('CCAvenue API response:', {
+      status: sanitizedData.status,
+      hasEncRequest: !!sanitizedData.encRequest,
+      hasAccessCode: !!sanitizedData.access_code,
+      errors: sanitizedData.errors || 'none'
     });
 
     // Return the response from CCAvenue API
-    return NextResponse.json(data);
+    return NextResponse.json(sanitizedData);
 
   } catch (error) {
     console.error('❌ CCAvenue proxy error:', error);
@@ -121,3 +127,4 @@ export async function GET() {
     message: 'Method not allowed. Only POST requests are accepted.' 
   }, { status: 405 });
 }
+

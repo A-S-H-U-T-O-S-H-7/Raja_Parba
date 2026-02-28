@@ -210,6 +210,9 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   
   const submitToCCAvenue = (encRequest, accessCode) => {
     try {
+      const sanitizedEncRequest = typeof encRequest === 'string' ? encRequest.trim() : encRequest;
+      const sanitizedAccessCode = typeof accessCode === 'string' ? accessCode.trim() : accessCode;
+
       // Create form dynamically - same pattern as existing PaymentProcess.jsx
       const form = document.createElement('form');
       form.method = 'POST';
@@ -221,14 +224,14 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
       const encInput = document.createElement('input');
       encInput.type = 'hidden';
       encInput.name = 'encRequest';
-      encInput.value = encRequest;
+      encInput.value = sanitizedEncRequest;
       form.appendChild(encInput);
       
       // Add access code input
       const accInput = document.createElement('input');
       accInput.type = 'hidden';
       accInput.name = 'access_code';
-      accInput.value = accessCode;
+      accInput.value = sanitizedAccessCode;
       form.appendChild(accInput);
       
       // Append form to body and submit
