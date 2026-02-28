@@ -9,13 +9,15 @@ function getBaseUrl(request) {
   if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
 
   if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
-  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://donate.svsamiti.com';
+  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://rajaparba.svsamiti.com';
 }
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { order_id, purpose, amount, name, email, phone, address } = body;
+    const normalizedPurpose = (purpose || '').trim().toLowerCase();
+    const upstreamPurpose = normalizedPurpose === 'donation' ? 'Donation' : purpose.trim();
 
     // Comprehensive validation for CCAvenue API requirements
     const errors = [];
@@ -57,7 +59,7 @@ export async function POST(request) {
     // Prepare data for CCAvenue API with proper formatting
     const paymentData = {
       order_id: order_id.trim(),
-      purpose: purpose.trim(),
+      purpose: upstreamPurpose,
       amount: parseFloat(amount).toFixed(2), // Ensure decimal format
       name: name.trim(),
       email: email.trim().toLowerCase(),

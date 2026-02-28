@@ -11,7 +11,7 @@ function getBaseUrl(request) {
   if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
 
   if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
-  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://donate.svsamiti.com';
+  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://rajaparba.svsamiti.com';
 }
 
 export async function POST(request) {
