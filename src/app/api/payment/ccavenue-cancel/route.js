@@ -1,18 +1,6 @@
 // Next.js App Router API route to handle CCAvenue payment cancellations
 import { NextResponse } from 'next/server';
 
-function getBaseUrl(request) {
-  const origin = request.headers.get('origin');
-  if (origin) return origin;
-
-  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
-  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
-  if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
-
-  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
-  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://rajaparba.svsamiti.com';
-}
-
 export async function POST(request) {
   try {
     let encResp;
@@ -57,7 +45,7 @@ export async function POST(request) {
     });
 
     // Send encrypted response to CCAvenue response handler
-    const response = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
+    const response = await fetch('https://svsamiti.com/havan-booking/ccavResponseHandler.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -141,7 +129,7 @@ export async function POST(request) {
       }
       
       // Redirect to payment success page with cancelled status
-      const redirectUrl = new URL('/payment/success', getBaseUrl(request));
+      const redirectUrl = new URL('/payment/success', 'https://rajaparba.svsamiti.com');
       redirectUrl.searchParams.set('order_id', paymentInfo.order_id || 'unknown');
       redirectUrl.searchParams.set('status', 'cancelled');
       redirectUrl.searchParams.set('message', 'Payment was cancelled by user. Seats have been released.');
@@ -175,7 +163,7 @@ export async function GET(request) {
   
   if (!encResp) {
     // Redirect to general cancellation page
-    return NextResponse.redirect(new URL('/payment/success?status=cancelled&message=Payment%20was%20cancelled', getBaseUrl(request)));
+    return NextResponse.redirect(new URL('/payment/success?status=cancelled&message=Payment%20was%20cancelled', 'https://rajaparba.svsamiti.com'));
   }
   
   // Process the encrypted response

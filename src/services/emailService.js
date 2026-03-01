@@ -353,6 +353,170 @@ export const sendSponsorConfirmationEmail = async (sponsorData) => {
   }
 };
 
+/**
+ * Send Raja Kumari confirmation email
+ * @param {Object} candidateData - Candidate information
+ * @returns {Promise<Object>} - API response
+ */
+export const sendRajaKumariConfirmationEmail = async (candidateData) => {
+  try {
+    const formData = new FormData();
+    formData.append('name', candidateData.name || '');
+    formData.append('email', candidateData.email || '');
+    formData.append('registrationId', candidateData.registrationId || candidateData.id || '');
+    formData.append('eventDate', 'Raja Parba 2026');
+    formData.append('purpose', 'Raja Kumari Registration');
+
+    const response = await fetch('https://svsamiti.com/havan-booking/general-email.php', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'User-Agent': 'Havan-Booking-System/1.0'
+      }
+    });
+
+    const responseText = await response.text();
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      return { success: false, error: 'Invalid response from Raja Kumari email service', rawResponse: responseText };
+    }
+
+    if (result.status) {
+      return { success: true, message: 'Raja Kumari confirmation email sent', data: result };
+    } else {
+      return { success: false, error: 'Raja Kumari email service error: ' + (result.errors ? result.errors.join(', ') : 'Unknown error'), data: result };
+    }
+  } catch (error) {
+    return { success: false, error: 'Failed to send Raja Kumari email: ' + error.message };
+  }
+};
+
+/**
+ * Send Raja Queen confirmation email
+ * @param {Object} candidateData - Candidate information
+ * @returns {Promise<Object>} - API response
+ */
+export const sendRajaQueenConfirmationEmail = async (candidateData) => {
+  try {
+    const formData = new FormData();
+    formData.append('name', candidateData.name || '');
+    formData.append('email', candidateData.email || '');
+    formData.append('registrationId', candidateData.registrationId || candidateData.id || '');
+    formData.append('eventDate', 'Raja Parba 2026');
+    formData.append('purpose', 'Raja Queen Registration');
+
+    const response = await fetch('https://svsamiti.com/havan-booking/general-email.php', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'User-Agent': 'Havan-Booking-System/1.0'
+      }
+    });
+
+    const responseText = await response.text();
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      return { success: false, error: 'Invalid response from Raja Queen email service', rawResponse: responseText };
+    }
+
+    if (result.status) {
+      return { success: true, message: 'Raja Queen confirmation email sent', data: result };
+    } else {
+      return { success: false, error: 'Raja Queen email service error: ' + (result.errors ? result.errors.join(', ') : 'Unknown error'), data: result };
+    }
+  } catch (error) {
+    return { success: false, error: 'Failed to send Raja Queen email: ' + error.message };
+  }
+};
+
+/**
+ * Send Drawing confirmation email
+ * @param {Object} candidateData - Candidate information
+ * @returns {Promise<Object>} - API response
+ */
+export const sendDrawingConfirmationEmail = async (candidateData) => {
+  try {
+    const formData = new FormData();
+    formData.append('name', candidateData.name || '');
+    formData.append('email', candidateData.email || '');
+    formData.append('registrationId', candidateData.registrationId || candidateData.id || '');
+    formData.append('eventDate', 'Raja Parba 2026');
+    formData.append('purpose', 'Drawing Competition Registration');
+
+    const response = await fetch('https://svsamiti.com/havan-booking/general-email.php', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'User-Agent': 'Havan-Booking-System/1.0'
+      }
+    });
+
+    const responseText = await response.text();
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      return { success: false, error: 'Invalid response from Drawing email service', rawResponse: responseText };
+    }
+
+    if (result.status) {
+      return { success: true, message: 'Drawing confirmation email sent', data: result };
+    } else {
+      return { success: false, error: 'Drawing email service error: ' + (result.errors ? result.errors.join(', ') : 'Unknown error'), data: result };
+    }
+  } catch (error) {
+    return { success: false, error: 'Failed to send Drawing email: ' + error.message };
+  }
+};
+
+/**
+ * Send Award confirmation email
+ * @param {Object} candidateData - Candidate information
+ * @returns {Promise<Object>} - API response
+ */
+export const sendAwardConfirmationEmail = async (candidateData) => {
+  try {
+    const formData = new FormData();
+    formData.append('name', candidateData.name || '');
+    formData.append('email', candidateData.email || '');
+    formData.append('registrationId', candidateData.registrationId || candidateData.id || '');
+    formData.append('eventDate', 'Raja Parba 2026');
+    formData.append('purpose', 'Award Nomination Registration');
+
+    const response = await fetch('https://svsamiti.com/havan-booking/general-email.php', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'User-Agent': 'Havan-Booking-System/1.0'
+      }
+    });
+
+    const responseText = await response.text();
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      return { success: false, error: 'Invalid response from Award email service', rawResponse: responseText };
+    }
+
+    if (result.status) {
+      return { success: true, message: 'Award confirmation email sent', data: result };
+    } else {
+      return { success: false, error: 'Award email service error: ' + (result.errors ? result.errors.join(', ') : 'Unknown error'), data: result };
+    }
+  } catch (error) {
+    return { success: false, error: 'Failed to send Award email: ' + error.message };
+  }
+};
+
 export const sendBookingConfirmationEmail = async (bookingData, bookingType) => {
   try {
     // Prepare email data based on booking type

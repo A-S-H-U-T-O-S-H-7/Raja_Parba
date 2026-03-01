@@ -120,38 +120,38 @@ export default function Header() {
                 </div>
 
                 {/* Divider — only on desktop */}
-                <div className="hidden lg:flex flex-col items-center self-stretch py-3">
+                <div className="flex flex-col items-center self-stretch py-3">
                   <div className="w-px flex-1 bg-gradient-to-b from-transparent via-amber-300 to-transparent"></div>
                 </div>
 
-                {/* Parent Org Logo — desktop only */}
-                <a
-                  href="https://svsamiti.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden lg:flex items-center gap-2 group pl-1"
-                  title="Visit Samudayik Vikas Samiti"
-                >
-                  <div className="relative w-11 h-11 rounded-full overflow-hidden border border-amber-200 shadow-sm group-hover:shadow-md group-hover:border-amber-400 transition-all duration-300 group-hover:scale-105 flex-shrink-0">
-                    <Image
-                      src="/logo.png"
-                      alt="Samudayik Vikas Samiti"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-[11px] font-bold text-amber-800 group-hover:text-amber-900 transition-colors whitespace-nowrap">
-                      Samudayik Vikas
-                    </span>
-                    <span className="text-[11px] font-bold text-amber-800 group-hover:text-amber-900 transition-colors whitespace-nowrap">
-                      Samiti
-                    </span>
-                    <span className="text-[10px] text-amber-500 group-hover:text-amber-600 transition-colors">
-                      svsamiti.com
-                    </span>
-                  </div>
-                </a>
+                {/* Parent Org Logo — visible on both desktop and mobile in header */}
+<a
+  href="https://svsamiti.com"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center gap-2 group "
+  title="Visit Samudayik Vikas Samiti"
+>
+  <div className="relative w-9 h-9 md:w-11 md:h-11 rounded-full overflow-hidden border border-amber-200 shadow-sm group-hover:shadow-md group-hover:border-amber-400 transition-all duration-300 group-hover:scale-105 flex-shrink-0">
+    <Image
+      src="/logo.png"
+      alt="Samudayik Vikas Samiti"
+      fill
+      className="object-contain"
+    />
+  </div>
+  <div className="flex flex-col leading-tight">
+    <span className="text-[8px] xs:text-[10px] md:text-[11px] font-bold text-amber-800 group-hover:text-amber-900 transition-colors whitespace-nowrap">
+      Samudayik Vikas
+    </span>
+    <span className="text-[8px] xs:text-[10px] md:text-[11px] font-bold text-amber-800 group-hover:text-amber-900 transition-colors whitespace-nowrap">
+      Samiti
+    </span>
+    <span className="text-[6px] xs:text-[8px] md:text-[10px] text-amber-500 group-hover:text-amber-600 transition-colors hidden lg:block">
+      svsamiti.com
+    </span>
+  </div>
+</a>
               </div>
 
               {/* Desktop Navigation */}
@@ -223,111 +223,96 @@ export default function Header() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden p-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                className="lg:hidden z-40 p-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                 aria-label="Open menu"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-6 h-6 " />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Sidebar */}
+        {/* Mobile Sidebar - with reduced height and removed svsamiti */}
         <div className={`fixed inset-0 z-[100] transition-opacity duration-300 lg:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
           <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsMobileMenuOpen(false)} />
 
-          <div ref={sidebarRef} className={`absolute top-0 left-0 h-full w-80 bg-gradient-to-b from-amber-50 via-orange-50 to-amber-100 shadow-2xl transform transition-transform duration-300 ease-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div ref={sidebarRef} className={`absolute top-0 left-0 h-full w-80 bg-gradient-to-b from-amber-50 via-orange-50 to-amber-100 shadow-2xl transform transition-transform duration-300 ease-out overflow-y-auto ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             
             {/* Sidebar Header */}
-            <div className="relative h-32 bg-gradient-to-r from-amber-600 to-orange-600 overflow-hidden">
+            <div className="relative h-28 bg-gradient-to-r from-amber-600 to-orange-600 overflow-hidden">
               <div className="absolute inset-0 opacity-20">
                 <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
                 <div className="absolute bottom-0 right-0 w-32 h-32 bg-white rounded-full translate-x-16 translate-y-16"></div>
               </div>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors">
-                <X className="w-5 h-5" />
+              <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors">
+                <X className="w-4 h-4" />
               </button>
-              <div className="absolute bottom-4 left-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                    <span className="text-xl text-white font-bold">🎪</span>
+              <div className="absolute bottom-3 left-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <span className="text-lg text-white font-bold">🎪</span>
                   </div>
                   <div>
-                    <p className="text-white font-bold text-lg">Raja Mahotsav</p>
-                    <p className="text-amber-100 text-sm">Festival Menu</p>
+                    <p className="text-white font-bold text-base">Raja Mahotsav</p>
+                    <p className="text-amber-100 text-xs">Festival Menu</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Navigation Links */}
-            <nav className="p-6">
-              <div className="space-y-2">
-                <Link href="/" className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🏠</span>Home
+            {/* Navigation Links - reduced spacing */}
+            <nav className="p-4">
+              <div className="space-y-1">
+                <Link href="/" className="flex items-center gap-3 px-3 py-2.5 text-amber-900 hover:bg-amber-100/80 font-semibold text-base rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="w-7 h-7 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700 text-sm">🏠</span>Home
                 </Link>
-                <Link href="/about-raja" className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">📖</span>About Raja
+                <Link href="/about-raja" className="flex items-center gap-3 px-3 py-2.5 text-amber-900 hover:bg-amber-100/80 font-semibold text-base rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="w-7 h-7 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700 text-sm">📖</span>About Raja
                 </Link>
-                <Link href="/events" className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🎉</span>Events
+                <Link href="/events" className="flex items-center gap-3 px-3 py-2.5 text-amber-900 hover:bg-amber-100/80 font-semibold text-base rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="w-7 h-7 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700 text-sm">🎉</span>Events
                 </Link>
-                <Link href="/gallery" className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🖼️</span>Gallery
+                <Link href="/gallery" className="flex items-center gap-3 px-3 py-2.5 text-amber-900 hover:bg-amber-100/80 font-semibold text-base rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="w-7 h-7 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700 text-sm">🖼️</span>Gallery
                 </Link>
-                <Link href="/guests" className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🌟</span>Our Guests
+                <Link href="/guests" className="flex items-center gap-3 px-3 py-2.5 text-amber-900 hover:bg-amber-100/80 font-semibold text-base rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="w-7 h-7 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700 text-sm">🌟</span>Our Guests
                 </Link>
-                <Link href="/donate" className="flex items-center gap-3 px-4 py-3 text-amber-900 hover:bg-amber-100/80 font-semibold text-lg rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
-                  <span className="w-8 h-8 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700">🌟</span>Donate
+                <Link href="/donate" className="flex items-center gap-3 px-3 py-2.5 text-amber-900 hover:bg-amber-100/80 font-semibold text-base rounded-xl transition-all duration-200 group" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="w-7 h-7 bg-amber-200 group-hover:bg-amber-300 rounded-lg flex items-center justify-center text-amber-700 text-sm">❤️</span>Donate
                 </Link>
               </div>
 
-              <div className="my-6 border-t border-amber-200"></div>
+              <div className="my-3 border-t border-amber-200"></div>
 
-              {/* Mobile CTA Buttons */}
-              <div className="space-y-3 px-4">
+              {/* Mobile CTA Buttons - reduced spacing */}
+              <div className="space-y-2 px-3">
                 {user ? (
                   <>
-                    <Link href="/profile" className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300" onClick={() => setIsMobileMenuOpen(false)}>
-                      <User className="w-5 h-5" />My Profile
+                    <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-sm" onClick={() => setIsMobileMenuOpen(false)}>
+                      <User className="w-4 h-4" />My Profile
                     </Link>
-                    <Link href="/tickets" className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Ticket className="w-5 h-5" />Get Free Entry Pass
+                    <Link href="/tickets" className="flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-sm" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Ticket className="w-4 h-4" />Get Free Entry Pass
                     </Link>
-                    <button onClick={() => { setIsMobileMenuOpen(false); handleLogoutClick(); }} className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                      <LogOut className="w-5 h-5" />Sign Out
+                    <button onClick={() => { setIsMobileMenuOpen(false); handleLogoutClick(); }} className="w-full flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-sm">
+                      <LogOut className="w-4 h-4" />Sign Out
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link href="/register" className="block px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-center rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300" onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
-                    <button onClick={() => { setIsMobileMenuOpen(false); handleGetTickets(); }} className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-center rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">Get Free Entry Pass</button>
+                    <Link href="/register" className="block px-3 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-center rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-sm" onClick={() => setIsMobileMenuOpen(false)}>Register</Link>
+                    <button onClick={() => { setIsMobileMenuOpen(false); handleGetTickets(); }} className="w-full px-3 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-center rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-sm">Get Free Entry Pass</button>
                   </>
                 )}
               </div>
             </nav>
 
-            {/* Sidebar Footer — with parent org logo */}
-            <div className="absolute bottom-0 left-0 right-0 border-t border-amber-200 bg-amber-50/50">
-              {/* Parent org branding */}
-              <a
-                href="https://svsamiti.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-6 py-3 hover:bg-amber-100/60 transition-colors group"
-              >
-                <div className="relative w-9 h-9 rounded-full overflow-hidden border border-amber-200 shadow-sm group-hover:shadow-md flex-shrink-0">
-                  <Image src="/logo.png" alt="Samudayik Vikas Samiti" fill className="object-contain" />
-                </div>
-                <div className="flex flex-col leading-tight">
-                  <span className="text-xs font-semibold text-amber-800">Samudayik Vikas Samiti</span>
-                  <span className="text-[10px] text-amber-500">svsamiti.com ↗</span>
-                </div>
-              </a>
-              <div className="px-6 pb-4 text-center">
-                <p className="text-sm text-amber-700">© 2024 Raja Mahotsav</p>
-                <p className="text-xs text-amber-600 mt-0.5">Celebrate the spirit of Raja</p>
+            {/* Sidebar Footer - simplified without svsamiti */}
+            <div className="sticky bottom-0 left-0 right-0 border-t border-amber-200 bg-amber-50/90 backdrop-blur-sm mt-2">
+              <div className="px-4 py-3 text-center">
+                <p className="text-xs text-amber-700">© 2024 Raja Mahotsav</p>
+                <p className="text-[10px] text-amber-600 mt-0.5">Celebrate the spirit of Raja</p>
               </div>
             </div>
           </div>

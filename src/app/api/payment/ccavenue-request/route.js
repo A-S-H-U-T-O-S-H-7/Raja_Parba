@@ -1,23 +1,12 @@
+// Next.js App Router API route to proxy CCAvenue requests and avoid CORS issues
 import { NextResponse } from 'next/server';
-
-function getBaseUrl(request) {
-  const origin = request.headers.get('origin');
-  if (origin) return origin;
-
-  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
-  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
-  if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
-
-  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
-  return process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://rajaparba.svsamiti.com';
-}
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { order_id, purpose, amount, name, email, phone, address } = body;
-    const normalizedPurpose = (purpose || '').trim().toLowerCase();
-    const upstreamPurpose = normalizedPurpose === 'donation' ? 'Donation' : purpose.trim();
+    const purposeNormalized = (purpose || '').trim().toLowerCase();
+    const appBaseUrl = 'https://rajaparba.svsamiti.com';
 
     // Comprehensive validation for CCAvenue API requirements
     const errors = [];
@@ -54,12 +43,13 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const baseUrl = getBaseUrl(request);
+    // Get origin from headers
+    const origin = request.headers.get('origin') || 'http://localhost:3000';
 
     // Prepare data for CCAvenue API with proper formatting
     const paymentData = {
       order_id: order_id.trim(),
-      purpose: upstreamPurpose,
+      purpose: purposeNormalized === 'donation' ? 'Donation' : purpose.trim(),
       amount: parseFloat(amount).toFixed(2), // Ensure decimal format
       name: name.trim(),
       email: email.trim().toLowerCase(),
@@ -67,8 +57,8 @@ export async function POST(request) {
       address: (address || 'Delhi, India').trim(),
       donor_type: body.donor_type || 'indian',
       country: body.country || 'india',
-      redirect_url: `${baseUrl}/api/payment/ccavenue-response`,
-      cancel_url: `${baseUrl}/api/payment/ccavenue-cancel`
+      redirect_url: `${appBaseUrl}/api/payment/ccavenue-response`,
+      cancel_url: `${appBaseUrl}/api/payment/ccavenue-cancel`
     };
 
     console.log('🚀 Proxying payment request to CCAvenue:', {
@@ -93,21 +83,15 @@ export async function POST(request) {
     }
 
     const data = await response.json();
-    const sanitizedData = {
-      ...data,
-      encRequest: typeof data?.encRequest === 'string' ? data.encRequest.trim() : data?.encRequest,
-      access_code: typeof data?.access_code === 'string' ? data.access_code.trim() : data?.access_code
-    };
-
-    console.log('CCAvenue API response:', {
-      status: sanitizedData.status,
-      hasEncRequest: !!sanitizedData.encRequest,
-      hasAccessCode: !!sanitizedData.access_code,
-      errors: sanitizedData.errors || 'none'
+    console.log('✅ CCAvenue API response:', {
+      status: data.status,
+      hasEncRequest: !!data.encRequest,
+      hasAccessCode: !!data.access_code,
+      errors: data.errors || 'none'
     });
 
     // Return the response from CCAvenue API
-    return NextResponse.json(sanitizedData);
+    return NextResponse.json(data);
 
   } catch (error) {
     console.error('❌ CCAvenue proxy error:', error);
@@ -127,4 +111,3 @@ export async function GET() {
     message: 'Method not allowed. Only POST requests are accepted.' 
   }, { status: 405 });
 }
-

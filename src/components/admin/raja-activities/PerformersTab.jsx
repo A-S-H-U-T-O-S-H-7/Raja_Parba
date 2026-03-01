@@ -97,6 +97,11 @@ export default function PerformersTab() {
                     <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                       Track: {performer.trackMusicName}
                     </div>
+                    {performer.trackDuration && (
+                      <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Duration: {performer.trackDuration}
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3">

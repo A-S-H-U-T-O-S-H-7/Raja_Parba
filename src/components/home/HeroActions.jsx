@@ -6,10 +6,6 @@ import { motion } from "framer-motion";
 import { Heart, Star, Users, Mic, Calendar, Sparkles, Award, Crown, Sparkle } from 'lucide-react';
 import { Playfair_Display, Cinzel } from 'next/font/google';
 import ShowModal from "./ShowModal";
-import { createSponsorApplication, createPerformerApplication } from '@/services/sponsorPerformerService';
-import SponsorModal from "../sponsor-perfomer/SponsorModal";
-import PerformerModal from "../sponsor-perfomer/PerformerModal";
-import ToastNotification from "../sponsor-perfomer/ToastNotification";
 import PortalModal from "./PortalModal";
 
 const playfair = Playfair_Display({ 
@@ -30,38 +26,6 @@ function HeroActions({ user }) {
   const [pendingAction, setPendingAction] = useState(null);
   const [isScrolling, setIsScrolling] = useState(false);
   
-  // Sponsor Modal State
-  const [showSponsorModal, setShowSponsorModal] = useState(false);
-  const [sponsorForm, setSponsorForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    organization: '',
-    address: '',
-    city: ''
-  });
-  
-  // Performer Modal State
-  const [showPerformerModal, setShowPerformerModal] = useState(false);
-  const [performerForm, setPerformerForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    gender: '',
-    performanceCategory: '',
-    customPerformanceType: '',
-    performanceType: '',
-    participationType: '',
-    groupName: '',
-    memberCount: '',
-    memberNames: [],
-    trackMusicName: ''
-  });
-  
-  // Toast State
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
 
   // Handle scroll to optimize animations
   useEffect(() => {
@@ -79,211 +43,148 @@ function HeroActions({ user }) {
     };
   }, []);
 
-  const showToastMessage = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 5000);
-  };
-
   const openShowModal = () => setIsShowModalOpen(true);
   const closeShowModal = () => setIsShowModalOpen(false);
   
-  const openSponsorModal = () => setShowSponsorModal(true);
-  const openPerformerModal = () => setShowPerformerModal(true);
 
   // Handle action for non-authenticated users
   const handleAction = (action) => {
     if (!user) {
+      if (action === 'sponsor') {
+        window.location.href = '/sponsor';
+        return;
+      }
+      if (action === 'performer') {
+        window.location.href = '/performer';
+        return;
+      }
+      if (action === 'raja-queen') {
+        window.location.href = '/raja-queen';
+        return;
+      }
+      if (action === 'drawing') {
+        window.location.href = '/drawing';
+        return;
+      }
+      if (action === 'awards') {
+        window.location.href = '/award';
+        return;
+      }
       setPendingAction(action);
       setShowLoginPrompt(true);
     } else {
-      if (action === 'sponsor') openSponsorModal();
-      else if (action === 'performer') openPerformerModal();
+      if (action === 'sponsor') window.location.href = '/sponsor';
+      else if (action === 'performer') window.location.href = '/performer';
+      else if (action === 'raja-queen') window.location.href = '/raja-queen';
+      else if (action === 'drawing') window.location.href = '/drawing';
+      else if (action === 'awards') window.location.href = '/award';
       else if (action === 'show') window.location.href = '/show';
       else if (action === 'stall') window.location.href = '/stall';
-      else if (action === 'awards') window.location.href = '/awards';
       else if (action === 'kumari') window.location.href = '/raja-kumari';
       else if (action === 'fancy-dress') window.location.href = '/fancy-dress';
     }
   };
 
-  const handleSponsorSubmit = async () => {
-    if (sponsorForm.name && sponsorForm.email && sponsorForm.phone && sponsorForm.organization && sponsorForm.address && sponsorForm.city) {
-      try {
-        const result = await createSponsorApplication(sponsorForm);
-        
-        // Send confirmation email
-        try {
-          const { sendSponsorConfirmationEmail } = await import('@/services/emailService');
-          const emailResult = await sendSponsorConfirmationEmail(sponsorForm);
-          console.log('📧 Sponsor email sent:', emailResult.success ? 'Success' : emailResult.error);
-        } catch (emailError) {
-          console.error('❌ Failed to send sponsor email:', emailError);
-        }
-        
-        showToastMessage("Thank you for your interest in sponsoring! Our partnership team will reach out to you within 24 hours to discuss exciting collaboration opportunities.");
-        setSponsorForm({ name: '', email: '', phone: '', organization: '', address: '', city: '' });
-        setShowSponsorModal(false);
-      } catch (error) {
-        console.error('Error submitting sponsor application:', error);
-        showToastMessage("Sorry, there was an error submitting your application. Please try again later.");
-      }
-    }
-  };
-
-  const handlePerformerSubmit = async () => {
-    const resolvedPerformanceType =
-      performerForm.performanceCategory === 'Others'
-        ? (performerForm.customPerformanceType || '').trim()
-        : (performerForm.performanceCategory || '').trim();
-
-    const isGroup = performerForm.participationType === 'Group';
-    const memberCount = Number(performerForm.memberCount || 0);
-
-    const isFormValid =
-      (performerForm.name || '').trim() &&
-      (performerForm.email || '').trim() &&
-      (performerForm.phone || '').trim() &&
-      (performerForm.address || '').trim() &&
-      (performerForm.gender || '').trim() &&
-      (performerForm.participationType || '').trim() &&
-      (performerForm.trackMusicName || '').trim() &&
-      resolvedPerformanceType &&
-      (!isGroup || ((performerForm.groupName || '').trim() && memberCount > 0));
-
-    if (isFormValid) {
-      const performerPayload = {
-        ...performerForm,
-        performanceType: resolvedPerformanceType,
-        groupName: isGroup ? performerForm.groupName : '',
-        memberCount: isGroup ? String(memberCount) : '',
-        memberNames: isGroup ? (performerForm.memberNames || []) : [],
-      };
-
-      try {
-        const result = await createPerformerApplication(performerPayload);
-        
-        // Send confirmation email
-        try {
-          const { sendPerformerConfirmationEmail } = await import('@/services/emailService');
-          const emailResult = await sendPerformerConfirmationEmail(performerPayload);
-          console.log('📧 Performer email sent:', emailResult.success ? 'Success' : emailResult.error);
-        } catch (emailError) {
-          console.error('❌ Failed to send performer email:', emailError);
-        }
-        
-        showToastMessage("We're thrilled about your performance application! Our talent acquisition team will contact you soon to discuss your artistic journey with us.");
-        setPerformerForm({
-          name: '',
-          email: '',
-          phone: '',
-          address: '',
-          gender: '',
-          performanceCategory: '',
-          customPerformanceType: '',
-          performanceType: '',
-          participationType: '',
-          groupName: '',
-          memberCount: '',
-          memberNames: [],
-          trackMusicName: ''
-        });
-        setShowPerformerModal(false);
-      } catch (error) {
-        console.error('Error submitting performer application:', error);
-        showToastMessage("Sorry, there was an error submitting your application. Please try again later.");
-      }
-    }
-  };
-
   // Cards with static classes (no dynamic template literals for Tailwind)
   const cards = [
-    {
-      id: 'sponsor',
-      title: 'Be a Sponsor',
-      description: 'Partner with us',
-      icon: Star,
-      gradient: 'from-amber-500 to-orange-500',
-      lightGradient: 'from-amber-50 to-orange-50',
-      borderClass: 'border-amber-200/50',
-      viaColor: 'via-amber-500',
-      image: '/sponser.png',
-      action: 'sponsor'
-    },
-    {
-      id: 'performer',
-      title: 'Join as Performer',
-      description: 'Showcase talent',
-      icon: Mic,
-      gradient: 'from-fuchsia-500 to-purple-500',
-      lightGradient: 'from-fuchsia-50 to-purple-50',
-      borderClass: 'border-purple-200/50',
-      viaColor: 'via-purple-500',
-      image: '/performer.png',
-      action: 'performer'
-    },
-    {
-      id: 'show',
-      title: 'Show Booking',
-      description: 'Book tickets now',
-      icon: Calendar,
-      gradient: 'from-blue-500 to-cyan-500',
-      lightGradient: 'from-blue-50 to-cyan-50',
-      borderClass: 'border-blue-200/50',
-      viaColor: 'via-blue-500',
-      image: '/show.png',
-      action: 'show'
-    },
-    {
-      id: 'stall',
-      title: 'Stall Booking',
-      description: 'Reserve your stall',
-      icon: Heart,
-      gradient: 'from-purple-500 to-pink-500',
-      lightGradient: 'from-purple-50 to-pink-50',
-      borderClass: 'border-pink-200/50',
-      viaColor: 'via-pink-500',
-      image: '/stall.png',
-      action: 'stall',
-      isLink: true
-    },
-    {
-      id: 'awards',
-      title: 'Awards Nomination',
-      description: 'Nominate yourself',
-      icon: Award,
-      gradient: 'from-yellow-500 to-amber-500',
-      lightGradient: 'from-yellow-50 to-amber-50',
-      borderClass: 'border-yellow-200/50',
-      viaColor: 'via-yellow-500',
-      image: '/awards.png',
-      action: 'awards'
-    },
-    {
-      id: 'kumari',
-      title: 'Raja Kumari',
-      description: 'Royal contest',
-      icon: Crown,
-      gradient: 'from-rose-500 to-red-500',
-      lightGradient: 'from-rose-50 to-red-50',
-      borderClass: 'border-rose-200/50',
-      viaColor: 'via-rose-500',
-      image: '/rajaqueen.png',
-      action: 'kumari'
-    },
-    {
-      id: 'fancy-dress',
-      title: 'Fancy Dress',
-      description: 'Show your style',
-      icon: Sparkle,
-      gradient: 'from-emerald-500 to-teal-500',
-      lightGradient: 'from-emerald-50 to-teal-50',
-      borderClass: 'border-emerald-200/50',
-      viaColor: 'via-emerald-500',
-      image: '/fancy.png',
-      action: 'fancy-dress'
-    }
-  ];
+  {
+    id: 'sponsor',
+    title: 'Be a Sponsor',
+    description: 'Partner with us',
+    icon: Star,
+    gradient: 'from-amber-500 to-orange-500',
+    lightGradient: 'from-amber-50 to-orange-50',
+    borderClass: 'border-amber-200/50',
+    viaColor: 'via-amber-500',
+    image: '/sponser.png',
+    action: 'sponsor'
+  },
+  {
+    id: 'performer',
+    title: 'Join as Performer',
+    description: 'Showcase talent',
+    icon: Mic,
+    gradient: 'from-fuchsia-500 to-purple-500',
+    lightGradient: 'from-fuchsia-50 to-purple-50',
+    borderClass: 'border-purple-200/50',
+    viaColor: 'via-purple-500',
+    image: '/performer.png',
+    action: 'performer'
+  },
+  {
+    id: 'show',
+    title: 'Show Booking',
+    description: 'Book tickets now',
+    icon: Calendar,
+    gradient: 'from-blue-500 to-cyan-500',
+    lightGradient: 'from-blue-50 to-cyan-50',
+    borderClass: 'border-blue-200/50',
+    viaColor: 'via-blue-500',
+    image: '/show.png',
+    action: 'show'
+  },
+  {
+    id: 'stall',
+    title: 'Stall Booking',
+    description: 'Reserve your stall',
+    icon: Heart,
+    gradient: 'from-purple-500 to-pink-500',
+    lightGradient: 'from-purple-50 to-pink-50',
+    borderClass: 'border-pink-200/50',
+    viaColor: 'via-pink-500',
+    image: '/stall.png',
+    action: 'stall',
+    isLink: true
+  },
+  {
+    id: 'awards',
+    title: 'Awards',
+    description: 'Nominate yourself',
+    icon: Award,
+    gradient: 'from-yellow-500 to-amber-500',
+    lightGradient: 'from-yellow-50 to-amber-50',
+    borderClass: 'border-yellow-200/50',
+    viaColor: 'via-yellow-500',
+    image: '/awards.png',
+    action: 'awards'
+  },
+  {
+    id: 'kumari',
+    title: 'Raja Kumari',
+    description: 'Royal contest',
+    icon: Crown,
+    gradient: 'from-rose-500 to-red-500',
+    lightGradient: 'from-rose-50 to-red-50',
+    borderClass: 'border-rose-200/50',
+    viaColor: 'via-rose-500',
+    image: '/rajaqueen.png',
+    action: 'kumari'
+  },
+  {
+    id: 'raja-queen',
+    title: 'Raja Queen',
+    description: 'Elegance & grace',
+    icon: Crown,
+    gradient: 'from-pink-500 to-purple-500',
+    lightGradient: 'from-pink-50 to-purple-50',
+    borderClass: 'border-pink-200/50',
+    viaColor: 'via-pink-500',
+    image: '/rajaqueen.png',
+    action: 'raja-queen'
+  },
+  {
+    id: 'drawing',
+    title: 'Drawing',
+    description: 'Show your creativity',
+    icon: Sparkle,
+    gradient: 'from-emerald-500 to-teal-500',
+    lightGradient: 'from-emerald-50 to-teal-50',
+    borderClass: 'border-emerald-200/50',
+    viaColor: 'via-emerald-500',
+    image: '/drawing.jpg',
+    action: 'drawing'
+  }
+];
 
   // Generate random values for particles that stay consistent
   const particles = [...Array(6)].map(() => ({
@@ -327,7 +228,7 @@ function HeroActions({ user }) {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="relative py-5 z-10 max-w-7xl mx-auto">
         {/* Header Section with New Fonts */}
         <div className="text-center mb-6 md:mb-8">
           
@@ -355,7 +256,7 @@ function HeroActions({ user }) {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
           {cards.map((card, index) => {
             const IconComponent = card.icon;
             
@@ -476,6 +377,8 @@ function HeroActions({ user }) {
                 pendingAction === 'show' ? 'book show tickets' : 
                 pendingAction === 'awards' ? 'nominate for awards' :
                 pendingAction === 'kumari' ? 'participate in Raja Kumari' :
+                pendingAction === 'raja-queen' ? 'participate in Raja Queen' :
+                pendingAction === 'drawing' ? 'join drawing competition' :
                 pendingAction === 'fancy-dress' ? 'join fancy dress' : 'book a stall'}
             </p>
 
@@ -515,26 +418,6 @@ function HeroActions({ user }) {
         {/* Modals */}
         <ShowModal isOpen={isShowModalOpen} onClose={closeShowModal} />
         
-        <SponsorModal 
-          showSponsorModal={showSponsorModal}
-          setShowSponsorModal={setShowSponsorModal}
-          sponsorForm={sponsorForm}
-          setSponsorForm={setSponsorForm}
-          handleSponsorSubmit={handleSponsorSubmit}
-        />
-
-        <PerformerModal 
-          showPerformerModal={showPerformerModal}
-          setShowPerformerModal={setShowPerformerModal}
-          performerForm={performerForm}
-          setPerformerForm={setPerformerForm}
-          handlePerformerSubmit={handlePerformerSubmit}
-        />
-
-        <ToastNotification 
-          showToast={showToast}
-          toastMessage={toastMessage}
-        /> 
       </div>
 
       {/* Combined Style Tag */}

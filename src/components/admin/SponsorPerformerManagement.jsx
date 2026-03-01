@@ -628,6 +628,13 @@ export default function SponsorPerformerManagement() {
                 </div>
               )}
 
+              {selectedApplication.trackDuration && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Track Duration</label>
+                  <p>{selectedApplication.trackDuration}</p>
+                </div>
+              )}
+
               {selectedApplication.participationType === 'Group' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
