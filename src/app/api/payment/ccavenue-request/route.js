@@ -3,8 +3,19 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { order_id, purpose, amount, name, email, phone, address, donor_type, country } = body;
+    // FIX: Get FormData instead of JSON
+    const formData = await request.formData();
+    
+    // Extract values from FormData
+    const order_id = formData.get('order_id');
+    const purpose = formData.get('purpose');
+    const amount = formData.get('amount');
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const phone = formData.get('phone');
+    const address = formData.get('address');
+    const donor_type = formData.get('donor_type');
+    const country = formData.get('country');
     
     // Validation
     const errors = [];
@@ -18,15 +29,15 @@ export async function POST(request) {
       return NextResponse.json({ status: false, errors }, { status: 400 });
     }
 
-    // Create FormData (THIS IS CRITICAL - new API expects FormData)
-    const formData = new FormData();
-    formData.append("order_id", order_id.trim());
-    formData.append("amount", parseFloat(amount).toFixed(2));
-    formData.append("name", name.trim());
-    formData.append("email", email.trim().toLowerCase());
-    formData.append("phone", phone.replace(/\D/g, ''));
-    formData.append("address", (address || 'Delhi, India').trim());
-    formData.append("purpose", purpose || 'Donation');
+    // Create FormData for CCAvenue (forward the data)
+    const ccAvenueFormData = new FormData();
+    ccAvenueFormData.append("order_id", order_id.trim());
+    ccAvenueFormData.append("amount", parseFloat(amount).toFixed(2));
+    ccAvenueFormData.append("name", name.trim());
+    ccAvenueFormData.append("email", email.trim().toLowerCase());
+    ccAvenueFormData.append("phone", phone.replace(/\D/g, ''));
+    ccAvenueFormData.append("address", (address || 'Delhi, India').trim());
+    ccAvenueFormData.append("purpose", purpose || 'Donation');
 
     console.log('🚀 Sending to CCAvenue:', {
       order_id, amount, name, email, phone
@@ -35,8 +46,7 @@ export async function POST(request) {
     // CORRECTED ENDPOINT
     const response = await fetch('https://svsamiti.com/rajaparba/ccavenueRequest.php', {
       method: 'POST',
-      body: formData,  // Send as FormData, not JSON
-      // NO Content-Type header - browser sets it automatically with boundary
+      body: ccAvenueFormData,  // Send as FormData
     });
 
     if (!response.ok) {
