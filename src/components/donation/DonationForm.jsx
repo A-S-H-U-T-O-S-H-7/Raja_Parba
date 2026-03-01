@@ -103,7 +103,7 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
       // Create donation record in Firebase first
       const donationId = await createDonationRecord();
       
-      // Initiate CCAvenue payment with existing API
+      // Initiate CCAvenue payment with updated API
       await initiatePayment(donationId);
       
     } catch (error) {
@@ -163,11 +163,11 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   
   const initiatePayment = async (donationId) => {
     try {
-      // Prepare payment data for existing CCAvenue API
+      // Prepare payment data
       const paymentData = {
         order_id: donationId,
         purpose: 'donation',
-        amount: parseFloat(formData.amount),
+        amount: parseFloat(formData.amount).toFixed(2),
         name: formData.fullName,
         email: formData.email,
         phone: formData.mobile.replace(/\D/g, ''),
@@ -176,13 +176,30 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
         country: formData.country || 'india'
       };
       
-      // Use existing CCAvenue request API
+      // CRITICAL FIX: Create FormData instead of JSON
+      const formDataObj = new FormData();
+      formDataObj.append('order_id', paymentData.order_id);
+      formDataObj.append('purpose', paymentData.purpose);
+      formDataObj.append('amount', paymentData.amount);
+      formDataObj.append('name', paymentData.name);
+      formDataObj.append('email', paymentData.email);
+      formDataObj.append('phone', paymentData.phone);
+      formDataObj.append('address', paymentData.address);
+      formDataObj.append('donor_type', paymentData.donor_type);
+      formDataObj.append('country', paymentData.country);
+      
+      console.log('🚀 Sending payment request:', {
+        order_id: paymentData.order_id,
+        amount: paymentData.amount,
+        name: paymentData.name,
+        email: paymentData.email
+      });
+      
+      // Use existing CCAvenue request API - now with FormData
       const response = await fetch('/api/payment/ccavenue-request', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData)
+        // NO Content-Type header - browser sets it automatically with boundary
+        body: formDataObj // Send as FormData, not JSON
       });
       
       if (!response.ok) {
@@ -190,6 +207,11 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
       }
       
       const data = await response.json();
+      console.log('📥 Payment API response:', {
+        status: data.status,
+        hasEncRequest: !!data.encRequest,
+        hasAccessCode: !!data.access_code
+      });
       
       if (!data.status) {
         const errorMessage = data.errors ? data.errors.join(', ') : 'Payment request failed';
@@ -344,7 +366,7 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
               name="mobile"
               value={formData.mobile}
               onChange={handleInputChange}
-              placeholder="+91 9876543210"
+              placeholder="9876543210"
               className="w-full px-4 py-3 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent focus:outline-none transition-all duration-200 text-gray-900 placeholder-gray-400 text-sm shadow-sm hover:shadow-md"
               required
             />

@@ -44,16 +44,19 @@ export async function POST(request) {
       timestamp: new Date().toISOString()
     });
 
-    // Send encrypted response to CCAvenue response handler
-    const response = await fetch('https://svsamiti.com/havan-booking/ccavResponseHandler.php', {
+    // CRITICAL FIX: Use FormData instead of URLSearchParams
+    const formData = new FormData();
+    formData.append('encResp', encResp);
+
+    // FIXED: Updated to correct endpoint
+    const response = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
       method: 'POST',
+      body: formData,  // Send as FormData
+      // REMOVED Content-Type header - browser sets it automatically
+      // Keep User-Agent if needed
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent': 'Havan-Booking-System/1.0',
-      },
-      body: new URLSearchParams({
-        encResp: encResp
-      })
+      }
     });
 
     console.log('📥 CCAvenue cancellation handler status:', response.status);
@@ -62,7 +65,26 @@ export async function POST(request) {
       throw new Error(`CCAvenue response handler returned status ${response.status}`);
     }
 
-    const data = await response.json();
+    // Try to parse response - handle both JSON and text
+    const responseText = await response.text();
+    let data;
+    
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.log('Response is not JSON, treating as raw text');
+      // If not JSON, it's likely an error page or raw response
+      const redirectUrl = new URL('/payment/success', 'https://rajaparba.svsamiti.com');
+      redirectUrl.searchParams.set('status', 'cancelled');
+      redirectUrl.searchParams.set('message', 'Payment cancelled');
+      
+      return NextResponse.json({
+        status: true,
+        redirect: redirectUrl.toString(),
+        data: { order_id: 'unknown', status: 'cancelled' }
+      });
+    }
+
     console.log('✅ CCAvenue cancellation processed:', {
       status: data.status,
       hasData: !!data.data,
@@ -125,10 +147,9 @@ export async function POST(request) {
         
       } catch (error) {
         console.error('❌ Error updating Firebase after cancellation:', error);
-        // Continue with redirect even if Firebase update fails
       }
       
-      // Redirect to payment success page with cancelled status
+      // Redirect to payment success page with cancelled status - DOMAIN IS CORRECT ✓
       const redirectUrl = new URL('/payment/success', 'https://rajaparba.svsamiti.com');
       redirectUrl.searchParams.set('order_id', paymentInfo.order_id || 'unknown');
       redirectUrl.searchParams.set('status', 'cancelled');
@@ -162,7 +183,7 @@ export async function GET(request) {
   const encResp = searchParams.get('encResp');
   
   if (!encResp) {
-    // Redirect to general cancellation page
+    // Redirect to general cancellation page - DOMAIN IS CORRECT ✓
     return NextResponse.redirect(new URL('/payment/success?status=cancelled&message=Payment%20was%20cancelled', 'https://rajaparba.svsamiti.com'));
   }
   

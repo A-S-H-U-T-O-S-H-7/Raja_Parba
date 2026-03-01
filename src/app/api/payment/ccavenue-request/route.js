@@ -1,113 +1,74 @@
-// Next.js App Router API route to proxy CCAvenue requests and avoid CORS issues
+// app/api/payment/ccavenue-request/route.js
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { order_id, purpose, amount, name, email, phone, address } = body;
-    const purposeNormalized = (purpose || '').trim().toLowerCase();
-    const appBaseUrl = 'https://rajaparba.svsamiti.com';
-
-    // Comprehensive validation for CCAvenue API requirements
+    const { order_id, purpose, amount, name, email, phone, address, donor_type, country } = body;
+    
+    // Validation
     const errors = [];
-    
-    if (!order_id || order_id.trim().length === 0) {
-      errors.push('Order ID is required');
-    }
-    
-    if (!purpose || purpose.trim().length === 0) {
-      errors.push('Purpose is required');
-    }
-    
-    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
-      errors.push('Valid amount is required');
-    }
-    
-    if (!name || name.trim().length < 2) {
-      errors.push('Customer name must be at least 2 characters');
-    }
-    
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.push('Valid email address is required');
-    }
-    
-    if (!phone || !/^[0-9]{10}$/.test(phone.replace(/\D/g, ''))) {
-      errors.push('Valid 10-digit phone number is required');
-    }
+    if (!order_id) errors.push('Order ID is required');
+    if (!amount || parseFloat(amount) <= 0) errors.push('Valid amount is required');
+    if (!name) errors.push('Name is required');
+    if (!email) errors.push('Email is required');
+    if (!phone) errors.push('Phone is required');
     
     if (errors.length > 0) {
-      return NextResponse.json({
-        status: false,
-        message: 'Validation failed',
-        errors: errors
-      }, { status: 400 });
+      return NextResponse.json({ status: false, errors }, { status: 400 });
     }
 
-    // Get origin from headers
-    const origin = request.headers.get('origin') || 'http://localhost:3000';
+    // Create FormData (THIS IS CRITICAL - new API expects FormData)
+    const formData = new FormData();
+    formData.append("order_id", order_id.trim());
+    formData.append("amount", parseFloat(amount).toFixed(2));
+    formData.append("name", name.trim());
+    formData.append("email", email.trim().toLowerCase());
+    formData.append("phone", phone.replace(/\D/g, ''));
+    formData.append("address", (address || 'Delhi, India').trim());
+    formData.append("purpose", purpose || 'Donation');
 
-    // Prepare data for CCAvenue API with proper formatting
-    const paymentData = {
-      order_id: order_id.trim(),
-      purpose: purposeNormalized === 'donation' ? 'Donation' : purpose.trim(),
-      amount: parseFloat(amount).toFixed(2), // Ensure decimal format
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone.replace(/\D/g, ''), // Remove non-digits
-      address: (address || 'Delhi, India').trim(),
-      donor_type: body.donor_type || 'indian',
-      country: body.country || 'india',
-      redirect_url: `${appBaseUrl}/api/payment/ccavenue-response`,
-      cancel_url: `${appBaseUrl}/api/payment/ccavenue-cancel`
-    };
-
-    console.log('🚀 Proxying payment request to CCAvenue:', {
-      ...paymentData,
-      timestamp: new Date().toISOString()
+    console.log('🚀 Sending to CCAvenue:', {
+      order_id, amount, name, email, phone
     });
 
-    // Make request to CCAvenue PHP API
+    // CORRECTED ENDPOINT
     const response = await fetch('https://svsamiti.com/rajaparba/ccavenueRequest.php', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'Havan-Booking-System/1.0',
-      },
-      body: new URLSearchParams(paymentData)
+      body: formData,  // Send as FormData, not JSON
+      // NO Content-Type header - browser sets it automatically with boundary
     });
-
-    console.log('📥 CCAvenue API response status:', response.status);
 
     if (!response.ok) {
-      throw new Error(`CCAvenue API returned status ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log('✅ CCAvenue API response:', {
+    const text = await response.text();
+    console.log('📥 Raw response:', text.substring(0, 200));
+    
+    // Parse JSON response
+    const data = JSON.parse(text);
+    
+    // Return in the format your frontend expects
+    return NextResponse.json({
       status: data.status,
-      hasEncRequest: !!data.encRequest,
-      hasAccessCode: !!data.access_code,
-      errors: data.errors || 'none'
+      encRequest: data.encRequest,
+      access_code: data.access_code,
+      order_id: data.order_id
     });
 
-    // Return the response from CCAvenue API
-    return NextResponse.json(data);
-
   } catch (error) {
-    console.error('❌ CCAvenue proxy error:', error);
-    
+    console.error('❌ Error:', error);
     return NextResponse.json({
       status: false,
-      message: 'Payment request failed',
-      errors: [error.message || 'Internal server error']
+      message: error.message
     }, { status: 500 });
   }
 }
 
-// Only allow POST method
 export async function GET() {
   return NextResponse.json({ 
     status: false, 
-    message: 'Method not allowed. Only POST requests are accepted.' 
+    message: 'Method not allowed' 
   }, { status: 405 });
 }
