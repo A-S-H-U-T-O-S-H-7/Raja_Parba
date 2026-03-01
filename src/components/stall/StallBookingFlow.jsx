@@ -95,7 +95,7 @@ export default function StallBookingFlow() {
                     </h1>
                     
                     <p className="text-gray-700 text-sm md:text-base max-w-xl mx-auto mb-3">
-                      Secure your premium business space for the 5-day grand event
+                      Secure your premium business space for the 3-day grand event
                     </p>
                     
                     <div className="flex flex-wrap justify-center gap-2 text-xs md:text-sm">
@@ -105,7 +105,7 @@ export default function StallBookingFlow() {
                       </div>
                       <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 px-3 py-1.5 rounded-full border border-blue-200/50 shadow-sm">
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                        <span className="font-semibold">5-Day Event Pass</span>
+                        <span className="font-semibold">3-Day Event Pass</span>
                       </div>
                       <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 px-3 py-1.5 rounded-full border border-purple-200/50 shadow-sm">
                         <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
