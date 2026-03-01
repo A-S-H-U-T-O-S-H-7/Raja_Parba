@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { PencilRuler, User, Mail, Phone, MapPin, Calendar, Cake, Camera } from "lucide-react";
 import { createDrawingApplication } from "@/services/drawingService";
+import useAuthStore from "@/lib/stores/useAuthStore";
 
 const competitionItems = [
   "Self-introduction",
@@ -49,6 +50,7 @@ const detectCategoryByAge = (ageNum) => {
 
 export default function DrawingPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [form, setForm] = useState(initialForm);
   const [candidatePhoto, setCandidatePhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
@@ -89,6 +91,7 @@ export default function DrawingPage() {
       dob: form.dob || "",
       age: Number(form.age || 0),
       category: form.category || "",
+      userId: user?.uid || null,
     };
 
     const hasAllRequired =
@@ -149,12 +152,12 @@ export default function DrawingPage() {
       await Swal.fire({
         icon: "success",
         title: "Registration Submitted",
-        text: "Drawing registration submitted successfully. Redirecting to home...",
+        text: "Drawing registration submitted successfully. Redirecting to your profile...",
         timer: 2300,
         showConfirmButton: false,
       });
 
-      router.push("/");
+      router.push("/profile");
     } catch (error) {
       console.error("Error submitting Drawing registration:", error);
       await Swal.fire({

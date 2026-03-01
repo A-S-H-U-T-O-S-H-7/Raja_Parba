@@ -33,6 +33,11 @@ export const createAwardApplication = async (applicationData, photoFile) => {
       photoUrl,
       photoPath: uploadResult.ref.fullPath,
       status: 'pending',
+      reviewStatus: 'pending',
+      adminNotes: '',
+      confirmedAt: null,
+      awardDate: null,
+      awardTime: null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       type: 'award'

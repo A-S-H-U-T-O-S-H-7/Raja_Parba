@@ -25,13 +25,16 @@ export default function ShowDateSelection() {
       return dates;
     }
     
-    // Fallback to next 5 days
-    return Array.from({ length: 5 }, (_, i) => addDays(today, i + 1));
+    // Fallback to configured availableDays (default 5)
+    const availableDays = Number(eventDates?.availableDays) || 5;
+    return Array.from({ length: availableDays }, (_, i) => addDays(today, i + 1));
   };
 
   const availableDates = generateAvailableDates();
   
-  const activeShows = showSettings?.shows?.filter(show => show.active === true) || [];
+  const activeShows = showSettings?.shows?.filter(
+    (show) => show?.active === true || show?.isActive === true
+  ) || [];
 
   const handleDateSelect = (date) => {
     const firstShow = activeShows.length > 0 ? 

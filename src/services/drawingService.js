@@ -34,6 +34,11 @@ export const createDrawingApplication = async (applicationData, photoFile) => {
       photoPath: uploadResult.ref.fullPath,
       competitions: ['Self-introduction', 'Quiz', 'Drawing in the Given Topic'],
       status: 'pending',
+      reviewStatus: 'pending',
+      adminNotes: '',
+      confirmedAt: null,
+      eventDate: null,
+      eventTime: null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       type: 'drawing'

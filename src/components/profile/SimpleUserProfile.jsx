@@ -41,7 +41,7 @@ const SimpleUserProfile = ({ user }) => {
 
       // If we don't have complete data, check booking collections
       if (!profile.name || !profile.phone) {
-        const bookingCollections = ['bookings', 'showBookings', 'stallBookings'];
+        const bookingCollections = ['showBookings', 'stallBookings', 'delegateBookings', 'donations', 'sponsors', 'performers'];
         
         for (const collectionName of bookingCollections) {
           if (profile.name && profile.phone) break; // Stop if we have all data
@@ -57,7 +57,7 @@ const SimpleUserProfile = ({ user }) => {
             if (profile.name && profile.phone) return; // Skip if already found
             
             const data = doc.data();
-            const customerDetails = data.customerDetails || data.userDetails;
+            const customerDetails = data.customerDetails || data.userDetails || data.donorDetails;
             
             if (customerDetails) {
               if (!profile.name && customerDetails.name?.trim()) {
@@ -70,6 +70,10 @@ const SimpleUserProfile = ({ user }) => {
                 profile.email = customerDetails.email.trim();
               }
             }
+
+            if (!profile.name && data.name?.trim()) profile.name = data.name.trim();
+            if (!profile.phone && data.phone?.trim()) profile.phone = data.phone.trim();
+            if (!profile.email && data.email?.trim()) profile.email = data.email.trim();
           });
         }
       }

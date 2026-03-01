@@ -34,6 +34,11 @@ export const createRajaKumariApplication = async (applicationData, photoFile) =>
       photoPath: uploadResult.ref.fullPath,
       competitions: ['Self-introduction', 'Rangoli', 'Quiz', 'Dress/Attire'],
       status: 'pending',
+      reviewStatus: 'pending',
+      adminNotes: '',
+      confirmedAt: null,
+      eventDate: null,
+      eventTime: null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       type: 'raja-kumari'

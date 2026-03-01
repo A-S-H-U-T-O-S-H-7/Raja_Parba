@@ -51,9 +51,7 @@ export async function POST(request) {
     // FIXED: Updated to correct endpoint
     const response = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
       method: 'POST',
-      body: formData,  // Send as FormData
-      // REMOVED Content-Type header - browser sets it automatically
-      // Keep User-Agent if needed
+      body: formData,  
       headers: {
         'User-Agent': 'Havan-Booking-System/1.0',
       }

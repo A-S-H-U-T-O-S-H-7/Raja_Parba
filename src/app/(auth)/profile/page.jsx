@@ -1,10 +1,8 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useEffect, useMemo, useState } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import Header from '@/components/home/Header';
 import SimpleUserProfile from '@/components/profile/SimpleUserProfile';
-import ProfileHeader from '@/components/profile/ProfileHeader';
 import BookingTabs from '@/components/profile/BookingTabs';
 import EmptyState from '@/components/profile/EmptyState';
 import QuickActions from '@/components/profile/QuickActions';
@@ -12,524 +10,168 @@ import ContactInfo from '@/components/profile/ContactInfo';
 import ShowBookingCard from '@/components/show/ShowBookingCard';
 import StallBookingCard from '@/components/stall/StallBookingCard';
 import DonationCard from '@/components/donation/DonationCard';
+import EntryPassCard from '@/components/profile/EntryPassCard';
+import SponsorApplicationCard from '@/components/profile/SponsorApplicationCard';
+import PerformerApplicationCard from '@/components/profile/PerformerApplicationCard';
+import ContestApplicationCard from '@/components/profile/ContestApplicationCard';
 import ImageModal from '@/components/ImageModal';
-import { useShifts } from '@/hooks/useShifts';
-import { useSeatCleanup } from '@/hooks/useSeatCleanup';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { parseISO } from 'date-fns';
-import { toast } from 'react-hot-toast';
+import useAuthStore from '@/lib/stores/useAuthStore';
+import useUserProfileStore from '@/lib/stores/useUserProfileStore';
 
 const ProfilePage = () => {
-  const { user, logout } = useAuth();
-  const router = useRouter();
-  const [bookings, setBookings] = useState([]);
-  const [showBookings, setShowBookings] = useState([]);
-  const [stallBookings, setStallBookings] = useState([]);
-  const [delegateBookings, setDelegateBookings] = useState([]);
-  const [donations, setDonations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('havan');
+  const { user } = useAuthStore();
+  const [activeTab, setActiveTab] = useState('show');
   const [showEventLayoutModal, setShowEventLayoutModal] = useState(false);
 
-  const { getShiftLabel, getShiftTime } = useShifts();
-  
-  // Initialize seat cleanup for havan bookings auto-cancellation
-  const { manualCleanup } = useSeatCleanup();
+  const {
+    loading,
+    showBookings,
+    stallBookings,
+    entryPassBookings,
+    donations,
+    sponsors,
+    performers,
+    awards,
+    rajaKumari,
+    rajaQueen,
+    drawings,
+    fetchProfileData,
+  } = useUserProfileStore();
 
   useEffect(() => {
-    if (user) {
-      fetchUserBookings();
-      fetchUserShowBookings();
-      fetchUserStallBookings();
-      fetchUserDelegateBookings();
-      fetchUserDonations();
+    if (user?.uid) {
+      fetchProfileData(user);
     }
-  }, [user]);
+  }, [user?.uid, fetchProfileData]);
 
-  const fetchUserBookings = async () => {
-    try {
-      const bookingsQuery = query(
-        collection(db, 'bookings'),
-        where('userId', '==', user.uid)
-      );
-      
-      const snapshot = await getDocs(bookingsQuery);
-      const bookingsData = [];
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        let eventDate;
-        
-        if (data.eventDetails?.date) {
-          if (data.eventDetails.date.toDate) {
-            eventDate = data.eventDetails.date.toDate();
-          } else if (data.eventDetails.date.seconds) {
-            eventDate = new Date(data.eventDetails.date.seconds * 1000);
-          } else if (typeof data.eventDetails.date === 'string') {
-            eventDate = parseISO(data.eventDetails.date);
-          } else {
-            eventDate = new Date();
-          }
-        } else if (data.eventDate) {
-          if (data.eventDate.toDate) {
-            eventDate = data.eventDate.toDate();
-          } else if (data.eventDate.seconds) {
-            eventDate = new Date(data.eventDate.seconds * 1000);
-          } else if (typeof data.eventDate === 'string') {
-            eventDate = parseISO(data.eventDate);
-          } else {
-            eventDate = new Date();
-          }
-        } else {
-          eventDate = new Date();
-        }
-        
-        let createdDate;
-        if (data.createdAt) {
-          if (data.createdAt.toDate) {
-            createdDate = data.createdAt.toDate();
-          } else if (data.createdAt.seconds) {
-            createdDate = new Date(data.createdAt.seconds * 1000);
-          } else if (typeof data.createdAt === 'string') {
-            createdDate = parseISO(data.createdAt);
-          } else {
-            createdDate = new Date();
-          }
-        } else {
-          createdDate = new Date();
-        }
-        
-        const structuredData = {
-          id: doc.id,
-          ...data,
-          createdAt: createdDate,
-          eventDetails: {
-            ...(data.eventDetails || {}),
-            date: eventDate,
-            shift: data.eventDetails?.shift || data.shift,
-            seats: data.eventDetails?.seats || data.seats,
-            seatCount: data.eventDetails?.seatCount || data.seatCount
-          }
-        };
-        
-        bookingsData.push(structuredData);
-      });
-      
-      bookingsData.sort((a, b) => b.createdAt - a.createdAt);
-      setBookings(bookingsData);
-    } catch (error) {
-      toast.error('Failed to load booking history');
-    }
+  const counts = useMemo(
+    () => ({
+      show: showBookings.length,
+      stall: stallBookings.length,
+      entryPass: entryPassBookings.length,
+      donations: donations.length,
+      sponsor: sponsors.length,
+      performer: performers.length,
+      award: awards.length,
+      rajaKumari: rajaKumari.length,
+      rajaQueen: rajaQueen.length,
+      drawing: drawings.length,
+    }),
+    [showBookings, stallBookings, entryPassBookings, donations, sponsors, performers, awards, rajaKumari, rajaQueen, drawings]
+  );
+
+  const emptyStates = {
+    show: { type: 'Show bookings', icon: '🎭', color: 'purple', link: '/show', linkText: 'Book Show' },
+    stall: { type: 'Stall bookings', icon: '🏪', color: 'green', link: '/stall', linkText: 'Book Stall' },
+    entryPass: { type: 'Entry pass bookings', icon: '🎟️', color: 'yellow', link: '/free-pass', linkText: 'Book Free Pass' },
+    donations: { type: 'Donations', icon: '💝', color: 'pink', link: '/donate', linkText: 'Make Donation' },
+    sponsor: { type: 'Sponsor applications', icon: '⭐', color: 'orange', link: '/sponsor', linkText: 'Apply Sponsor' },
+    performer: { type: 'Performer applications', icon: '🎤', color: 'blue', link: '/performer', linkText: 'Apply Performer' },
+    award: { type: 'Award applications', icon: '🏆', color: 'yellow', link: '/award', linkText: 'Apply Award' },
+    rajaKumari: { type: 'Raja Kumari applications', icon: '👑', color: 'rose', link: '/raja-kumari', linkText: 'Apply Raja Kumari' },
+    rajaQueen: { type: 'Raja Queen applications', icon: '👸', color: 'pink', link: '/raja-queen', linkText: 'Apply Raja Queen' },
+    drawing: { type: 'Drawing applications', icon: '🖌️', color: 'green', link: '/drawing', linkText: 'Apply Drawing' },
   };
 
-  const fetchUserShowBookings = async () => {
-    try {
-      const showBookingsQuery = query(
-        collection(db, 'showBookings'),
-        where('userId', '==', user.uid)
-      );
-      
-      const snapshot = await getDocs(showBookingsQuery);
-      const showBookingsData = [];
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        let showDate;
-        
-        if (data.showDetails?.date) {
-          if (typeof data.showDetails.date === 'string') {
-            showDate = parseISO(data.showDetails.date);
-          } else if (data.showDetails.date.toDate) {
-            showDate = data.showDetails.date.toDate();
-          } else if (data.showDetails.date.seconds) {
-            showDate = new Date(data.showDetails.date.seconds * 1000);
-          } else {
-            showDate = new Date();
-          }
-        } else {
-          showDate = new Date();
-        }
-        
-        let createdDate;
-        if (data.createdAt) {
-          if (data.createdAt.toDate) {
-            createdDate = data.createdAt.toDate();
-          } else if (data.createdAt.seconds) {
-            createdDate = new Date(data.createdAt.seconds * 1000);
-          } else if (typeof data.createdAt === 'string') {
-            createdDate = parseISO(data.createdAt);
-          } else {
-            createdDate = new Date();
-          }
-        } else {
-          createdDate = new Date();
-        }
-        
-        showBookingsData.push({
-          id: doc.id,
-          ...data,
-          createdAt: createdDate,
-          showDetails: {
-            ...data.showDetails,
-            date: showDate
-          },
-          type: 'show'
-        });
-      });
-      
-      showBookingsData.sort((a, b) => b.createdAt - a.createdAt);
-      setShowBookings(showBookingsData);
-    } catch (error) {
-      toast.error('Failed to load show booking history');
-    }
+  const tabData = {
+    show: showBookings,
+    stall: stallBookings,
+    entryPass: entryPassBookings,
+    donations,
+    sponsor: sponsors,
+    performer: performers,
+    award: awards,
+    rajaKumari,
+    rajaQueen,
+    drawing: drawings,
   };
 
-  const fetchUserStallBookings = async () => {
-    try {
-      // Query by UID first
-      const stallBookingsQueryByUid = query(
-        collection(db, 'stallBookings'),
-        where('userId', '==', user.uid)
-      );
-      
-      // Also query by email (for admin-booked stalls)
-      const stallBookingsQueryByEmail = query(
-        collection(db, 'stallBookings'),
-        where('userId', '==', user.email)
-      );
-      
-      // Fetch both
-      const [snapshotByUid, snapshotByEmail] = await Promise.all([
-        getDocs(stallBookingsQueryByUid),
-        getDocs(stallBookingsQueryByEmail)
-      ]);
-      
-      // Combine and deduplicate results
-      const allDocs = new Map();
-      snapshotByUid.forEach(doc => allDocs.set(doc.id, doc));
-      snapshotByEmail.forEach(doc => allDocs.set(doc.id, doc));
-      
-      const snapshot = { docs: Array.from(allDocs.values()) };
-      const stallBookingsData = [];
-      
-      let stallSettings = null;
-      
-      for (const doc of snapshot.docs) {
-        const data = doc.data();
-        let startDate, endDate;
-        
-        if (data.eventDetails?.startDate) {
-          if (data.eventDetails.startDate.toDate) {
-            startDate = data.eventDetails.startDate.toDate();
-          } else if (data.eventDetails.startDate.seconds) {
-            startDate = new Date(data.eventDetails.startDate.seconds * 1000);
-          } else if (data.eventDetails.startDate instanceof Date) {
-            startDate = data.eventDetails.startDate;
-          } else {
-            startDate = new Date(data.eventDetails.startDate);
-          }
-        } else {
-          try {
-            if (!stallSettings) {
-              const { getStallEventSettings } = await import('@/services/systemSettingsService');
-              stallSettings = await getStallEventSettings();
-            }
-            startDate = new Date(stallSettings.startDate);
-          } catch (error) {
-            startDate = new Date('2025-11-15');
-          }
-        }
-        
-        if (data.eventDetails?.endDate) {
-          if (data.eventDetails.endDate.toDate) {
-            endDate = data.eventDetails.endDate.toDate();
-          } else if (data.eventDetails.endDate.seconds) {
-            endDate = new Date(data.eventDetails.endDate.seconds * 1000);
-          } else if (data.eventDetails.endDate instanceof Date) {
-            endDate = data.eventDetails.endDate;
-          } else {
-            endDate = new Date(data.eventDetails.endDate);
-          }
-        } else {
-          try {
-            if (!stallSettings) {
-              const { getStallEventSettings } = await import('@/services/systemSettingsService');
-              stallSettings = await getStallEventSettings();
-            }
-            endDate = new Date(stallSettings.endDate);
-          } catch (error) {
-            endDate = new Date('2025-11-20');
-          }
-        }
-        
-        let createdDate;
-        if (data.createdAt) {
-          if (data.createdAt.toDate) {
-            createdDate = data.createdAt.toDate();
-          } else if (data.createdAt.seconds) {
-            createdDate = new Date(data.createdAt.seconds * 1000);
-          } else if (typeof data.createdAt === 'string') {
-            createdDate = parseISO(data.createdAt);
-          } else {
-            createdDate = new Date();
-          }
-        } else {
-          createdDate = new Date();
-        }
-        
-        stallBookingsData.push({
-          id: doc.id,
-          ...data,
-          createdAt: createdDate,
-          eventDetails: {
-            ...data.eventDetails,
-            startDate,
-            endDate
-          },
-          type: 'stall'
-        });
-      }
-      
-      stallBookingsData.sort((a, b) => b.createdAt - a.createdAt);
-      setStallBookings(stallBookingsData);
-    } catch (error) {
-      toast.error('Failed to load stall booking history');
-    } finally {
-      setLoading(false);
-    }
+  const refreshData = () => {
+    if (user?.uid) fetchProfileData(user);
   };
 
-  
-
-  const fetchUserDonations = async () => {
-    try {
-      const userDonationsQuery = query(
-        collection(db, 'donations'),
-        where('userId', '==', user.uid)
-      );
-      
-      const snapshot = await getDocs(userDonationsQuery);
-      const donationsData = [];
-      
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        let createdDate;
-        
-        if (data.createdAt) {
-          if (data.createdAt.toDate) {
-            createdDate = data.createdAt.toDate();
-          } else if (data.createdAt.seconds) {
-            createdDate = new Date(data.createdAt.seconds * 1000);
-          } else if (typeof data.createdAt === 'string') {
-            createdDate = parseISO(data.createdAt);
-          } else {
-            createdDate = new Date();
-          }
-        } else {
-          createdDate = new Date();
-        }
-        
-        donationsData.push({
-          id: doc.id,
-          ...data,
-          createdAt: createdDate,
-          type: 'donation'
-        });
-      });
-      
-      donationsData.sort((a, b) => b.createdAt - a.createdAt);
-      setDonations(donationsData);
-    } catch (error) {
-      toast.error('Failed to load donation history');
-    }
-  };
-
-  const refreshBookings = () => {
-    if (activeTab === 'havan') {
-      fetchUserBookings();
-    } else if (activeTab === 'show') {
-      fetchUserShowBookings();
-    } else if (activeTab === 'stall') {
-      fetchUserStallBookings();
-    } else if (activeTab === 'donations') {
-      fetchUserDonations();
-    }
-  };
-
-  // Handle booking status updates from individual booking cards
-  const handleBookingStatusUpdate = async (bookingId, newStatus) => {
-    
-    // Always refresh bookings to get latest data
-    await fetchUserBookings();
-    
-    // If status changed to cancelled, also trigger cleanup to ensure consistency
-    if (newStatus === 'cancelled') {
-      try {
-        console.log('🧹 Triggering manual cleanup after cancellation...');
-        await manualCleanup();
-      } catch (error) {
-        console.error('❌ Manual cleanup failed:', error);
-      }
-    }
-  };
-
-  // Auto-refresh havan bookings periodically to catch status updates
-  useEffect(() => {
-    if (activeTab === 'havan' && bookings.length > 0) {
-      const hasPendingBookings = bookings.some(booking => booking.status === 'pending_payment');
-      
-      if (hasPendingBookings) {
-        console.log('🔄 Setting up periodic refresh for pending havan bookings...');
-        const refreshInterval = setInterval(() => {
-          console.log('⏰ Auto-refreshing havan bookings...');
-          fetchUserBookings();
-        }, 30000); // Refresh every 30 seconds when there are pending bookings
-        
-        return () => {
-          console.log('🛑 Stopping periodic refresh for havan bookings');
-          clearInterval(refreshInterval);
-        };
-      }
-    }
-  }, [activeTab, bookings]);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case 'show':
+        return showBookings.map((item) => <ShowBookingCard key={item.id} booking={item} onCancel={refreshData} />);
+      case 'stall':
+        return stallBookings.map((item) => <StallBookingCard key={item.id} booking={item} onCancel={refreshData} />);
+      case 'entryPass':
+        return entryPassBookings.map((item) => <EntryPassCard key={item.id} booking={item} />);
+      case 'donations':
+        return donations.map((item) => <DonationCard key={item.id} donation={item} />);
+      case 'sponsor':
+        return sponsors.map((item) => <SponsorApplicationCard key={item.id} item={item} />);
+      case 'performer':
+        return performers.map((item) => <PerformerApplicationCard key={item.id} item={item} />);
+      case 'award':
+        return awards.map((item) => <ContestApplicationCard key={item.id} item={item} title="Award Application" accent="amber" />);
+      case 'rajaKumari':
+        return rajaKumari.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Kumari Application" accent="rose" />);
+      case 'rajaQueen':
+        return rajaQueen.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Queen Application" accent="pink" />);
+      case 'drawing':
+        return drawings.map((item) => <ContestApplicationCard key={item.id} item={item} title="Drawing Application" accent="emerald" />);
+      default:
+        return null;
     }
   };
 
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your profile...</p>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-orange-500" />
+            <p className="text-gray-600">Loading profile dashboard...</p>
           </div>
         </div>
       </ProtectedRoute>
     );
   }
 
-  const emptyStates = {
-    havan: {
-      type: 'Havan reservations',
-      icon: '🎫',
-      color: 'orange',
-      link: '/booking',
-      linkText: 'Reserve Havan Spots'
-    },
-    show: {
-      type: 'Show reservations',
-      icon: '🎭',
-      color: 'purple',
-      link: '/booking/show',
-      linkText: 'Reserve Show Spots'
-    },
-    stall: {
-      type: 'Stall reservations',
-      icon: '🏪',
-      color: 'green',
-      link: '/booking/stall',
-      linkText: 'Reserve Stalls'
-    },
-    delegates: {
-      type: 'Delegate registrations',
-      icon: '🎓',
-      color: 'yellow',
-      link: '/booking/delegate',
-      linkText: 'Register as Delegate'
-    },
-    donations: {
-      type: 'Donations',
-      icon: '💝',
-      color: 'pink',
-      link: '/donate',
-      linkText: 'Make a Donation'
-    }
-  };
-
-  const renderBookings = () => {
-    switch (activeTab) {
-      
-      case 'show':
-        return showBookings.map((booking) => (
-          <ShowBookingCard 
-            key={booking.id} 
-            booking={booking} 
-            onCancel={fetchUserShowBookings}
-          />
-        ));
-      case 'stall':
-        return stallBookings.map((booking) => (
-          <StallBookingCard 
-            key={booking.id} 
-            booking={booking} 
-            onCancel={fetchUserStallBookings}
-          />
-        ));
-      
-      case 'donations':
-        return donations.map((donation) => (
-          <DonationCard key={donation.id} donation={donation} />
-        ));
-      default:
-        return null;
-    }
-  };
-
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
-        <ProfileHeader 
-          onShowEventLayout={() => setShowEventLayoutModal(true)}
-          onLogout={handleLogout}
-        />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Header />
+        <div className="mx-auto max-w-[96rem] px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-6 rounded-3xl border border-orange-200 bg-gradient-to-r from-orange-100 via-amber-50 to-yellow-100 p-5 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 sm:text-3xl">My Festival Dashboard</h1>
+                <p className="text-sm text-slate-600">Track all bookings, passes, and applications in one place.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEventLayoutModal(true)}
+                className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-indigo-600 hover:to-violet-700"
+              >
+                View Event Layout
+              </button>
+            </div>
+          </div>
           <div className="mb-8">
             <SimpleUserProfile user={user} />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-xl shadow-lg p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-                  <h3 className="text-xl font-bold text-gray-800">Your Reservations</h3>
-                  <BookingTabs 
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    counts={{
-                      show: showBookings.length,
-                      stall: stallBookings.length,
-                      donations: donations.length
-                    }}
-                  />
+              <div className="rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-lg">
+                <div className="mb-6 flex flex-col gap-4">
+                  <h3 className="text-xl font-bold text-gray-800">My Bookings & Applications</h3>
+                  <BookingTabs activeTab={activeTab} setActiveTab={setActiveTab} counts={counts} />
                 </div>
 
-                {(() => {
-                  const currentTabData = {
-                    show: showBookings,
-                    stall: stallBookings,
-                    donations: donations
-                  };
-                  
-                  if (currentTabData[activeTab].length === 0) {
-                    return <EmptyState {...emptyStates[activeTab]} />;
-                  }
-                  
-                  return <div className="space-y-4">{renderBookings()}</div>;
-                })()}
+                {tabData[activeTab].length === 0 ? (
+                  <EmptyState {...emptyStates[activeTab]} />
+                ) : (
+                  <div className="space-y-4">{renderActiveTab()}</div>
+                )}
               </div>
             </div>
 
             <div className="space-y-6">
-              <QuickActions onRefresh={refreshBookings} />
+              <QuickActions onRefresh={refreshData} />
               <ContactInfo />
             </div>
           </div>

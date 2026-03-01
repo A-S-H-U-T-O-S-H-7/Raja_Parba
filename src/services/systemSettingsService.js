@@ -16,8 +16,8 @@ export const getStallEventSettings = async () => {
     if (stallSnap.exists()) {
       const data = stallSnap.data();
       return {
-        startDate: data.eventDates?.startDate || '2025-11-15',
-        endDate: data.eventDates?.endDate || '2025-11-20',
+        startDate: data.eventDates?.startDate || '',
+        endDate: data.eventDates?.endDate || '',
         isActive: data.eventDates?.isActive || false,
         totalStalls: data.totalStalls || 70,
         defaultPrice: data.defaultPrice || 5000
@@ -25,8 +25,8 @@ export const getStallEventSettings = async () => {
     } else {
       // Return default values if no settings found
       return {
-        startDate: '2025-11-15',
-        endDate: '2025-11-20',
+        startDate: '',
+        endDate: '',
         isActive: false,
         totalStalls: 70,
         defaultPrice: 5000
@@ -36,8 +36,8 @@ export const getStallEventSettings = async () => {
     console.error('Error fetching stall event settings:', error);
     // Return default values on error
     return {
-      startDate: '2025-11-15',
-      endDate: '2025-11-20',
+      startDate: '',
+      endDate: '',
       isActive: false,
       totalStalls: 70,
       defaultPrice: 5000

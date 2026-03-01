@@ -3,12 +3,12 @@ import { format, differenceInDays } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { cancelBooking } from '@/utils/cancellationUtils';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '@/context/AuthContext';
+import useAuthStore from '@/lib/stores/useAuthStore';
 import { getStallEventSettings, calculateEventDays } from '@/services/systemSettingsService';
 import PassReceiptModal from '../PassReceiptModal';
 
 const StallBookingCard = ({ booking, onCancel }) => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [isCancelling, setIsCancelling] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [eventStartDate, setEventStartDate] = useState(booking.eventDetails?.startDate);

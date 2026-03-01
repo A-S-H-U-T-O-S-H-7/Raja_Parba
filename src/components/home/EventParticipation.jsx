@@ -150,7 +150,7 @@ export default function EventBanner() {
         {/* Right block — CTA */}
         <div className="shrink-0 flex flex-col items-center gap-3 w-48">
           <p className="text-indigo-300 text-xs text-center">FREE · No hidden fees · Instant confirmation</p>
-          <Link href="/delegate">
+          <Link href="/free-pass">
             <button
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
@@ -241,7 +241,7 @@ export default function EventBanner() {
         </div>
 
         {/* CTA Button — full width on mobile */}
-        <Link href="/delegate" className="w-full">
+        <Link href="/free-pass" className="w-full">
           <button
             className="relative overflow-hidden flex items-center justify-center gap-2 w-full py-3 rounded-xl font-black text-sm text-gray-900"
             style={{

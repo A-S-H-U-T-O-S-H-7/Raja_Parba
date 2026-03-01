@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Trophy, User, Mail, Phone, MapPin, GraduationCap, Cake, Camera } from "lucide-react";
 import { createAwardApplication } from "@/services/awardService";
+import useAuthStore from "@/lib/stores/useAuthStore";
 
 const awardFieldOptions = [
   "Best Cultural Performer",
@@ -40,6 +41,7 @@ const truncateToWordLimit = (text, limit) => {
 
 export default function AwardPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [form, setForm] = useState(initialForm);
   const [candidatePhoto, setCandidatePhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
@@ -82,6 +84,7 @@ export default function AwardPage() {
       age: Number(form.age || 0),
       gender: (form.gender || "").trim(),
       aboutSelf: (form.aboutSelf || "").trim(),
+      userId: user?.uid || null,
     };
 
     const hasAllRequired =
@@ -134,12 +137,12 @@ export default function AwardPage() {
       await Swal.fire({
         icon: "success",
         title: "Application Submitted",
-        text: "Award application submitted successfully. Redirecting to home...",
+        text: "Award application submitted successfully. Redirecting to your profile...",
         timer: 2300,
         showConfirmButton: false,
       });
 
-      router.push("/");
+      router.push("/profile");
     } catch (error) {
       console.error("Error submitting Award application:", error);
       await Swal.fire({

@@ -168,7 +168,10 @@ const usePriceStore = create((set, get) => ({
 
   // Update Stall seat price
   updateStallSeatPrice: (price) => set(state => ({
-    stall: { ...state.stall, seatPrice: price }
+    stall: {
+      ...state.stall,
+      seatPrice: Number(price) || 0
+    }
   })),
 
   // Update Stall early bird discounts

@@ -66,9 +66,12 @@ const useUserStallBookingStore = create(
         const unsubscribe = onSnapshot(pricingRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
+            const fallbackDefaultPrice = Number(get().stallSettings?.defaultPrice) || 5000;
+            const parsedSeatPrice = Number(data.seatPrice);
+            const parsedDefaultStallPrice = Number(data.defaultStallPrice);
             set({
               priceSettings: {
-                defaultStallPrice: data.seatPrice || 5000,
+                defaultStallPrice: parsedSeatPrice || parsedDefaultStallPrice || fallbackDefaultPrice,
                 earlyBirdDiscounts: data.earlyBirdDiscounts || [],
                 bulkBookingDiscounts: data.bulkBookingDiscounts || []
               }
@@ -94,7 +97,13 @@ const useUserStallBookingStore = create(
         const unsubscribe = onSnapshot(stallSettingsRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
-            set({ stallSettings: data });
+            set((state) => ({
+              stallSettings: data,
+              priceSettings: {
+                ...state.priceSettings,
+                defaultStallPrice: Number(state.priceSettings.defaultStallPrice) || Number(data.defaultPrice) || 5000
+              }
+            }));
             
             // Set event date for discount calculations
             if (data.eventDates?.startDate) {
@@ -151,27 +160,28 @@ const useUserStallBookingStore = create(
       // Generate stalls based on settings
       generateStalls: () => {
         const { stallSettings } = get();
-        
-        if (stallSettings?.stalls?.length > 0) {
-          return stallSettings.stalls
-            .filter(stall => stall.isActive)
-            .map(stall => ({
-              id: stall.id,
-              number: parseInt(stall.id.replace('S', '')),
-              name: stall.name,
-              size: stall.size,
-              price: stall.price
-            }));
-        }
-        
         const totalStalls = stallSettings?.totalStalls || 70;
+
+        // Always honor totalStalls so admin changes (e.g. 70 -> 100) reflect immediately.
+        const configuredStallsMap = new Map(
+          (stallSettings?.stalls || []).map((stall) => [stall.id, stall])
+        );
+
         return Array.from({ length: totalStalls }, (_, i) => ({
           id: `S${i + 1}`,
           number: i + 1,
-          name: `Stall S${i + 1}`,
-          size: '10x10 ft',
-          price: stallSettings?.defaultPrice || 5000
-        }));
+          name: configuredStallsMap.get(`S${i + 1}`)?.name || `Stall S${i + 1}`,
+          size: configuredStallsMap.get(`S${i + 1}`)?.size || '10x10 ft',
+          price: Number(configuredStallsMap.get(`S${i + 1}`)?.price) || Number(stallSettings?.defaultPrice) || Number(get().priceSettings.defaultStallPrice) || 5000,
+          isActive: configuredStallsMap.get(`S${i + 1}`)?.isActive !== false
+        })).filter((stall) => stall.isActive !== false);
+      },
+
+      getStallUnitPrice: (stallId) => {
+        const { stallSettings, priceSettings } = get();
+        const configuredStall = stallSettings?.stalls?.find(stall => stall.id === stallId);
+        // Price Settings should drive user booking price.
+        return Number(priceSettings.defaultStallPrice) || Number(configuredStall?.price) || Number(stallSettings?.defaultPrice) || 5000;
       },
 
       // Get stall status
@@ -270,12 +280,11 @@ const useUserStallBookingStore = create(
 
       // Price calculation utilities
       calculatePriceBreakdown: () => {
-        const { selectedStalls, priceSettings, eventDetails } = get();
-        const basePrice = priceSettings.defaultStallPrice;
+        const { selectedStalls, priceSettings, eventDetails, getStallUnitPrice } = get();
         const quantity = selectedStalls.length;
         
         // Calculate base amount
-        const baseAmount = basePrice * quantity;
+        const baseAmount = selectedStalls.reduce((sum, stallId) => sum + getStallUnitPrice(stallId), 0);
         
         // Calculate early bird discount
         let earlyBirdPercent = 0;
@@ -406,8 +415,12 @@ const useUserStallBookingStore = create(
               userId: user.uid,
               vendorDetails,
               stallIds: selectedStalls,
+              stalls: selectedStalls.map(stallId => ({
+                stallId,
+                price: get().getStallUnitPrice(stallId)
+              })),
               numberOfStalls: selectedStalls.length,
-              duration: eventDetails.duration || '5 days',
+              duration: eventDetails.duration || '3 days',
               totalAmount: getTotalAmount(),
               payment: {
                 ...paymentData,
@@ -419,9 +432,9 @@ const useUserStallBookingStore = create(
               updatedAt: serverTimestamp(),
               expiryTime,
               eventDetails: {
-                startDate: eventDetails.startDate || new Date('2025-11-15'),
-                endDate: eventDetails.endDate || new Date('2025-11-20'),
-                duration: eventDetails.duration || '5 days',
+                startDate: eventDetails.startDate || null,
+                endDate: eventDetails.endDate || null,
+                duration: eventDetails.duration || '3 days',
                 type: 'vendor_stall'
               }
             });
@@ -437,7 +450,7 @@ const useUserStallBookingStore = create(
 
       // Helper functions
       calculateDuration: (startDate, endDate) => {
-        if (!startDate || !endDate) return '5 days';
+        if (!startDate || !endDate) return '3 days';
         const start = new Date(startDate);
         const end = new Date(endDate);
         const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
@@ -445,7 +458,7 @@ const useUserStallBookingStore = create(
       },
 
       formatDuration: (startDate, endDate) => {
-        if (!startDate || !endDate) return 'Nov 15 - Nov 20, 2025 (5 Days)';
+        if (!startDate || !endDate) return 'Date will be announced';
         const start = new Date(startDate);
         const end = new Date(endDate);
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -474,11 +487,26 @@ const useUserStallBookingStore = create(
     }),
     {
       name: 'stall-booking-storage',
+      version: 2,
+      migrate: (persistedState) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return persistedState;
+        }
+        return {
+          vendorDetails: persistedState.vendorDetails || {
+            businessType: '',
+            ownerName: '',
+            email: '',
+            phone: '',
+            address: '',
+            aadhar: '',
+            pan: ''
+          }
+        };
+      },
       partialize: (state) => ({
-        // Only persist selected stalls and vendor details
-        selectedStalls: state.selectedStalls,
-        vendorDetails: state.vendorDetails,
-        currentStep: state.currentStep
+        // Keep only form data; flow state should reset on refresh
+        vendorDetails: state.vendorDetails
       })
     }
   )

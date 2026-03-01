@@ -22,6 +22,11 @@ export const createSponsorApplication = async (sponsorData) => {
     const docRef = await addDoc(collection(db, SPONSORS_COLLECTION), {
       ...sponsorData,
       status: 'pending',
+      reviewStatus: 'pending',
+      adminNotes: '',
+      confirmedAt: null,
+      eventDate: null,
+      eventTime: null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       type: 'sponsor'
@@ -50,6 +55,11 @@ export const createPerformerApplication = async (performerData) => {
     const docRef = await addDoc(collection(db, PERFORMERS_COLLECTION), {
       ...normalizedPerformerData,
       status: 'pending',
+      reviewStatus: 'pending',
+      adminNotes: '',
+      confirmedAt: null,
+      performanceDate: null,
+      performanceTime: null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       type: 'performer'

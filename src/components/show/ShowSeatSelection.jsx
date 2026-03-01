@@ -16,8 +16,7 @@ export default function ShowSeatSelection() {
     getBulkDiscount,
     getNextMilestone,
     getCurrentDiscountInfo,
-    showSettings,
-    seats
+    showSettings
   } = useUserShowBookingStore();
 
   const formatTime = (time) => {
@@ -29,11 +28,10 @@ export default function ShowSeatSelection() {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const activeShows = showSettings?.shows?.filter(show => show.active === true) || [];
+  const activeShows = showSettings?.shows?.filter(
+    (show) => show?.active === true || show?.isActive === true
+  ) || [];
   const currentShow = activeShows.length > 0 ? activeShows[0] : null;
-
-  // Get all seats for display
-  const allSeats = seats || {};
 
   return (
     <div className="space-y-6 p-0 md:p-2">

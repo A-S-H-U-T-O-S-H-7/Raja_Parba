@@ -81,10 +81,15 @@ const useUserShowBookingStore = create(
         const unsubscribe = onSnapshot(pricingRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
+            const seatTypes = data.seatTypes || {};
             const newPriceSettings = {
               seatTypes: {
-                VIP: { price: data.seatTypes?.blockA?.price || 1200 },
-                REGULAR_C: { price: data.seatTypes?.blockC?.price || 600 },
+                VIP: { 
+                  price: seatTypes.blockA?.price || seatTypes.blockB?.price || 1200 
+                },
+                REGULAR_C: { 
+                  price: seatTypes.blockC?.price || 600 
+                },
                 REGULAR_D: { price: data.seatTypes?.blockD?.price || 400 }
               },
               earlyBirdDiscounts: data.earlyBirdDiscounts || [],
@@ -156,8 +161,21 @@ const useUserShowBookingStore = create(
 
       // Get seat price based on seat ID
       getSeatPrice: (seatId) => {
-        const { priceSettings } = get();
+        const { priceSettings, showSettings } = get();
         const seatStr = String(seatId);
+        const blockId = seatStr.split('-')[0];
+        const premiumBlocks = showSettings?.seatLayout?.premiumBlocks || [];
+        const regularBlocks = showSettings?.seatLayout?.regularBlocks || [];
+        const premiumBlock = premiumBlocks.find((block) => block.id === blockId);
+        const regularBlock = regularBlocks.find((block) => block.id === blockId);
+
+        if (premiumBlock?.price != null) {
+          return premiumBlock.price;
+        }
+
+        if (regularBlock?.price != null) {
+          return regularBlock.price;
+        }
         
         if (seatStr.startsWith('A-') || seatStr.startsWith('B-')) {
           return priceSettings.seatTypes.VIP.price;
@@ -526,12 +544,25 @@ const useUserShowBookingStore = create(
     }),
     {
       name: 'show-booking-storage',
+      version: 2,
+      migrate: (persistedState) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return persistedState;
+        }
+        return {
+          userDetails: persistedState.userDetails || {
+            name: '',
+            email: '',
+            phone: '',
+            aadhar: '',
+            pan: '',
+            address: '',
+            emergencyContact: ''
+          }
+        };
+      },
       partialize: (state) => ({
-        selectedSeats: state.selectedSeats,
-        selectedDate: state.selectedDate,
-        selectedShift: state.selectedShift,
-        userDetails: state.userDetails,
-        currentStep: state.currentStep
+        userDetails: state.userDetails
       })
     }
   )

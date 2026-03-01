@@ -1,48 +1,45 @@
-// components/show/ShowAuditorium.jsx
 "use client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ChevronDown, Info, ZoomIn, ZoomOut } from 'lucide-react';
 import useUserShowBookingStore from '@/lib/stores/useUserShowBooking';
 
+const DEFAULT_PREMIUM_BLOCKS = [
+  { id: 'A', name: 'Block A', maxRows: 8, maxPairsPerRow: 7, isActive: true },
+  { id: 'B', name: 'Block B', maxRows: 8, maxPairsPerRow: 7, isActive: true }
+];
+
+const DEFAULT_REGULAR_BLOCKS = [
+  { id: 'C', name: 'Block C', maxRows: 25, maxSeatsPerRow: 15, isActive: true },
+  { id: 'D', name: 'Block D', maxRows: 25, maxSeatsPerRow: 15, isActive: true }
+];
+
 export default function ShowAuditorium() {
-  const { 
-    selectedSeats, 
+  const {
+    selectedSeats,
     toggleSeat,
     getSeatColor,
     getSeatStatus,
     getSeatPrice,
-    selectedDate,
     showSettings
   } = useUserShowBookingStore();
 
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const premiumBlocks = (showSettings?.seatLayout?.premiumBlocks || DEFAULT_PREMIUM_BLOCKS)
+    .filter((block) => block?.isActive !== false);
+  const regularBlocks = (showSettings?.seatLayout?.regularBlocks || DEFAULT_REGULAR_BLOCKS)
+    .filter((block) => block?.isActive !== false);
 
-  // Generate seat layout based on settings
   const generateSeats = () => {
     const seats = {};
-    const premiumBlocks = showSettings?.seatLayout?.premiumBlocks || [
-      { id: 'A', maxRows: 8, maxPairsPerRow: 7 },
-      { id: 'B', maxRows: 8, maxPairsPerRow: 7 }
-    ];
-    const regularBlocks = showSettings?.seatLayout?.regularBlocks || [
-      { id: 'C', maxRows: 25, maxSeatsPerRow: 15 },
-      { id: 'D', maxRows: 25, maxSeatsPerRow: 15 }
-    ];
 
-    // Premium seats (A & B)
-    premiumBlocks.forEach(block => {
-      for (let row = 1; row <= block.maxRows; row++) {
-        for (let pair = 0; pair < block.maxPairsPerRow; pair++) {
+    premiumBlocks.forEach((block) => {
+      const rows = Number(block.maxRows) || 0;
+      const pairs = Number(block.maxPairsPerRow) || 0;
+      for (let row = 1; row <= rows; row++) {
+        for (let pair = 0; pair < pairs; pair++) {
           const letter = String.fromCharCode(65 + pair);
-          [1, 2].forEach(pos => {
+          [1, 2].forEach((pos) => {
             const seatId = `${block.id}-R${row}-${letter}${pos}`;
             seats[seatId] = { id: seatId };
           });
@@ -50,10 +47,11 @@ export default function ShowAuditorium() {
       }
     });
 
-    // Regular seats (C & D)
-    regularBlocks.forEach(block => {
-      for (let row = 1; row <= block.maxRows; row++) {
-        for (let seat = 1; seat <= block.maxSeatsPerRow; seat++) {
+    regularBlocks.forEach((block) => {
+      const rows = Number(block.maxRows) || 0;
+      const seatsPerRow = Number(block.maxSeatsPerRow) || 0;
+      for (let row = 1; row <= rows; row++) {
+        for (let seat = 1; seat <= seatsPerRow; seat++) {
           const seatId = `${block.id}-R${row}-S${seat}`;
           seats[seatId] = { id: seatId };
         }
@@ -66,11 +64,11 @@ export default function ShowAuditorium() {
   const allSeats = generateSeats();
 
   const getFreeSeatsCount = () => {
-    const counts = { A: 0, B: 0, C: 0, D: 0 };
-    Object.keys(allSeats).forEach(seatId => {
+    const counts = {};
+    Object.keys(allSeats).forEach((seatId) => {
       if (getSeatStatus(seatId) === 'available') {
         const section = seatId.charAt(0);
-        counts[section]++;
+        counts[section] = (counts[section] || 0) + 1;
       }
     });
     return counts;
@@ -80,92 +78,84 @@ export default function ShowAuditorium() {
   const totalFree = Object.values(freeSeats).reduce((a, b) => a + b, 0);
 
   const renderVIPSection = () => {
-    const rows = Array.from({ length: 8 }, (_, i) => i + 1);
-    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    if (premiumBlocks.length === 0) return null;
+    const hasTwoColumns = premiumBlocks.length === 2;
+    const maxRows = Math.max(...premiumBlocks.map((block) => Number(block.maxRows) || 0));
+    const rows = Array.from({ length: maxRows }, (_, i) => i + 1);
 
     return (
       <div className="mb-8">
         <div className="text-center mb-4">
           <h3 className="text-xl font-bold text-amber-700">Premium Seating</h3>
-          <p className="text-sm text-gray-600">₹{getSeatPrice('A-R1-A1').toLocaleString()} per seat</p>
+          <p className="text-sm text-gray-600">
+            From Rs {getSeatPrice(`${premiumBlocks[0].id}-R1-A1`).toLocaleString()} per seat
+          </p>
         </div>
 
-        <div className="flex items-center justify-center gap-8 mb-4">
-          <div className="px-6 py-2 bg-amber-50 border-2 border-amber-300 rounded-lg font-bold text-amber-800">
-            Block A
-          </div>
-          <div className="w-12"></div>
-          <div className="px-6 py-2 bg-amber-50 border-2 border-amber-300 rounded-lg font-bold text-amber-800">
-            Block B
-          </div>
+        <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+          {premiumBlocks.map((block) => (
+            <div key={block.id} className="px-6 py-2 bg-amber-50 border-2 border-amber-300 rounded-lg font-bold text-amber-800">
+              {block.name || `Block ${block.id}`}
+            </div>
+          ))}
         </div>
 
         <div className="space-y-2">
-          {rows.map(row => (
-            <div key={row} className="flex items-center justify-center gap-8">
-              {/* Block A */}
-              <div className="flex gap-1">
-                {letters.map(letter => (
-                  <div key={letter} className="flex gap-0.5">
-                    {[1, 2].map(pos => {
-                      const seatId = `A-R${row}-${letter}${pos}`;
-                      if (!allSeats[seatId]) return null;
-                      const isSelected = selectedSeats.includes(seatId);
-                      const status = getSeatStatus(seatId);
-                      
-                      return (
-                        <button
-                          key={seatId}
-                          onClick={() => toggleSeat(seatId)}
-                          disabled={status !== 'available' && !isSelected}
-                          className={`
-                            w-7 h-6 rounded-md text-xs font-bold transition-all
-                            ${getSeatColor(seatId)}
-                            ${status === 'available' || isSelected ? 'hover:scale-105 cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                            border border-amber-200 shadow-sm
-                          `}
-                        >
-                          {letter}{pos}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
+          {rows.map((row) => (
+            <div key={row} className="flex items-center justify-center gap-4 flex-wrap">
+              {premiumBlocks.map((block, index) => {
+                const blockRows = Number(block.maxRows) || 0;
+                const pairCount = Number(block.maxPairsPerRow) || 0;
+                const blockContent = row > blockRows
+                  ? <div key={`${block.id}-${row}`} className="min-w-[140px] h-6" />
+                  : (
+                    <div key={`${block.id}-${row}`} className="flex gap-1">
+                      {Array.from({ length: pairCount }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
+                        <div key={`${block.id}-${letter}`} className="flex gap-0.5">
+                          {[1, 2].map((pos) => {
+                            const seatId = `${block.id}-R${row}-${letter}${pos}`;
+                            if (!allSeats[seatId]) return null;
+                            const isSelected = selectedSeats.includes(seatId);
+                            const status = getSeatStatus(seatId);
+                            return (
+                              <button
+                                key={seatId}
+                                onClick={() => toggleSeat(seatId)}
+                                disabled={status !== 'available' && !isSelected}
+                                className={`
+                                  w-7 h-6 rounded-md text-xs font-bold transition-all
+                                  ${getSeatColor(seatId)}
+                                  ${status === 'available' || isSelected ? 'hover:scale-105 cursor-pointer' : 'cursor-not-allowed opacity-50'}
+                                  border border-amber-200 shadow-sm
+                                `}
+                              >
+                                {letter}{pos}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  );
 
-              <div className="w-12 text-center font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded">
-                R{row}
-              </div>
+                if (hasTwoColumns && index === 0) {
+                  return (
+                    <div key={`vip-left-${row}`} className="flex items-center gap-4">
+                      {blockContent}
+                      <div className="w-12 text-center font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded">
+                        R{row}
+                      </div>
+                    </div>
+                  );
+                }
 
-              {/* Block B */}
-              <div className="flex gap-1">
-                {letters.map(letter => (
-                  <div key={letter} className="flex gap-0.5">
-                    {[1, 2].map(pos => {
-                      const seatId = `B-R${row}-${letter}${pos}`;
-                      if (!allSeats[seatId]) return null;
-                      const isSelected = selectedSeats.includes(seatId);
-                      const status = getSeatStatus(seatId);
-                      
-                      return (
-                        <button
-                          key={seatId}
-                          onClick={() => toggleSeat(seatId)}
-                          disabled={status !== 'available' && !isSelected}
-                          className={`
-                            w-7 h-6 rounded-md text-xs font-bold transition-all
-                            ${getSeatColor(seatId)}
-                            ${status === 'available' || isSelected ? 'hover:scale-105 cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                            border border-amber-200 shadow-sm
-                          `}
-                        >
-                          {letter}{pos}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
+                return blockContent;
+              })}
+              {!hasTwoColumns && (
+                <div className="w-12 text-center font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded">
+                  R{row}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -174,85 +164,88 @@ export default function ShowAuditorium() {
   };
 
   const renderRegularSection = () => {
-    const rows = Array.from({ length: 25 }, (_, i) => i + 1);
+    if (regularBlocks.length === 0) return null;
+    const hasTwoColumns = regularBlocks.length === 2;
+    const maxRows = Math.max(...regularBlocks.map((block) => Number(block.maxRows) || 0));
+    const rows = Array.from({ length: maxRows }, (_, i) => i + 1);
 
     return (
       <div>
         <div className="text-center mb-4">
           <h3 className="text-xl font-bold text-emerald-700">Regular Seating</h3>
           <p className="text-sm text-gray-600">
-            Block C: ₹{getSeatPrice('C-R1-S1').toLocaleString()} | Block D: ₹{getSeatPrice('D-R1-S1').toLocaleString()}
+            {regularBlocks.map((block) => `${block.name || `Block ${block.id}`}: Rs ${getSeatPrice(`${block.id}-R1-S1`).toLocaleString()}`).join(' | ')}
           </p>
         </div>
 
-        <div className="flex items-center justify-center gap-8 mb-4">
-          <div className="px-6 py-2 bg-emerald-50 border-2 border-emerald-300 rounded-lg font-bold text-emerald-800">
-            Block C
-          </div>
-          <div className="w-12"></div>
-          <div className="px-6 py-2 bg-teal-50 border-2 border-teal-300 rounded-lg font-bold text-teal-800">
-            Block D
-          </div>
+        <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+          {regularBlocks.map((block, index) => (
+            <div
+              key={block.id}
+              className={`px-6 py-2 border-2 rounded-lg font-bold ${
+                index % 2 === 0
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                  : 'bg-teal-50 border-teal-300 text-teal-800'
+              }`}
+            >
+              {block.name || `Block ${block.id}`}
+            </div>
+          ))}
         </div>
 
         <div className="space-y-2">
-          {rows.slice(0, 10).map(row => (
-            <div key={row} className="flex items-center justify-center gap-8">
-              {/* Block C */}
-              <div className="flex gap-1">
-                {Array.from({ length: 15 }, (_, i) => i + 1).map(seat => {
-                  const seatId = `C-R${row}-S${seat}`;
-                  if (!allSeats[seatId]) return null;
-                  const isSelected = selectedSeats.includes(seatId);
-                  const status = getSeatStatus(seatId);
-                  
-                  return (
-                    <button
-                      key={seatId}
-                      onClick={() => toggleSeat(seatId)}
-                      disabled={status !== 'available' && !isSelected}
-                      className={`
-                        w-5 h-5 rounded text-xs font-bold transition-all
-                        ${getSeatColor(seatId)}
-                        ${status === 'available' || isSelected ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                        border border-emerald-200 shadow-sm
-                      `}
-                    >
-                      {seat}
-                    </button>
+          {rows.map((row) => (
+            <div key={row} className="flex items-center justify-center gap-4 flex-wrap">
+              {regularBlocks.map((block, index) => {
+                const blockRows = Number(block.maxRows) || 0;
+                const seatsCount = Number(block.maxSeatsPerRow) || 0;
+                const blockContent = row > blockRows
+                  ? <div key={`${block.id}-${row}`} className="min-w-[140px] h-5" />
+                  : (
+                    <div key={`${block.id}-${row}`} className="flex gap-1">
+                      {Array.from({ length: seatsCount }, (_, i) => i + 1).map((seat) => {
+                        const seatId = `${block.id}-R${row}-S${seat}`;
+                        if (!allSeats[seatId]) return null;
+                        const isSelected = selectedSeats.includes(seatId);
+                        const status = getSeatStatus(seatId);
+                        const borderClass = index % 2 === 0 ? 'border-emerald-200' : 'border-teal-200';
+                        return (
+                          <button
+                            key={seatId}
+                            onClick={() => toggleSeat(seatId)}
+                            disabled={status !== 'available' && !isSelected}
+                            className={`
+                              w-5 h-5 rounded text-xs font-bold transition-all
+                              ${getSeatColor(seatId)}
+                              ${status === 'available' || isSelected ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-50'}
+                              ${borderClass} border shadow-sm
+                            `}
+                          >
+                            {seat}
+                          </button>
+                        );
+                      })}
+                    </div>
                   );
-                })}
-              </div>
 
-              <div className="w-10 text-center text-xs font-bold text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
-                R{row}
-              </div>
-
-              {/* Block D */}
-              <div className="flex gap-1">
-                {Array.from({ length: 15 }, (_, i) => i + 1).map(seat => {
-                  const seatId = `D-R${row}-S${seat}`;
-                  if (!allSeats[seatId]) return null;
-                  const isSelected = selectedSeats.includes(seatId);
-                  const status = getSeatStatus(seatId);
-                  
+                if (hasTwoColumns && index === 0) {
                   return (
-                    <button
-                      key={seatId}
-                      onClick={() => toggleSeat(seatId)}
-                      disabled={status !== 'available' && !isSelected}
-                      className={`
-                        w-5 h-5 rounded text-xs font-bold transition-all
-                        ${getSeatColor(seatId)}
-                        ${status === 'available' || isSelected ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                        border border-teal-200 shadow-sm
-                      `}
-                    >
-                      {seat}
-                    </button>
+                    <div key={`regular-left-${row}`} className="flex items-center gap-4">
+                      {blockContent}
+                      <div className="w-10 text-center text-xs font-bold text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
+                        R{row}
+                      </div>
+                    </div>
                   );
-                })}
-              </div>
+                }
+
+                return blockContent;
+              })}
+              {!hasTwoColumns && (
+                <div className="w-10 text-center text-xs font-bold text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
+                  R{row}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -262,7 +255,6 @@ export default function ShowAuditorium() {
 
   return (
     <div className="p-4 bg-white rounded-xl border border-gray-200">
-      {/* Header with Zoom */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900">Auditorium Layout</h2>
         <div className="flex items-center gap-2">
@@ -283,32 +275,20 @@ export default function ShowAuditorium() {
         </div>
       </div>
 
-      {/* Available Seats Summary */}
       <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg">
-            <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
-            <span className="font-semibold text-amber-800">A: {freeSeats.A}</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg">
-            <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
-            <span className="font-semibold text-amber-800">B: {freeSeats.B}</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-emerald-100 rounded-lg">
-            <div className="w-3 h-3 bg-emerald-400 rounded-full"></div>
-            <span className="font-semibold text-emerald-800">C: {freeSeats.C}</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-teal-100 rounded-lg">
-            <div className="w-3 h-3 bg-teal-400 rounded-full"></div>
-            <span className="font-semibold text-teal-800">D: {freeSeats.D}</span>
-          </div>
+          {Object.entries(freeSeats).map(([section, count]) => (
+            <div key={section} className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg">
+              <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
+              <span className="font-semibold text-amber-800">{section}: {count}</span>
+            </div>
+          ))}
           <div className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold">
             Total: {totalFree}
           </div>
         </div>
       </div>
 
-      {/* Legend */}
       <div className="flex flex-wrap justify-center gap-4 mb-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-gradient-to-br from-amber-300 to-yellow-400 rounded"></div>
@@ -316,11 +296,7 @@ export default function ShowAuditorium() {
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-emerald-400 rounded"></div>
-          <span>Block C Available</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-teal-300 rounded"></div>
-          <span>Block D Available</span>
+          <span>Regular Available</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-blue-600 rounded"></div>
@@ -332,30 +308,25 @@ export default function ShowAuditorium() {
         </div>
       </div>
 
-      {/* Layout */}
-      <div 
+      <div
         className="overflow-auto"
         style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center' }}
       >
         <div className="min-w-max pb-4">
-          {/* Stage */}
           <div className="text-center mb-6">
             <div className="inline-block px-12 py-3 bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-dashed border-yellow-400 rounded-lg">
-              <span className="text-lg font-bold text-yellow-700">🎭 STAGE 🎪</span>
+              <span className="text-lg font-bold text-yellow-700">STAGE</span>
             </div>
           </div>
 
           {renderVIPSection()}
-
           <div className="flex justify-center my-4">
             <div className="w-3/4 h-px bg-gray-300"></div>
           </div>
-
           {renderRegularSection()}
         </div>
       </div>
 
-      {/* Scroll Down Button */}
       {selectedSeats.length > 0 && (
         <div className="mt-4 flex justify-end">
           <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-lg px-3 py-1">

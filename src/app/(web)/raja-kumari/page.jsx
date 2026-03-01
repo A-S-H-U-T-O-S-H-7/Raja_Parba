@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Crown, User, Mail, Phone, MapPin, Calendar, Cake, Camera } from "lucide-react";
 import { createRajaKumariApplication } from "@/services/rajaKumariService";
+import useAuthStore from "@/lib/stores/useAuthStore";
 
 const competitionItems = [
   "Self-introduction",
@@ -43,6 +44,7 @@ const calculateAgeFromDob = (dobString) => {
 
 export default function RajaKumariPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [form, setForm] = useState(initialForm);
   const [candidatePhoto, setCandidatePhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
@@ -81,6 +83,7 @@ export default function RajaKumariPage() {
       dob: form.dob || "",
       age: Number(form.age || 0),
       ageGroup: "6-15",
+      userId: user?.uid || null,
     };
 
     const hasAllRequired =
@@ -131,12 +134,12 @@ export default function RajaKumariPage() {
       await Swal.fire({
         icon: "success",
         title: "Registration Submitted",
-        text: "Raja Kumari registration submitted successfully. Redirecting to home...",
+        text: "Raja Kumari registration submitted successfully. Redirecting to your profile...",
         timer: 2300,
         showConfirmButton: false,
       });
 
-      router.push("/");
+      router.push("/profile");
     } catch (error) {
       console.error("Error submitting Raja Kumari registration:", error);
       await Swal.fire({

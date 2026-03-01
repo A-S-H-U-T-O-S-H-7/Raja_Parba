@@ -23,8 +23,7 @@ export default function ShowPaymentProcess({ onBack }) {
     getBulkDiscount,
     getCurrentDiscountInfo,
     processBooking,
-    showSettings,
-    seats
+    showSettings
   } = useUserShowBookingStore();
 
   // Format time to AM/PM format
@@ -43,30 +42,6 @@ export default function ShowPaymentProcess({ onBack }) {
   ) || [];
   
   const currentShow = activeShows.length > 0 ? activeShows[0] : null;
-
-  // SAFE: Group selected seats by type with error handling
-  const seatsByType = selectedSeats.reduce((acc, seatId) => {
-    // Safely access seats object
-    const seat = seats && seats[seatId] ? seats[seatId] : null;
-    
-    // Determine seat type based on ID pattern if seat object is not available
-    let type = 'REGULAR';
-    if (seat?.type) {
-      type = seat.type;
-    } else if (seatId) {
-      if (seatId.startsWith('A-') || seatId.startsWith('B-')) {
-        type = 'VIP';
-      } else if (seatId.startsWith('C-')) {
-        type = 'REGULAR_C';
-      } else if (seatId.startsWith('D-')) {
-        type = 'REGULAR_D';
-      }
-    }
-    
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(seatId);
-    return acc;
-  }, {});
 
   const handlePayment = async () => {
     if (!user) {

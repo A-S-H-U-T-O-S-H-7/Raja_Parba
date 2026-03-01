@@ -3,12 +3,15 @@
 import { useEffect } from 'react';
 import { Store, UserCheck, CreditCard, Check } from 'lucide-react';
 import useUserStallBookingStore from '@/lib/stores/useUserStallBookingStore';
+import { useStallCleanup } from '@/hooks/useStallCleanup';
 import StallMap from './StallMap';
 import VendorDetails from './VendorDetails';
 import StallPaymentProcess from './StallPaymentProcess';
 import DonateBar from '../donation/DonationBar';
 
 export default function StallBookingFlow() {
+  useStallCleanup();
+
   const { 
     currentStep,
     nextStep,

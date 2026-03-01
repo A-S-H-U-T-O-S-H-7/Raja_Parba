@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Mic, User, Mail, Phone, MapPin, Music2, Users, UserCircle2, Clock3 } from "lucide-react";
 import { createPerformerApplication } from "@/services/sponsorPerformerService";
+import useAuthStore from "@/lib/stores/useAuthStore";
 
 const performanceOptions = ["Song", "Dance", "Others"];
 const participationOptions = ["Solo", "Group"];
@@ -28,6 +29,7 @@ const initialForm = {
 
 export default function PerformerPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
 
@@ -135,6 +137,7 @@ export default function PerformerPage() {
       memberNames: isGroup ? (form.memberNames || []) : [],
       trackMusicName: form.trackMusicName.trim(),
       trackDuration: form.trackDuration.trim(),
+      userId: user?.uid || null,
     };
 
     try {
@@ -151,12 +154,12 @@ export default function PerformerPage() {
       await Swal.fire({
         icon: "success",
         title: "Application Submitted",
-        text: "Thank you for applying as a performer. Redirecting to home page...",
+        text: "Thank you for applying as a performer. Redirecting to your profile...",
         timer: 2200,
         showConfirmButton: false,
       });
 
-      router.push("/");
+      router.push("/profile");
     } catch (error) {
       console.error("Error submitting performer application:", error);
       await Swal.fire({

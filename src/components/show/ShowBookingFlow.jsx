@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Calendar, Users, UserCheck, CreditCard, Check } from 'lucide-react';
 import useUserShowBookingStore from '@/lib/stores/useUserShowBooking';
+import { useShowSeatCleanup } from '@/hooks/useShowSeatCleanup';
 import ShowDateSelection from './ShowDateSelection';
 import ShowSeatSelection from './ShowSeatSelection';
 import ShowUserDetails from './ShowUserDetails';
@@ -10,6 +11,8 @@ import ShowPaymentProcess from './ShowPaymentProcess';
 import DonateBar from '../donation/DonationBar';
 
 export default function ShowBookingFlow() {
+  useShowSeatCleanup();
+
   const { 
     currentStep,
     nextStep,

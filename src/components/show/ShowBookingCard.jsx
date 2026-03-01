@@ -3,11 +3,11 @@ import { format, differenceInDays } from 'date-fns';
 import { useState } from 'react';
 import { cancelBooking } from '@/utils/cancellationUtils';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '@/context/AuthContext';
+import useAuthStore from '@/lib/stores/useAuthStore';
 import PassReceiptModal from '../PassReceiptModal';
 
 const ShowBookingCard = ({ booking, onCancel }) => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [isCancelling, setIsCancelling] = useState(false);
     const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   

@@ -65,7 +65,7 @@ function ShowModal({ isOpen, onClose }) {
             </Link>
             
             {/* Free Entry Badge */}
-            <Link href="/delegate">
+            <Link href="/free-pass">
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

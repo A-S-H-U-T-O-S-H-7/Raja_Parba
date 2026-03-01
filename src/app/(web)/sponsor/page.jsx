@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Heart, User, Mail, Phone, Building2, MapPin } from "lucide-react";
 import { createSponsorApplication } from "@/services/sponsorPerformerService";
+import useAuthStore from "@/lib/stores/useAuthStore";
 
 const initialForm = {
   name: "",
@@ -17,6 +18,7 @@ const initialForm = {
 
 export default function SponsorPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,6 +36,7 @@ export default function SponsorPage() {
       organization: form.organization.trim(),
       address: form.address.trim(),
       city: form.city.trim(),
+      userId: user?.uid || null,
     };
 
     const hasAllFields = Object.values(payload).every(Boolean);
@@ -60,12 +63,12 @@ export default function SponsorPage() {
       await Swal.fire({
         icon: "success",
         title: "Request Submitted",
-        text: "Thank you for your sponsorship interest. Redirecting to home page...",
+        text: "Thank you for your sponsorship interest. Redirecting to your profile...",
         timer: 2200,
         showConfirmButton: false,
       });
 
-      router.push("/");
+      router.push("/profile");
     } catch (error) {
       console.error("Error submitting sponsor application:", error);
       await Swal.fire({
