@@ -62,6 +62,33 @@ function PaymentFailedContent() {
   }, [searchParams]);
 
   useEffect(() => {
+    const syncPaymentStatus = async () => {
+      if (!paymentInfo?.order_id) return;
+      if (!["failed", "cancelled"].includes(String(paymentInfo.status || "").toLowerCase())) return;
+
+      try {
+        await fetch('/api/payment/sync-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: paymentInfo.order_id,
+            status: paymentInfo.status,
+            amount: paymentInfo.amount,
+            tracking_id: paymentInfo.tracking_id,
+            status_message: paymentInfo.status_message,
+            failure_message: paymentInfo.failure_message,
+            payment_method: paymentInfo.payment_method
+          })
+        });
+      } catch (error) {
+        console.error('Payment status sync failed:', error);
+      }
+    };
+
+    syncPaymentStatus();
+  }, [paymentInfo]);
+
+  useEffect(() => {
     const fetchBookingDetails = async () => {
       if (paymentInfo?.order_id && paymentInfo.order_id !== "error") {
         try {

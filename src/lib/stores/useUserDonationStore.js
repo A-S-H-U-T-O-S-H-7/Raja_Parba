@@ -120,6 +120,9 @@ const useUserDonationStore = create((set, get) => ({
         id: donationId,
         donationId,
         userId: user?.uid || null,
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.mobile.replace(/\D/g, ''),
         donorDetails: {
           name: formData.fullName,
           email: formData.email,

@@ -50,8 +50,9 @@ function PaymentSuccessContent() {
       const tracking_id = searchParams.get("tracking_id");
       const failure_message = searchParams.get("failure_message");
       const status_message = searchParams.get("status_message");
+      const payment_method = searchParams.get("payment_method");
 
-      setPaymentInfo({ order_id, status, message, amount, tracking_id, failure_message, status_message });
+      setPaymentInfo({ order_id, status, message, amount, tracking_id, failure_message, status_message, payment_method });
     } catch (error) {
       console.error("Error processing payment params:", error);
       setPaymentInfo({
@@ -63,6 +64,35 @@ function PaymentSuccessContent() {
       setIsLoading(false);
     }
   }, [searchParams]);
+
+  // Fallback sync: if gateway redirects directly to this page,
+  // ensure booking/donation status is persisted in Firestore.
+  useEffect(() => {
+    const syncPaymentStatus = async () => {
+      if (!paymentInfo?.order_id) return;
+      if (!["success", "failed", "cancelled"].includes(paymentInfo.status)) return;
+
+      try {
+        await fetch('/api/payment/sync-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: paymentInfo.order_id,
+            status: paymentInfo.status,
+            amount: paymentInfo.amount,
+            tracking_id: paymentInfo.tracking_id,
+            status_message: paymentInfo.status_message,
+            failure_message: paymentInfo.failure_message,
+            payment_method: paymentInfo.payment_method
+          })
+        });
+      } catch (error) {
+        console.error('Payment status sync failed:', error);
+      }
+    };
+
+    syncPaymentStatus();
+  }, [paymentInfo]);
 
   // Fetch dynamic event settings
   useEffect(() => {
