@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '@/context/AuthContext';
+import useAuthStore from '@/lib/stores/useAuthStore';
 import { useLocationData } from '@/hooks/useLocationData';
 import { Heart, Mail, Phone, MapPin, Globe, Building2, MapPinned, Lock, Shield, IndianRupee } from 'lucide-react';
 
@@ -26,7 +26,7 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   const [errors, setErrors] = useState({});
 
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuthStore();
   
   // Use location data hook similar to delegate form
   const { countries, states, cities, loading } = useLocationData(formData);
@@ -88,7 +88,7 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
   };
 
   const handleSubmit = async () => {
-    if (processing) return;
+    if (processing || authLoading) return;
     
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
@@ -118,14 +118,16 @@ export default function DonationForm({ donorType = 'indian', setDonorType }) {
     
     try {
       const { db } = await import('@/lib/firebase');
+      const { auth } = await import('@/lib/firebase');
       const { doc, setDoc, serverTimestamp } = await import('firebase/firestore');
+      const resolvedUser = user || auth.currentUser || null;
       
       const donationRef = doc(db, 'donations', donationId);
       
       await setDoc(donationRef, {
         id: donationId,
         donationId,
-        userId: user?.uid || null,
+        userId: resolvedUser?.uid || null,
         name: formData.fullName,
         email: formData.email,
         phone: formData.mobile.replace(/\D/g, ''),
