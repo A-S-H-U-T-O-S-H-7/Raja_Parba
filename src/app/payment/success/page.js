@@ -17,6 +17,16 @@ function LoadingPaymentResult() {
   );
 }
 
+const normalizePaymentStatus = (status) => {
+  const normalized = String(status || "").toLowerCase();
+
+  if (["success", "succeeded", "completed", "paid"].includes(normalized)) return "success";
+  if (["failed", "failure", "error"].includes(normalized)) return "failed";
+  if (["cancelled", "canceled", "aborted"].includes(normalized)) return "cancelled";
+
+  return normalized || "error";
+};
+
 // Main payment success component
 function PaymentSuccessContent() {
   const [paymentInfo, setPaymentInfo] = useState(null);
@@ -34,12 +44,14 @@ function PaymentSuccessContent() {
   useEffect(() => {
     try {
       const order_id = searchParams.get("order_id");
-      const status = searchParams.get("status");
+      const status = normalizePaymentStatus(searchParams.get("status"));
       const message = searchParams.get("message");
       const amount = searchParams.get("amount");
       const tracking_id = searchParams.get("tracking_id");
+      const failure_message = searchParams.get("failure_message");
+      const status_message = searchParams.get("status_message");
 
-      setPaymentInfo({ order_id, status, message, amount, tracking_id });
+      setPaymentInfo({ order_id, status, message, amount, tracking_id, failure_message, status_message });
     } catch (error) {
       console.error("Error processing payment params:", error);
       setPaymentInfo({
@@ -186,7 +198,13 @@ function PaymentSuccessContent() {
   };
 
   const handleGoHome = () => router.push("/");
-  const handleTryAgain = () => router.push("/booking");
+  const handleTryAgain = () => {
+    if (paymentInfo?.order_id?.startsWith("DN")) {
+      router.push("/donate");
+      return;
+    }
+    router.push("/booking");
+  };
   const handleViewBookings = () => router.push("/profile");
 
   if (isLoading || !paymentInfo) {

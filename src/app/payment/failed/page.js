@@ -116,7 +116,13 @@ function PaymentFailedContent() {
     fetchBookingDetails();
   }, [paymentInfo]);
 
-  const handleTryAgain = () => router.push("/booking");
+  const handleTryAgain = () => {
+    if (paymentInfo?.order_id?.startsWith("DN")) {
+      router.push("/donate");
+      return;
+    }
+    router.push("/booking");
+  };
   const handleGoHome = () => router.push("/");
   const handleContactSupport = () => {
     window.open("mailto:support@svsamiti.com?subject=Payment Failed - Order ID: " + (paymentInfo?.order_id || 'Unknown'), "_blank");

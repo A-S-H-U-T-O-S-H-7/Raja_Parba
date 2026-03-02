@@ -1,13 +1,119 @@
-// app/api/payment/ccavenue-response/route.js
 import { NextResponse } from 'next/server';
+
+const BASE_URL = 'https://rajaparba.svsamiti.com';
+
+const getUiStatusFromOrderStatus = (orderStatus = '') => {
+  const normalized = String(orderStatus).toLowerCase();
+
+  if (normalized === 'success') return 'success';
+  if (normalized === 'aborted' || normalized === 'cancelled' || normalized === 'canceled') {
+    return 'cancelled';
+  }
+
+  return 'failed';
+};
+
+const buildPaymentRedirectUrl = (paymentInfo = {}, fallbackMessage = '') => {
+  const redirectUrl = new URL('/payment/success', BASE_URL);
+  const uiStatus = getUiStatusFromOrderStatus(paymentInfo.order_status);
+
+  redirectUrl.searchParams.set('status', uiStatus);
+  redirectUrl.searchParams.set('order_id', paymentInfo.order_id || '');
+
+  if (paymentInfo.amount) redirectUrl.searchParams.set('amount', paymentInfo.amount);
+  if (paymentInfo.tracking_id) redirectUrl.searchParams.set('tracking_id', paymentInfo.tracking_id);
+  if (paymentInfo.failure_message) redirectUrl.searchParams.set('failure_message', paymentInfo.failure_message);
+  if (paymentInfo.status_message) redirectUrl.searchParams.set('status_message', paymentInfo.status_message);
+  if (paymentInfo.payment_mode) redirectUrl.searchParams.set('payment_method', paymentInfo.payment_mode);
+  if (fallbackMessage) redirectUrl.searchParams.set('message', fallbackMessage);
+
+  return redirectUrl;
+};
+
+async function updateBookingState(paymentInfo) {
+  if (!paymentInfo?.order_id) return;
+
+  try {
+    const { updateBookingAfterPayment, getBookingTypeFromOrderId } = await import('@/services/paymentService');
+    const bookingType = await getBookingTypeFromOrderId(
+      paymentInfo.order_id,
+      paymentInfo.mer_param1 || paymentInfo.merchant_param1 || paymentInfo.purpose
+    );
+
+    await updateBookingAfterPayment(paymentInfo.order_id, paymentInfo, bookingType);
+  } catch (error) {
+    console.error('Failed to update booking after payment response:', error);
+  }
+}
+
+async function processPaymentResponse(encResp, wantsRedirect = false) {
+  if (!encResp) {
+    const message = 'Missing encrypted response';
+
+    if (wantsRedirect) {
+      const redirectUrl = new URL('/payment/success', BASE_URL);
+      redirectUrl.searchParams.set('status', 'error');
+      redirectUrl.searchParams.set('message', message);
+      return NextResponse.redirect(redirectUrl.toString());
+    }
+
+    return NextResponse.json({ status: false, message }, { status: 400 });
+  }
+
+  const formData = new FormData();
+  formData.append('encResp', encResp);
+
+  const upstreamResponse = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
+    method: 'POST',
+    body: formData
+  });
+
+  const text = await upstreamResponse.text();
+  let parsed;
+
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    const message = 'Could not parse payment response';
+
+    if (wantsRedirect) {
+      const redirectUrl = new URL('/payment/success', BASE_URL);
+      redirectUrl.searchParams.set('status', 'error');
+      redirectUrl.searchParams.set('message', message);
+      return NextResponse.redirect(redirectUrl.toString());
+    }
+
+    return NextResponse.json(
+      { status: false, message, rawResponse: text.substring(0, 300) },
+      { status: 502 }
+    );
+  }
+
+  if (parsed?.status && parsed?.data) {
+    await updateBookingState(parsed.data);
+
+    if (wantsRedirect) {
+      const redirectUrl = buildPaymentRedirectUrl(parsed.data);
+      return NextResponse.redirect(redirectUrl.toString());
+    }
+  }
+
+  if (wantsRedirect && (!parsed?.status || !parsed?.data)) {
+    const redirectUrl = new URL('/payment/success', BASE_URL);
+    redirectUrl.searchParams.set('status', 'error');
+    redirectUrl.searchParams.set('message', parsed?.message || 'Invalid payment response');
+    return NextResponse.redirect(redirectUrl.toString());
+  }
+
+  return NextResponse.json(parsed);
+}
 
 export async function POST(request) {
   try {
     let encResp;
-    
-    // Handle both form data and JSON
     const contentType = request.headers.get('content-type') || '';
-    
+    const wantsRedirect = !contentType.includes('application/json');
+
     if (contentType.includes('application/x-www-form-urlencoded')) {
       const formData = await request.formData();
       encResp = formData.get('encResp');
@@ -16,94 +122,23 @@ export async function POST(request) {
       encResp = body.encResp;
     }
 
-    if (!encResp) {
-      return NextResponse.json({
-        status: false,
-        message: 'Missing encrypted response'
-      }, { status: 400 });
-    }
-
-    console.log('🔐 Processing response, length:', encResp.length);
-
-    // CORRECTED ENDPOINT - use FormData
-    const formData = new FormData();
-    formData.append("encResp", encResp);
-
-    const response = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
-      method: 'POST',
-      body: formData
-    });
-
-    const text = await response.text();
-    console.log('📥 Raw response from handler:', text.substring(0, 200));
-
-    // Try to parse as JSON
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      // If not JSON, handle as raw response
-      console.log('Not JSON, treating as raw response');
-      
-      // CORRECTED REDIRECT URL
-      const baseUrl = 'https://rajaparba.svsamiti.com';
-      const redirectUrl = new URL('/payment/success', baseUrl);
-      redirectUrl.searchParams.set('status', 'completed');
-      redirectUrl.searchParams.set('raw_response', 'true');
-      
-      return new Response(`
-        <!DOCTYPE html>
-        <html>
-        <head><meta http-equiv="refresh" content="0;url=${redirectUrl.toString()}" /></head>
-        <body>Redirecting...</body>
-        </html>
-      `, {
-        headers: { 'Content-Type': 'text/html' }
-      });
-    }
-
-    // Process successful response
-    if (data.status && data.data) {
-      const baseUrl = 'https://rajaparba.svsamiti.com';
-      const redirectUrl = new URL('/payment/success', baseUrl);
-      
-      if (data.data.order_status === 'Success') {
-        redirectUrl.searchParams.set('status', 'success');
-        redirectUrl.searchParams.set('order_id', data.data.order_id || '');
-        redirectUrl.searchParams.set('amount', data.data.amount || '');
-        redirectUrl.searchParams.set('tracking_id', data.data.tracking_id || '');
-      } else {
-        redirectUrl.searchParams.set('status', 'failed');
-        redirectUrl.searchParams.set('message', data.data.failure_message || 'Payment failed');
-      }
-      
-      return NextResponse.redirect(redirectUrl.toString());
-    }
-
-    return NextResponse.json(data);
-
+    return processPaymentResponse(encResp, wantsRedirect);
   } catch (error) {
-    console.error('❌ Error:', error);
-    return NextResponse.json({
-      status: false,
-      message: error.message
-    }, { status: 500 });
+    console.error('Error processing CCAvenue response:', error);
+    return NextResponse.json(
+      {
+        status: false,
+        message: error.message || 'Internal server error'
+      },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const encResp = searchParams.get('encResp');
-  
-  if (encResp) {
-    // Convert GET to POST internally
-    const req = new Request(request.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ encResp })
-    });
-    return POST(req);
-  }
-  
-  return NextResponse.redirect(new URL('/', 'https://rajaparba.svsamiti.com'));
+
+  if (!encResp) return NextResponse.redirect(new URL('/', BASE_URL));
+  return processPaymentResponse(encResp, true);
 }
