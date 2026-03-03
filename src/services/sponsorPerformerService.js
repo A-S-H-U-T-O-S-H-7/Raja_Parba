@@ -4,6 +4,7 @@ import {
   getDocs, 
   updateDoc, 
   doc, 
+  runTransaction,
   query, 
   orderBy, 
   where, 
@@ -16,13 +17,47 @@ import { db } from '@/lib/firebase';
 const SPONSORS_COLLECTION = 'sponsors';
 const PERFORMERS_COLLECTION = 'performers';
 
+const getDateCode = (date = new Date()) => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = String(date.getFullYear());
+  return `${day}${month}${year}`;
+};
+
+const getYearShort = (date = new Date()) => String(date.getFullYear()).slice(-2);
+
+const generatePerformerRegistrationId = async () => {
+  const now = new Date();
+  const dateCode = getDateCode(now);
+  const yearShort = getYearShort(now);
+  const counterRef = doc(db, 'application_counters', `performer_${dateCode}`);
+
+  const sequence = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(counterRef);
+    const current = snapshot.exists() ? Number(snapshot.data()?.seq || 0) : 0;
+    const next = current + 1;
+    transaction.set(
+      counterRef,
+      {
+        seq: next,
+        dateCode,
+        updatedAt: Timestamp.now()
+      },
+      { merge: true }
+    );
+    return next;
+  });
+
+  return `orp-${yearShort}-${dateCode}q${sequence}`;
+};
+
 // Create a new sponsor application
 export const createSponsorApplication = async (sponsorData) => {
   try {
     const docRef = await addDoc(collection(db, SPONSORS_COLLECTION), {
       ...sponsorData,
-      status: 'pending',
-      reviewStatus: 'pending',
+      status: 'requested',
+      reviewStatus: 'requested',
       adminNotes: '',
       confirmedAt: null,
       eventDate: null,
@@ -41,8 +76,10 @@ export const createSponsorApplication = async (sponsorData) => {
 // Create a new performer application
 export const createPerformerApplication = async (performerData) => {
   try {
+    const registrationId = await generatePerformerRegistrationId();
     const normalizedPerformerData = {
       ...performerData,
+      registrationId,
       performanceType:
         performerData.performanceType ||
         performerData.customPerformanceType ||
@@ -64,7 +101,7 @@ export const createPerformerApplication = async (performerData) => {
       updatedAt: Timestamp.now(),
       type: 'performer'
     });
-    return { id: docRef.id, success: true };
+    return { id: docRef.id, registrationId, success: true };
   } catch (error) {
     console.error('Error creating performer application:', error);
     throw error;

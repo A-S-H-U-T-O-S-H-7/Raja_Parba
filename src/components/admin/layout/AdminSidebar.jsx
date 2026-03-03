@@ -56,12 +56,18 @@ const navigation = [
     permission: 'manage_show_seats'
   },
  
-{
-  name: 'Raja Activity',
-  href: '/admin/raja-activities',
-  icon: Sparkles,
-  permission: 'view_sponsor_performer'
+  {
+    name: 'Raja Activity',
+    href: '/admin/raja-activities',
+    icon: Sparkles,
+    permission: 'view_sponsor_performer'
 },
+  {
+    name: 'Entry Pass Management',
+    href: '/admin/entry-pass-management',
+    icon: Ticket,
+    permission: 'view_entry_pass_management'
+  },
   {
     name: 'Cancellation & Refund',
     href: '/admin/cancellations',

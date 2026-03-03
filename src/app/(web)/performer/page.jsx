@@ -3,7 +3,21 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import { Mic, User, Mail, Phone, MapPin, Music2, Users, UserCircle2, Clock3 } from "lucide-react";
+import { 
+  Mic, 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Music2, 
+  Users, 
+  UserCircle2, 
+  Clock3,
+  Sparkles,
+  Flower2,
+  Drama,
+  ChevronDown
+} from "lucide-react";
 import { createPerformerApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 
@@ -125,6 +139,7 @@ export default function PerformerPage() {
         icon: "warning",
         title: "Missing Details",
         text: "Please complete all required fields before submitting.",
+        confirmButtonColor: "#2563eb",
       });
       return;
     }
@@ -142,7 +157,7 @@ export default function PerformerPage() {
 
     try {
       setSubmitting(true);
-      await createPerformerApplication(performerPayload);
+      const submission = await createPerformerApplication(performerPayload);
 
       try {
         const { sendPerformerConfirmationEmail } = await import("@/services/emailService");
@@ -152,20 +167,34 @@ export default function PerformerPage() {
       }
 
       await Swal.fire({
-        icon: "success",
-        title: "Application Submitted",
-        text: "Thank you for applying as a performer. Redirecting to your profile...",
-        timer: 2200,
+        html: `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;">
+            <div style="width:56px;height:56px;border-radius:9999px;background:linear-gradient(135deg,#2563eb,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:700;">✓</div>
+            <h2 style="margin:0;font-size:1.25rem;color:#111827;">Performer Application Submitted</h2>
+            <p style="margin:0;font-size:0.95rem;color:#4b5563;text-align:center;line-height:1.45;">
+              Your request has been received successfully.
+            </p>
+            <p style="margin:0;font-size:0.85rem;font-weight:600;color:#1d4ed8;">ID: ${submission?.registrationId || "Generating..."}</p>
+          </div>
+        `,
         showConfirmButton: false,
+        timer: 1700,
+        timerProgressBar: true,
+        background: "#ffffff",
+        allowOutsideClick: false,
+        customClass: {
+          popup: "rounded-2xl shadow-2xl",
+        },
       });
 
-      router.push("/profile");
+      router.push("/profile?tab=performer");
     } catch (error) {
       console.error("Error submitting performer application:", error);
       await Swal.fire({
         icon: "error",
         title: "Submission Failed",
         text: "Sorry, there was an error submitting your application. Please try again.",
+        confirmButtonColor: "#2563eb",
       });
     } finally {
       setSubmitting(false);
@@ -175,236 +204,310 @@ export default function PerformerPage() {
   const groupMemberCount = parseInt(form.memberCount || "0", 10) || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50 px-4 py-10">
-      <div className="max-w-3xl mx-auto">
-        <div className="relative w-full rounded-3xl border border-cyan-200 bg-white/90 shadow-2xl overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600" />
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-indigo-50 to-cyan-50 py-6 px-3 md:py-8 md:px-4">
+      {/* Decorative Elements */}
+      <div className="fixed top-0 left-0 w-48 h-48 bg-blue-200/30 rounded-full blur-3xl -z-10"></div>
+      <div className="fixed bottom-0 right-0 w-64 h-64 bg-cyan-200/30 rounded-full blur-3xl -z-10"></div>
+      
+      <div className="max-w-4xl mx-auto">
+        {/* Header with Festival Theme */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-blue-200 mb-3">
+            <Flower2 className="w-3.5 h-3.5 text-blue-500" />
+            <span className="text-xs font-medium text-blue-600">Raja Parba 2026</span>
+            <Flower2 className="w-3.5 h-3.5 text-blue-500" />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+            Performer Application
+          </h1>
+          <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
+            Showcase your talent at the biggest cultural festival of Odisha
+          </p>
+        </div>
 
-          <div className="p-5 sm:p-7">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 shadow-md">
-                <Mic className="h-5 w-5 text-white" />
+        {/* Main Form Card */}
+        <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-200 overflow-hidden">
+          {/* Decorative Top Border */}
+          <div className="h-1.5 bg-gradient-to-r from-blue-400 via-indigo-500 to-cyan-600"></div>
+          
+          {/* Title Section with Background */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-5 py-3 border-b border-blue-200">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg shadow-md">
+                <Mic className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Performer Application</h1>
-                <p className="text-xs sm:text-sm text-slate-600">Fill your details and talent profile.</p>
+                <h2 className="text-lg font-semibold text-gray-800">Performance Details</h2>
+                <p className="text-xs text-gray-600">Fill in your information to apply as a performer</p>
               </div>
             </div>
+          </div>
 
-            <form onSubmit={onSubmit} className="space-y-4 max-h-[78vh] overflow-y-auto pr-1">
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={form.name}
-                  onChange={(e) => updateField("name", e.target.value)}
-                  className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  value={form.email}
-                  onChange={(e) => updateField("email", e.target.value)}
-                  className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={form.phone}
-                  onChange={(e) => updateField("phone", e.target.value)}
-                  className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <MapPin className="absolute left-3 top-4 h-5 w-5 text-cyan-600" />
-                <textarea
-                  placeholder="Address"
-                  value={form.address}
-                  onChange={(e) => updateField("address", e.target.value)}
-                  className="w-full resize-none rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm font-semibold text-slate-700">Gender</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {["Male", "Female", "Other"].map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => updateField("gender", option)}
-                      className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
-                        form.gender === option
-                          ? "border-cyan-500 bg-cyan-500 text-white"
-                          : "border-cyan-200 bg-white text-slate-700 hover:border-cyan-400"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm font-semibold text-slate-700">Performance Type</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {performanceOptions.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setPerformanceType(option)}
-                      className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
-                        form.performanceCategory === option
-                          ? "border-indigo-500 bg-indigo-500 text-white"
-                          : "border-cyan-200 bg-white text-slate-700 hover:border-indigo-300"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {form.performanceCategory === "Others" && (
+          {/* Form */}
+          <form onSubmit={onSubmit} className="p-5 md:p-6">
+            {/* Personal Information Section */}
+            <div className="mb-6">
+              <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-500" />
+                Personal Information
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Name */}
                 <div className="relative">
-                  <Music2 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
                   <input
                     type="text"
-                    placeholder="Write your performance type"
-                    value={form.customPerformanceType}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setForm((prev) => ({
-                        ...prev,
-                        customPerformanceType: value,
-                        performanceType: value,
-                      }));
-                    }}
-                    className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
+                    placeholder="Full Name *"
+                    value={form.name}
+                    onChange={(e) => updateField("name", e.target.value)}
+                    className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all"
                     required
                   />
                 </div>
-              )}
 
-              <div>
-                <p className="mb-2 text-sm font-semibold text-slate-700">Solo or Group</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {participationOptions.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setParticipationType(option)}
-                      className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
-                        form.participationType === option
-                          ? "border-cyan-600 bg-cyan-600 text-white"
-                          : "border-cyan-200 bg-white text-slate-700 hover:border-cyan-400"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
+                {/* Email */}
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
+                  <input
+                    type="email"
+                    placeholder="Email Address *"
+                    value={form.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400" />
+                  <input
+                    type="tel"
+                    placeholder="Phone Number *"
+                    value={form.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all"
+                    required
+                  />
+                </div>
+
+                {/* Gender Dropdown */}
+                <div className="relative">
+                  <UserCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 z-10" />
+                  <select
+                    value={form.gender}
+                    onChange={(e) => updateField("gender", e.target.value)}
+                    className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-8 text-sm text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all appearance-none"
+                    required
+                  >
+                    <option value="" disabled>Select Gender *</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 pointer-events-none" />
+                </div>
+
+                {/* Address - Full Width */}
+                <div className="relative md:col-span-2">
+                  <MapPin className="absolute left-3 top-3 w-4 h-4 text-blue-400" />
+                  <textarea
+                    placeholder="Address *"
+                    value={form.address}
+                    onChange={(e) => updateField("address", e.target.value)}
+                    className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all resize-none"
+                    rows={2}
+                    required
+                  />
                 </div>
               </div>
+            </div>
 
-              {form.participationType === "Group" && (
-                <div className="rounded-2xl border border-cyan-200 bg-white/80 p-3 sm:p-4 space-y-3">
+            {/* Performance Information Section */}
+            <div className="mb-6">
+              <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Drama className="w-4 h-4 text-indigo-500" />
+                Performance Information
+              </h3>
+
+              <div className="space-y-3">
+                {/* Performance Type */}
+                <div>
+                  <p className="text-xs font-medium text-gray-700 mb-1.5">Performance Type *</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {performanceOptions.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setPerformanceType(option)}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                          form.performanceCategory === option
+                            ? "border-indigo-500 bg-indigo-500 text-white shadow-sm"
+                            : "border-blue-200 bg-white text-gray-600 hover:border-indigo-300 hover:bg-indigo-50"
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Performance Type */}
+                {form.performanceCategory === "Others" && (
                   <div className="relative">
-                    <Users className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
+                    <Music2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
                     <input
                       type="text"
-                      placeholder="Group Name"
-                      value={form.groupName}
-                      onChange={(e) => updateField("groupName", e.target.value)}
-                      className="w-full rounded-xl border border-cyan-200 bg-white py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
+                      placeholder="Specify your performance type *"
+                      value={form.customPerformanceType}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setForm((prev) => ({
+                          ...prev,
+                          customPerformanceType: value,
+                          performanceType: value,
+                        }));
+                      }}
+                      className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition-all"
                       required
                     />
                   </div>
+                )}
 
-                  <div className="relative">
-                    <UserCircle2 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="How many members?"
-                      value={form.memberCount}
-                      onChange={(e) => onMemberCountChange(e.target.value)}
-                      className="w-full rounded-xl border border-cyan-200 bg-white py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-                      required
-                    />
+                {/* Solo/Group Selection */}
+                <div>
+                  <p className="text-xs font-medium text-gray-700 mb-1.5">Participation Type *</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {participationOptions.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setParticipationType(option)}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                          form.participationType === option
+                            ? "border-cyan-500 bg-cyan-500 text-white shadow-sm"
+                            : "border-blue-200 bg-white text-gray-600 hover:border-cyan-300 hover:bg-cyan-50"
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  {groupMemberCount > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-slate-500">Member names (optional)</p>
-                      {Array.from({ length: groupMemberCount }).map((_, index) => (
+                {/* Group Details */}
+                {form.participationType === "Group" && (
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-3 rounded-lg border border-cyan-200 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="relative">
+                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
                         <input
-                          key={`member-${index}`}
                           type="text"
-                          placeholder={`Member ${index + 1} Name`}
-                          value={form.memberNames[index] || ""}
-                          onChange={(e) => onMemberNameChange(index, e.target.value)}
-                          className="w-full rounded-xl border border-cyan-200 bg-white py-2.5 px-3 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
+                          placeholder="Group Name *"
+                          value={form.groupName}
+                          onChange={(e) => updateField("groupName", e.target.value)}
+                          className="w-full rounded-lg border border-cyan-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-100 transition-all"
+                          required
                         />
-                      ))}
+                      </div>
+
+                      <div className="relative">
+                        <UserCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400" />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="Number of Members *"
+                          value={form.memberCount}
+                          onChange={(e) => onMemberCountChange(e.target.value)}
+                          className="w-full rounded-lg border border-cyan-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-100 transition-all"
+                          required
+                        />
+                      </div>
                     </div>
-                  )}
+
+                    {/* Member Names */}
+                    {groupMemberCount > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-600 mb-1.5">Member Names (Optional)</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {Array.from({ length: groupMemberCount }).map((_, index) => (
+                            <input
+                              key={`member-${index}`}
+                              type="text"
+                              placeholder={`Member ${index + 1} Name`}
+                              value={form.memberNames[index] || ""}
+                              onChange={(e) => onMemberNameChange(index, e.target.value)}
+                              className="w-full rounded-lg border border-cyan-200 bg-white py-2 px-3 text-sm text-gray-700 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-100 transition-all"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Track Details - Grid Layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="relative">
+                    <Music2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
+                    <input
+                      type="text"
+                      placeholder="Track / Music Name *"
+                      value={form.trackMusicName}
+                      onChange={(e) => updateField("trackMusicName", e.target.value)}
+                      className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Clock3 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
+                    <input
+                      type="text"
+                      placeholder="Duration (e.g. 3:45) *"
+                      value={form.trackDuration}
+                      onChange={(e) => updateField("trackDuration", e.target.value)}
+                      className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition-all"
+                      required
+                    />
+                  </div>
                 </div>
-              )}
-
-              <div className="relative">
-                <Music2 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
-                <input
-                  type="text"
-                  placeholder="Track / Music Name"
-                  value={form.trackMusicName}
-                  onChange={(e) => updateField("trackMusicName", e.target.value)}
-                  className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-                  required
-                />
               </div>
+            </div>
 
-              <div className="relative">
-                <Clock3 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
-                <input
-                  type="text"
-                  placeholder="Track Duration (e.g. 3:45)"
-                  value={form.trackDuration}
-                  onChange={(e) => updateField("trackDuration", e.target.value)}
-                  className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-                  required
-                />
-              </div>
-
+            {/* Submit Button - Centered */}
+            <div className="flex  justify-center pt-4 border-t border-blue-200">
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-2 w-full rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 px-4 py-3 font-semibold text-white shadow-md transition hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+                className="group cursor-pointer relative px-8 py-2.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500 text-white font-medium text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed overflow-hidden"
               >
-                {submitting ? "Submitting..." : "Submit Performer Request"}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {submitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>Submit Application</span>
+                    </>
+                  )}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </button>
-
-              <p className="pb-1 text-center text-xs text-slate-600">
-                Our team will contact you within 24 hours.
-              </p>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
+
+        {/* Footer Note */}
+        <p className="text-center text-xs text-gray-500 mt-4">
+          ✨ Our team will review your application and contact you within 24-48 hours
+        </p>
       </div>
     </div>
   );
 }
+

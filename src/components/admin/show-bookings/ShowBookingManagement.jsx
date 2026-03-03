@@ -31,6 +31,7 @@ export default function ShowBookingsPage() {
     selectedDate,
     bookingDate,
     initialize,
+    setAdminUser,
     setSearchTerm,
     setFilter,
     setCurrentPage,
@@ -44,6 +45,10 @@ export default function ShowBookingsPage() {
   useEffect(() => {
     initialize();
   }, []);
+
+  useEffect(() => {
+    setAdminUser(admin ? { ...admin, uid: admin.uid || admin.id } : null);
+  }, [admin, setAdminUser]);
 
   const totalPages = Math.ceil(totalBookings / bookingsPerPage);
 
@@ -91,6 +96,7 @@ export default function ShowBookingsPage() {
         isUpdating={isUpdating}
         currentPage={currentPage}
         bookingsPerPage={bookingsPerPage}
+        canManageBookings
         onViewDetails={(booking) => openModal('booking', booking)}
         onCancel={(booking) => openModal('cancellation', booking)}
         onParticipation={(booking) => openModal('participation', booking)}

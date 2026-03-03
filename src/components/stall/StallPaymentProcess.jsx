@@ -2,12 +2,12 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Shield, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Shield, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import useUserStallBookingStore from '@/lib/stores/useUserStallBookingStore';
 import useAuthStore from '@/lib/stores/useAuthStore';
 import { toast } from 'react-hot-toast';
 
-export default function StallPaymentProcess() {
+export default function StallPaymentProcess({ onBack }) {
   const [processing, setProcessing] = useState(false);
   const router = useRouter();
   const { user } = useAuthStore();
@@ -248,6 +248,19 @@ export default function StallPaymentProcess() {
               By clicking "Pay", you agree to our Terms of Service and Privacy Policy
             </p>
           </div>
+
+          {onBack && (
+            <div className="flex justify-start">
+              <button
+                onClick={onBack}
+                disabled={processing}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Previous
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

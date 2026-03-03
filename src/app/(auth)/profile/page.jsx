@@ -18,6 +18,19 @@ import ImageModal from '@/components/ImageModal';
 import useAuthStore from '@/lib/stores/useAuthStore';
 import useUserProfileStore from '@/lib/stores/useUserProfileStore';
 
+const PROFILE_TABS = [
+  'show',
+  'stall',
+  'entryPass',
+  'donations',
+  'sponsor',
+  'performer',
+  'award',
+  'rajaKumari',
+  'rajaQueen',
+  'drawing',
+];
+
 const ProfilePage = () => {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('show');
@@ -43,6 +56,14 @@ const ProfilePage = () => {
       fetchProfileData(user);
     }
   }, [user?.uid, fetchProfileData]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab && PROFILE_TABS.includes(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+  }, []);
 
   const counts = useMemo(
     () => ({

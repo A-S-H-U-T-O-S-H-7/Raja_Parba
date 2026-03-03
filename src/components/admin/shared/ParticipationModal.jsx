@@ -16,16 +16,15 @@ export default function ParticipationModal({
   onSuccess
 }) {
   const { isDarkMode } = useThemeStore();
-  const { admin } = useAdminAuthStore(); // ✅ Using Zustand store
+  const { admin } = useAdminAuthStore();
+  const adminUid = admin?.uid || admin?.id;
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSeatAttendance, setShowSeatAttendance] = useState(false);
   const [seatAttendanceData, setSeatAttendanceData] = useState({});
   const [loadingSeatData, setLoadingSeatData] = useState(false);
   const [loadingSeats, setLoadingSeats] = useState({});
 
-  const isSuperAdmin = admin?.role === 'super_admin'; // ✅ Check role from Zustand
-
-  if (!isOpen || !booking) return null;
+  const isSuperAdmin = admin?.role === 'super_admin';
 
   // Helper function to format dates
   const formatTimestamp = (timestamp) => {
@@ -151,7 +150,7 @@ export default function ParticipationModal({
   };
 
   const handleSeatAttendanceChange = async (unitId, status) => {
-    if (!admin?.uid) {
+    if (!adminUid) {
       toast.error('Admin not authenticated');
       return;
     }
@@ -160,7 +159,7 @@ export default function ParticipationModal({
     
     try {
       const { markSeatAttendance } = await import('@/services/participationService');
-      const result = await markSeatAttendance(booking.id, bookingType, unitId, status, admin.uid);
+      const result = await markSeatAttendance(booking.id, bookingType, unitId, status, adminUid);
       
       if (result.success) {
         try {
@@ -180,7 +179,7 @@ export default function ParticipationModal({
             ...prev[unitId],
             status,
             updatedAt: new Date(),
-            updatedBy: admin.uid
+            updatedBy: adminUid
           }
         }));
         
@@ -207,7 +206,7 @@ export default function ParticipationModal({
   };
 
   const handleBulkAttendance = async (status) => {
-    if (!admin?.uid) {
+    if (!adminUid) {
       toast.error('Admin not authenticated');
       return;
     }
@@ -229,7 +228,7 @@ export default function ParticipationModal({
         booking.id, 
         bookingType, 
         unitUpdates, 
-        admin.uid
+        adminUid
       );
       
       if (result.success) {
@@ -249,7 +248,7 @@ export default function ParticipationModal({
           updatedData[unitId] = {
             status,
             updatedAt: new Date(),
-            updatedBy: admin.uid
+            updatedBy: adminUid
           };
         });
         setSeatAttendanceData(updatedData);
@@ -270,7 +269,7 @@ export default function ParticipationModal({
   };
 
   const handleMarkParticipated = async () => {
-    if (!admin?.uid) {
+    if (!adminUid) {
       toast.error('Admin not authenticated');
       return;
     }
@@ -290,7 +289,7 @@ export default function ParticipationModal({
             booking.id, 
             bookingType, 
             unitUpdates, 
-            admin.uid
+            adminUid
           );
           
           const updatedData = {};
@@ -298,7 +297,7 @@ export default function ParticipationModal({
             updatedData[unitId] = {
               status: 'present',
               updatedAt: new Date(),
-              updatedBy: admin.uid
+              updatedBy: adminUid
             };
           });
           setSeatAttendanceData(updatedData);
@@ -307,7 +306,7 @@ export default function ParticipationModal({
         }
       }
       
-      const result = await markAsParticipated(booking.id, bookingType, admin.uid);
+      const result = await markAsParticipated(booking.id, bookingType, adminUid);
       
       if (result.success) {
         try {
@@ -341,7 +340,7 @@ export default function ParticipationModal({
       return;
     }
 
-    if (!admin?.uid) {
+    if (!adminUid) {
       toast.error('Admin not authenticated');
       return;
     }
@@ -361,7 +360,7 @@ export default function ParticipationModal({
             booking.id, 
             bookingType, 
             unitUpdates, 
-            admin.uid
+            adminUid
           );
           
           const updatedData = {};
@@ -369,7 +368,7 @@ export default function ParticipationModal({
             updatedData[unitId] = {
               status: 'pending',
               updatedAt: new Date(),
-              updatedBy: admin.uid
+              updatedBy: adminUid
             };
           });
           setSeatAttendanceData(updatedData);
@@ -378,7 +377,7 @@ export default function ParticipationModal({
         }
       }
       
-      const result = await undoParticipation(booking.id, bookingType, admin.uid);
+      const result = await undoParticipation(booking.id, bookingType, adminUid);
       
       if (result.success) {
         try {
@@ -468,6 +467,16 @@ export default function ParticipationModal({
             unitsLabel: 'Seats',
             extraClass: 'bg-blue-50 text-blue-700'
           };
+
+        case 'delegate':
+          return {
+            name: booking.delegateDetails?.name || 'N/A',
+            email: booking.delegateDetails?.email || 'N/A',
+            extra: booking.eventDetails?.delegateType || booking.category || 'Entry Pass',
+            extraLabel: 'Category',
+            units: '',
+            unitsLabel: ''
+          };
         
         default:
           return null;
@@ -538,6 +547,8 @@ export default function ParticipationModal({
       </div>
     );
   };
+
+  if (!isOpen || !booking) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">

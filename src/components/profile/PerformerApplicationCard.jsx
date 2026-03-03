@@ -10,6 +10,7 @@ const formatDate = (date) => {
 const PerformerApplicationCard = ({ item }) => {
   const status = (item.status || item.reviewStatus || 'pending').toLowerCase();
   const isConfirmed = status === 'confirmed' || status === 'approved';
+  const isPending = status === 'pending' || status === 'requested';
   const eventDate = item.performanceDate || item.eventDate || null;
   const eventTime = item.performanceTime || item.eventTime || null;
   const memberNames = Array.isArray(item.memberNames) ? item.memberNames.filter(Boolean) : [];
@@ -25,7 +26,7 @@ const PerformerApplicationCard = ({ item }) => {
           {isConfirmed ? (
             <span className="inline-flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Confirmed</span>
           ) : (
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Pending</span>
+            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {isPending ? 'Pending' : 'In Review'}</span>
           )}
         </span>
       </div>
@@ -51,7 +52,7 @@ const PerformerApplicationCard = ({ item }) => {
         <div className="rounded-xl border border-cyan-100 bg-white/90 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Timeline</p>
           <p className="inline-flex items-center gap-1 text-xs text-slate-600"><Calendar className="h-3.5 w-3.5" /> Applied: {formatDate(item.createdAt)}</p>
-          <p className="text-xs text-slate-600">ID: {item.id}</p>
+          <p className="text-xs text-slate-600">ID: {item.registrationId || item.id}</p>
           <p className="text-xs text-slate-600">Review: {item.reviewStatus || item.status || 'pending'}</p>
           {item.adminNotes && <p className="mt-1 rounded-md bg-cyan-50 p-2 text-xs text-slate-700">Notes: {item.adminNotes}</p>}
         </div>
@@ -71,8 +72,9 @@ const PerformerApplicationCard = ({ item }) => {
       )}
 
       {isConfirmed && (
-        <div className="border-t border-cyan-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          Scheduled Performance: {eventDate ? formatDate(eventDate) : 'Date pending'} {eventTime ? `at ${eventTime}` : ''}
+        <div className="border-t border-cyan-200 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 text-sm text-green-800">
+          <span className="font-semibold">Confirmed Performance:</span>{' '}
+          {eventDate ? formatDate(eventDate) : 'Date pending'} {eventTime ? `at ${eventTime}` : ''}
         </div>
       )}
     </div>

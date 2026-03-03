@@ -36,7 +36,7 @@ export default function StallBookingFlow() {
     switch (currentStep) {
       case 1: return <StallMap />;
       case 2: return <VendorDetails />;
-      case 3: return <StallPaymentProcess />;
+      case 3: return <StallPaymentProcess onBack={prevStep} />;
       default: return null;
     }
   };

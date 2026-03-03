@@ -69,17 +69,17 @@ export default function ShowDateSelection() {
         <p className="text-gray-600">Select your preferred date for the show</p>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap justify-center gap-4">
         {availableDates.map((date, index) => {
           const isSelected = isDateSelected(date);
 
           return (
             <div
               key={index}
-              className={`group relative p-4 rounded-2xl cursor-pointer transition-all duration-300 ${
+              className={`group relative w-full max-w-[190px] p-4 rounded-2xl cursor-pointer transition-all duration-300 ${
                 isSelected
-                  ? "bg-gradient-to-br from-pink-100 to-rose-50 border-2 border-pink-300 shadow-xl scale-105"
-                  : "bg-white border border-gray-200 hover:border-pink-200 hover:shadow-lg"
+                  ? "bg-gradient-to-br from-rose-100 via-pink-50 to-orange-50 border-2 border-rose-400 shadow-xl scale-[1.03]"
+                  : "bg-gradient-to-br from-white via-rose-50/70 to-pink-50/70 border border-rose-200 hover:border-rose-300 hover:shadow-lg"
               }`}
               onClick={() => handleDateSelect(date)}
             >

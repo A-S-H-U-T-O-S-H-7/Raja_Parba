@@ -1,7 +1,7 @@
-// components/admin/raja-activity/AwardNomineesTab.jsx
+// components/admin/raja-activity/DrawingTab.jsx
 "use client";
 import { useEffect, useState } from 'react';
-import { Award, Calendar, CheckCircle, Clock, Edit, Mail, Phone, Trash2, XCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, Edit, Mail, Palette, Phone, Trash2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import Swal from 'sweetalert2';
 import useThemeStore from '@/lib/stores/useThemeStore';
@@ -45,60 +45,59 @@ const statusMeta = (status) => {
   };
 };
 
-export default function AwardNomineesTab() {
+export default function DrawingTab() {
   const { isDarkMode } = useThemeStore();
   const { admin } = useAdminAuthStore();
-  const { loading, awardNominees, fetchAwardNominees, updateItemStatus, deleteItem } = useRajaActivityStore();
+  const { loading, drawings, fetchDrawings, updateItemStatus, deleteItem } = useRajaActivityStore();
 
   const [editingItem, setEditingItem] = useState(null);
   const [editStatus, setEditStatus] = useState('confirmed');
-  const [awardDate, setAwardDate] = useState('');
-  const [awardTime, setAwardTime] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchAwardNominees();
-  }, [fetchAwardNominees]);
+    fetchDrawings();
+  }, [fetchDrawings]);
 
   const openEditModal = (item) => {
     setEditingItem(item);
     setEditStatus((item?.status || 'pending').toLowerCase() === 'rejected' ? 'rejected' : 'confirmed');
-    setAwardDate(toDateInputValue(item?.awardDate));
-    setAwardTime(item?.awardTime || '');
+    setEventDate(toDateInputValue(item?.eventDate));
+    setEventTime(item?.eventTime || '');
     setAdminNotes(item?.adminNotes || '');
   };
 
   const closeEditModal = () => {
     setEditingItem(null);
     setEditStatus('confirmed');
-    setAwardDate('');
-    setAwardTime('');
+    setEventDate('');
+    setEventTime('');
     setAdminNotes('');
   };
 
   const handleSave = async () => {
     if (!editingItem?.id) return;
-
-    if (editStatus === 'confirmed' && !awardDate) {
+    if (editStatus === 'confirmed' && !eventDate) {
       await Swal.fire({
         icon: 'warning',
-        title: 'Award date required',
-        text: 'Please select award date before confirming.',
-        confirmButtonColor: '#7c3aed'
+        title: 'Event date required',
+        text: 'Please select event date before confirming.',
+        confirmButtonColor: '#059669'
       });
       return;
     }
 
     setSaving(true);
     const result = await updateItemStatus(
-      'award',
+      'drawing',
       editingItem.id,
       editStatus,
       adminNotes.trim(),
       {
-        awardDate: editStatus === 'confirmed' ? awardDate : null,
-        awardTime: editStatus === 'confirmed' ? (awardTime || null) : null
+        eventDate: editStatus === 'confirmed' ? eventDate : null,
+        eventTime: editStatus === 'confirmed' ? (eventTime || null) : null
       }
     );
     setSaving(false);
@@ -106,7 +105,7 @@ export default function AwardNomineesTab() {
     if (result?.success) {
       await Swal.fire({
         icon: 'success',
-        title: 'Award updated',
+        title: 'Drawing updated',
         text: `Status changed to ${editStatus}.`,
         timer: 1400,
         showConfirmButton: false
@@ -115,10 +114,10 @@ export default function AwardNomineesTab() {
     }
   };
 
-  if (loading && awardNominees.length === 0) {
+  if (loading && drawings.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-violet-600" />
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -140,13 +139,13 @@ export default function AwardNomineesTab() {
               </tr>
             </thead>
             <tbody className={isDarkMode ? 'divide-y divide-gray-800' : 'divide-y divide-slate-200'}>
-              {awardNominees.map((item) => {
+              {drawings.map((item) => {
                 const meta = statusMeta(item.status);
                 const Icon = meta.icon;
                 return (
                   <tr key={item.id} className={isDarkMode ? 'hover:bg-gray-800/80' : 'hover:bg-slate-50'}>
                     <td className="px-5 py-4">
-                      <div className="h-16 w-16 overflow-hidden rounded-lg border border-violet-200 bg-slate-100">
+                      <div className="h-16 w-16 overflow-hidden rounded-lg border border-emerald-200 bg-slate-100">
                         {item.photoUrl ? (
                           <img src={item.photoUrl} alt={item.name || 'candidate'} className="h-full w-full object-cover" />
                         ) : (
@@ -156,34 +155,33 @@ export default function AwardNomineesTab() {
                     </td>
                     <td className="px-5 py-4">
                       <p className={`text-base font-semibold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{item.name || 'N/A'}</p>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>{item.awardField || 'Award Nominee'}</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>Drawing</p>
                       <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-slate-500'}`}>{item.registrationId || item.id}</p>
                     </td>
                     <td className={`px-5 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
-                      <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-violet-500" /> {item.email || 'N/A'}</p>
-                      <p className="mt-1 flex items-center gap-2"><Phone className="h-4 w-4 text-violet-500" /> {item.phone || 'N/A'}</p>
+                      <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-emerald-500" /> {item.email || 'N/A'}</p>
+                      <p className="mt-1 flex items-center gap-2"><Phone className="h-4 w-4 text-emerald-500" /> {item.phone || 'N/A'}</p>
                     </td>
                     <td className={`px-5 py-4 text-xs ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
-                      <p>Age: {item.age || 'N/A'} | Gender: {item.gender || 'N/A'}</p>
-                      <p>Education: {item.educationQualification || 'N/A'}</p>
-                      <p>Pin: {item.pin || item.pincode || 'N/A'}</p>
-                      <p className="max-w-xs truncate">Address: {item.address || 'N/A'}</p>
-                      <p className="max-w-xs truncate">About: {item.aboutSelf || 'N/A'}</p>
+                      <p>Age: {item.age || 'N/A'} | DOB: {item.dob || 'N/A'}</p>
+                      <p>Gender: {item.gender || 'N/A'} | Category: {item.category || 'N/A'}</p>
+                      <p>Pincode: {item.pincode || 'N/A'}</p>
+                      <p className="max-w-xs truncate">Location: {item.location || 'N/A'}</p>
                     </td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-semibold ${meta.classes}`}>
                         <Icon className="h-4 w-4" />
                         {meta.label}
                       </span>
-                      {item.awardDate && (
+                      {item.eventDate && (
                         <p className={`mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
-                          Award Date: {formatDate(item.awardDate)} {item.awardTime ? `at ${item.awardTime}` : ''}
+                          Event Date: {formatDate(item.eventDate)} {item.eventTime ? `at ${item.eventTime}` : ''}
                         </p>
                       )}
                     </td>
                     <td className={`px-5 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
                       <span className="inline-flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-violet-500" />
+                        <Calendar className="h-4 w-4 text-emerald-500" />
                         {formatDate(item.createdAt)}
                       </span>
                     </td>
@@ -200,7 +198,7 @@ export default function AwardNomineesTab() {
                         {admin?.role === 'super_admin' && (
                           <button
                             type="button"
-                            onClick={() => deleteItem('award', item.id)}
+                            onClick={() => deleteItem('drawing', item.id)}
                             className="rounded-lg bg-red-50 p-2 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300"
                             title="Delete"
                           >
@@ -218,14 +216,14 @@ export default function AwardNomineesTab() {
       </div>
 
       <div className="space-y-3 lg:hidden">
-        {awardNominees.map((item) => {
+        {drawings.map((item) => {
           const meta = statusMeta(item.status);
           const Icon = meta.icon;
           return (
             <div key={item.id} className={`rounded-2xl border p-4 ${isDarkMode ? 'border-gray-700 bg-gray-900 text-gray-100' : 'border-slate-200 bg-white text-slate-800'}`}>
               <div className="mb-3 flex items-start justify-between gap-2">
                 <div className="flex items-start gap-3">
-                  <div className="h-16 w-16 overflow-hidden rounded-lg border border-violet-200 bg-slate-100">
+                  <div className="h-16 w-16 overflow-hidden rounded-lg border border-emerald-200 bg-slate-100">
                     {item.photoUrl ? (
                       <img src={item.photoUrl} alt={item.name || 'candidate'} className="h-full w-full object-cover" />
                     ) : (
@@ -234,7 +232,6 @@ export default function AwardNomineesTab() {
                   </div>
                   <div>
                     <p className="text-base font-bold">{item.name || 'N/A'}</p>
-                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>{item.awardField || 'Award Nominee'}</p>
                     <p className="text-xs opacity-80">{item.registrationId || item.id}</p>
                   </div>
                 </div>
@@ -245,12 +242,11 @@ export default function AwardNomineesTab() {
               </div>
 
               <div className="space-y-1 text-sm">
-                <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-violet-500" /> {item.email || 'N/A'}</p>
-                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-violet-500" /> {item.phone || 'N/A'}</p>
-                <p>Address: {item.address || 'N/A'}</p>
-                <p>Age: {item.age || 'N/A'} | Gender: {item.gender || 'N/A'}</p>
-                <p>About: {item.aboutSelf || 'N/A'}</p>
-                {item.awardDate && <p>Award Date: {formatDate(item.awardDate)} {item.awardTime ? `at ${item.awardTime}` : ''}</p>}
+                <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-emerald-500" /> {item.email || 'N/A'}</p>
+                <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-emerald-500" /> {item.phone || 'N/A'}</p>
+                <p>Location: {item.location || 'N/A'}</p>
+                <p>Category: {item.category || 'N/A'} | Age: {item.age || 'N/A'}</p>
+                {item.eventDate && <p>Event Date: {formatDate(item.eventDate)} {item.eventTime ? `at ${item.eventTime}` : ''}</p>}
               </div>
 
               <div className="mt-4 flex items-center gap-2">
@@ -264,7 +260,7 @@ export default function AwardNomineesTab() {
                 {admin?.role === 'super_admin' && (
                   <button
                     type="button"
-                    onClick={() => deleteItem('award', item.id)}
+                    onClick={() => deleteItem('drawing', item.id)}
                     className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-300"
                   >
                     Delete
@@ -276,17 +272,17 @@ export default function AwardNomineesTab() {
         })}
       </div>
 
-      {awardNominees.length === 0 && !loading && (
+      {drawings.length === 0 && !loading && (
         <div className={`rounded-2xl border p-10 text-center ${isDarkMode ? 'border-gray-700 bg-gray-900 text-gray-400' : 'border-slate-200 bg-white text-slate-500'}`}>
-          <Award className="mx-auto mb-3 h-12 w-12 opacity-50" />
-          <p className="text-lg font-medium">No award nominees yet.</p>
+          <Palette className="mx-auto mb-3 h-12 w-12 opacity-50" />
+          <p className="text-lg font-medium">No drawing applications yet.</p>
         </div>
       )}
 
       {editingItem && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4">
           <div className={`w-full max-w-lg rounded-2xl border p-6 shadow-2xl ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-slate-200 bg-white'}`}>
-            <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Update Award Status</h3>
+            <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Update Drawing Status</h3>
             <p className={`mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
               {editingItem.name || 'Candidate'} ({editingItem.registrationId || editingItem.id})
             </p>
@@ -307,20 +303,20 @@ export default function AwardNomineesTab() {
               {editStatus === 'confirmed' && (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>Award Date</label>
+                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>Event Date</label>
                     <input
                       type="date"
-                      value={awardDate}
-                      onChange={(e) => setAwardDate(e.target.value)}
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
                       className={`w-full rounded-xl border px-3 py-2 text-sm ${isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-slate-300 bg-white text-slate-900'}`}
                     />
                   </div>
                   <div>
-                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>Award Time</label>
+                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>Event Time</label>
                     <input
                       type="time"
-                      value={awardTime}
-                      onChange={(e) => setAwardTime(e.target.value)}
+                      value={eventTime}
+                      onChange={(e) => setEventTime(e.target.value)}
                       className={`w-full rounded-xl border px-3 py-2 text-sm ${isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-slate-300 bg-white text-slate-900'}`}
                     />
                   </div>
@@ -351,7 +347,7 @@ export default function AwardNomineesTab() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-violet-400"
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
               >
                 {saving ? 'Saving...' : 'Save Status'}
               </button>

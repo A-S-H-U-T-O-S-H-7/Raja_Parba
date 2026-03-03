@@ -121,7 +121,10 @@ function HeroActions({ user }) {
     borderClass: 'border-blue-200/50',
     viaColor: 'via-blue-500',
     image: '/show.png',
-    action: 'show'
+    action: 'show',
+    featured: true,
+    featuredBorderClass: 'border-blue-400',
+    featuredFocusClass: 'focus-visible:ring-blue-400'
   },
   {
     id: 'stall',
@@ -130,11 +133,14 @@ function HeroActions({ user }) {
     icon: Heart,
     gradient: 'from-purple-500 to-pink-500',
     lightGradient: 'from-purple-50 to-pink-50',
-    borderClass: 'border-pink-200/50',
+    borderClass: 'border-pink-600/50',
     viaColor: 'via-pink-500',
     image: '/stall.png',
     action: 'stall',
-    isLink: true
+    isLink: true,
+    featured: true,
+    featuredBorderClass: 'border-fuchsia-400',
+    featuredFocusClass: 'focus-visible:ring-fuchsia-400'
   },
   {
     id: 'awards',
@@ -272,7 +278,9 @@ function HeroActions({ user }) {
                 <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-xl blur-md opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
                 
                 {/* Main Card - Using static border class */}
-                <div className={`relative bg-gradient-to-br ${card.lightGradient} backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border ${card.borderClass} group-hover:-translate-y-0.5`}>
+                <div className={`relative bg-gradient-to-br ${card.lightGradient} backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border ${card.borderClass} group-hover:-translate-y-0.5 ${
+                  card.featured ? `border-2 ${card.featuredBorderClass} ring-1 ring-white/70 shadow-lg` : ''
+                }`}>
                   
                   {/* Top Gradient Bar */}
                   <div className={`h-1 bg-gradient-to-r ${card.gradient}`}></div>
@@ -329,7 +337,9 @@ function HeroActions({ user }) {
                             handleAction(card.action);
                           }
                         }}
-                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn`}
+                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                          card.featured ? card.featuredFocusClass : 'focus-visible:ring-purple-400'
+                        }`}
                       >
                         <span>{user ? "Book" : "Join"}</span>
                         <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,7 +349,9 @@ function HeroActions({ user }) {
                     ) : (
                       <button
                         onClick={() => handleAction(card.action)}
-                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn`}
+                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                          card.featured ? card.featuredFocusClass : 'focus-visible:ring-purple-400'
+                        }`}
                       >
                         <span>{user ? "Apply" : "Join"}</span>
                         <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import useThemeStore from '@/lib/stores/useThemeStore';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
@@ -18,7 +18,6 @@ import {
   X,
   AlertCircle,
   Loader2,
-  Map,
   Users,
   Calendar,
   TrendingUp,
@@ -61,15 +60,16 @@ export default function StallManagement() {
 
   // Fetch stall settings
   useEffect(() => {
-    const fetchStallSettings = async () => {
-      try {
-        const stallRef = doc(db, 'settings', 'stalls');
-        const stallSnap = await getDoc(stallRef);
-        
-        if (stallSnap.exists()) {
-          setStallSettings(stallSnap.data());
-        } else {
-          // Create default stalls
+    const stallRef = doc(db, 'settings', 'stalls');
+    const unsubscribe = onSnapshot(
+      stallRef,
+      async (stallSnap) => {
+        try {
+          if (stallSnap.exists()) {
+            setStallSettings(stallSnap.data());
+            return;
+          }
+
           const defaultStalls = Array.from({ length: DEFAULT_STALLS_COUNT }, (_, i) => ({
             id: `S${i + 1}`,
             name: `Stall S${i + 1}`,
@@ -91,17 +91,21 @@ export default function StallManagement() {
               isActive: true
             }
           };
-          
+
           setStallSettings(defaultSettings);
           await setDoc(stallRef, defaultSettings);
+        } catch (error) {
+          console.error('Error fetching stall settings:', error);
+          toast.error('Failed to load stall settings');
         }
-      } catch (error) {
-        console.error('Error fetching stall settings:', error);
+      },
+      (error) => {
+        console.error('Error listening to stall settings:', error);
         toast.error('Failed to load stall settings');
       }
-    };
+    );
 
-    fetchStallSettings();
+    return () => unsubscribe();
   }, []);
 
   // Real-time stall availability listener
@@ -134,24 +138,25 @@ export default function StallManagement() {
 
   // Generate all stalls from settings
   const allStalls = useMemo(() => {
-    if (stallSettings?.stalls?.length > 0) {
-      return stallSettings.stalls.map((stall, index) => ({
-        ...stall,
-        row: Math.floor(index / GRID_COLUMNS) + 1,
-        column: (index % GRID_COLUMNS) + 1
-      }));
-    }
-    
-    return Array.from({ length: DEFAULT_STALLS_COUNT }, (_, i) => ({
-      id: `S${i + 1}`,
-      name: `Stall S${i + 1}`,
-      number: i + 1,
-      size: '10x10 ft',
-      price: stallSettings?.defaultPrice || DEFAULT_STALL_PRICE,
-      isActive: true,
-      row: Math.floor(i / GRID_COLUMNS) + 1,
-      column: (i % GRID_COLUMNS) + 1
-    }));
+    const totalStalls = Number(stallSettings?.totalStalls) || DEFAULT_STALLS_COUNT;
+    const configuredStallsMap = new Map(
+      (stallSettings?.stalls || []).map((stall) => [stall.id, stall])
+    );
+
+    return Array.from({ length: totalStalls }, (_, i) => {
+      const id = `S${i + 1}`;
+      const configured = configuredStallsMap.get(id);
+      return {
+        id,
+        name: configured?.name || `Stall ${id}`,
+        number: i + 1,
+        size: configured?.size || '10x10 ft',
+        price: Number(configured?.price) || Number(stallSettings?.defaultPrice) || DEFAULT_STALL_PRICE,
+        isActive: configured?.isActive !== false,
+        row: Math.floor(i / GRID_COLUMNS) + 1,
+        column: (i % GRID_COLUMNS) + 1
+      };
+    }).filter((stall) => stall.isActive !== false);
   }, [stallSettings]);
 
   // Get stall status with details

@@ -1,8 +1,34 @@
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, doc, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 
 const DRAWING_COLLECTION = 'drawing_applications';
+
+const getYearShort = (date = new Date()) => String(date.getFullYear()).slice(-2);
+
+const generateDrawingRegistrationId = async () => {
+  const yearShort = getYearShort();
+  const counterRef = doc(db, 'application_counters', `drawing_${yearShort}`);
+
+  const seq = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(counterRef);
+    const current = snapshot.exists() ? Number(snapshot.data()?.seq || 0) : 0;
+    const next = current + 1;
+    transaction.set(
+      counterRef,
+      {
+        seq: next,
+        year: yearShort,
+        updatedAt: Timestamp.now()
+      },
+      { merge: true }
+    );
+    return next;
+  });
+
+  const padded = String(seq).padStart(3, '0');
+  return `orp-drawing-${yearShort}-${padded}`;
+};
 
 export const createDrawingApplication = async (applicationData, photoFile) => {
   try {
@@ -27,9 +53,11 @@ export const createDrawingApplication = async (applicationData, photoFile) => {
 
     const uploadResult = await uploadBytes(storageRef, photoFile);
     const photoUrl = await getDownloadURL(uploadResult.ref);
+    const registrationId = await generateDrawingRegistrationId();
 
     const docRef = await addDoc(collection(db, DRAWING_COLLECTION), {
       ...applicationData,
+      registrationId,
       photoUrl,
       photoPath: uploadResult.ref.fullPath,
       competitions: ['Self-introduction', 'Quiz', 'Drawing in the Given Topic'],
@@ -44,7 +72,7 @@ export const createDrawingApplication = async (applicationData, photoFile) => {
       type: 'drawing'
     });
 
-    return { id: docRef.id, success: true, photoUrl };
+    return { id: docRef.id, registrationId, success: true, photoUrl };
   } catch (error) {
     console.error('Error creating Drawing application:', error);
     throw error;

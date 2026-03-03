@@ -2,9 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { setDoc, doc, serverTimestamp, Timestamp, runTransaction } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { Ticket } from 'lucide-react';
+import Swal from 'sweetalert2';
+import { Ticket, Sparkles, Flower2, Camera, UploadCloud, X } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { useLocationData } from '@/hooks/useLocationData';
 import { uploadDelegateImage, validateImageFile } from '@/services/delegateImageService';
@@ -12,8 +13,6 @@ import useAuthStore from '@/lib/stores/useAuthStore';
 import FreePassPersonalInfo from './FreePassPersonalInfo';
 import FreePassLocationInfo from './FreePassLocationInfo';
 import FreePassMembersInfo from './FreePassMembersInfo';
-import FreePassAdditionalDetails from './FreePassAdditionalDetails';
-import FreePassSuccessModal from './FreePassSuccessModal';
 
 const createEmptyMember = () => ({
   name: '',
@@ -50,7 +49,6 @@ const FreePassForm = () => {
   const [errors, setErrors] = useState({});
   const [memberErrors, setMemberErrors] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const { countries, states, cities, loading } = useLocationData(formData);
 
@@ -200,7 +198,29 @@ const FreePassForm = () => {
     return { errors: nextErrors, memberErrors: nextMemberErrors };
   };
 
-  const generateBookingId = () => `FREEPASS-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const generateBookingId = async () => {
+    const yearShort = String(new Date().getFullYear()).slice(-2);
+    const counterRef = doc(db, 'application_counters', `epass_${yearShort}`);
+
+    const seq = await runTransaction(db, async (transaction) => {
+      const snapshot = await transaction.get(counterRef);
+      const current = snapshot.exists() ? Number(snapshot.data()?.seq || 0) : 0;
+      const next = current + 1;
+      transaction.set(
+        counterRef,
+        {
+          seq: next,
+          year: yearShort,
+          updatedAt: Timestamp.now(),
+        },
+        { merge: true }
+      );
+      return next;
+    });
+
+    const padded = String(seq).padStart(3, '0');
+    return `orp-epass-${yearShort}-${padded}`;
+  };
 
   const sendConfirmationEmail = async (bookingId, members) => {
     const emailPayload = {
@@ -268,7 +288,7 @@ const FreePassForm = () => {
 
     setIsSubmitting(true);
     try {
-      const bookingId = generateBookingId();
+      const bookingId = await generateBookingId();
 
       setImageUploading(true);
       const imageUploadResult = await uploadDelegateImage(selectedFile, bookingId);
@@ -331,8 +351,19 @@ const FreePassForm = () => {
         toast.error(`Booking saved but email failed: ${mailError.message}`);
       }
 
-      setShowSuccessModal(true);
       resetForm();
+      await Swal.fire({
+        icon: 'success',
+        title: 'Successfully Submitted',
+        text: 'Your Entry Pass registration has been submitted.',
+        showConfirmButton: false,
+        timer: 1800,
+        timerProgressBar: true,
+        background: '#f0fdf4',
+        color: '#14532d',
+        iconColor: '#16a34a',
+      });
+      router.push('/profile?tab=entryPass');
     } catch (error) {
       toast.error(error.message || 'Unable to complete free pass booking');
     } finally {
@@ -341,86 +372,167 @@ const FreePassForm = () => {
     }
   };
 
-  const goHome = () => {
-    setShowSuccessModal(false);
-    router.push('/');
-  };
-
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_10%_20%,#cffafe_0%,#f8fafc_45%,#dbeafe_100%)] px-4 py-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 rounded-3xl border border-cyan-200 bg-gradient-to-r from-cyan-700 via-blue-700 to-indigo-700 p-6 text-white shadow-xl">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs uppercase tracking-wider">
-            <Ticket className="h-3 w-3" />
-            Raja Festival Free Pass
-          </p>
-          <h1 className="mt-3 text-2xl font-black md:text-3xl">Book Your Free Pass</h1>
-          <p className="mt-2 max-w-3xl text-sm text-cyan-100 md:text-base">
-            Fill details once and receive confirmation for all three event days: {EVENT_DATE_LABEL}.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-emerald-50 to-sky-100 py-8 px-4">
+      {/* Decorative Elements */}
+      <div className="fixed top-0 left-0 h-64 w-64 rounded-full bg-orange-300/30 blur-3xl -z-10"></div>
+      <div className="fixed bottom-0 right-0 h-96 w-96 rounded-full bg-emerald-300/30 blur-3xl -z-10"></div>
+      
+      <div className="max-w-5xl mx-auto">
+        {/* Enhanced Header */}
+        <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-rose-500 via-orange-500 to-rose-500 p-8 shadow-xl">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMzAgMTBhMjAgMjAgMCAwIDEgMjAgMjAgMjAgMjAgMCAwIDEtNDAgMCAyMCAyMCAwIDAgMSAyMC0yMHoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIgZmlsdGVyPSJibHVyKDIpIi8+PC9zdmc+')] opacity-20"></div>
+          
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+              <Ticket className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 text-white/90 text-sm mb-1">
+                <Sparkles className="h-4 w-4" />
+                <span>Raja Festival 2026</span>
+                <Flower2 className="h-4 w-4" />
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">Entry Pass Registration</h1>
+              <p className="mt-1 max-w-2xl text-white/90">
+                Book your complimentary pass for all three days • 13, 14, 15 June 2026
+              </p>
+            </div>
+          </div>
+          
+          <div className="absolute -bottom-6 -right-6 h-32 w-32 rotate-12 opacity-30">
+            <Flower2 className="h-full w-full text-white" />
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <FreePassPersonalInfo
-            formData={formData}
-            errors={errors}
-            handleInputChange={handleInputChange}
-            handleBlur={handleBlur}
-          />
-
-          <FreePassLocationInfo
-            formData={formData}
-            errors={errors}
-            handleInputChange={handleInputChange}
-            handleBlur={handleBlur}
-            countries={countries}
-            states={states}
-            cities={cities}
-          />
-
-          <FreePassMembersInfo
-            formData={formData}
-            errors={errors}
-            memberErrors={memberErrors}
-            handleInputChange={handleInputChange}
-            handleMemberChange={handleMemberChange}
-            handleBlur={handleBlur}
-          />
-
-          <FreePassAdditionalDetails
-            errors={errors}
-            selectedFile={selectedFile}
-            imagePreview={imagePreview}
-            imageUploading={imageUploading}
-            handleFileChange={handleFileChange}
-            clearFile={clearFile}
-          />
-
-          <div className="rounded-2xl border border-cyan-100 bg-white p-5 shadow-sm">
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <div>
-                <p className="text-lg font-bold text-slate-900">Total Amount: Free</p>
-                <p className="text-sm text-slate-600">
-                  {formData.members.length} person(s) for 3 days ({EVENT_DATE_LABEL})
-                </p>
+        <form onSubmit={handleSubmit}>
+          <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-orange-50/70 to-emerald-50/70 p-6 shadow-xl md:p-8">
+            <div className="mb-6 flex items-center justify-between border-b border-slate-200 pb-4">
+              <h2 className="text-2xl font-bold text-slate-900">Entry Pass Registration</h2>
+              <div className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                <Sparkles className="h-3.5 w-3.5" />
+                13, 14, 15 June 2026
               </div>
-              <button
-                type="submit"
-                disabled={isSubmitting || loading.countries}
-                className="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-6 py-3 font-semibold text-white transition hover:from-cyan-700 hover:to-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              >
-                {isSubmitting ? 'Submitting...' : 'Confirm Free Pass'}
-              </button>
+            </div>
+
+            <div className="flex flex-col items-start gap-6 md:flex-row">
+              <div className="flex-1">
+                <p className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <Camera className="h-4 w-4" />
+                  Please upload a clear photo where your face is clearly visible
+                </p>
+                
+                <input id="free-pass-photo" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                
+                {!imagePreview ? (
+                  <label
+                    htmlFor="free-pass-photo"
+                    className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-8 transition hover:border-emerald-500 hover:bg-emerald-50/40"
+                  >
+                    <UploadCloud className="h-8 w-8 text-emerald-600" />
+                    <span className="text-sm font-semibold text-slate-800">Click to upload photo</span>
+                    <span className="text-xs text-slate-600">JPEG, PNG, WebP (max 5MB)</span>
+                  </label>
+                ) : (
+                  <div className="flex items-center gap-4 rounded-xl border border-emerald-300 bg-emerald-50/40 p-3">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="h-20 w-20 rounded-lg border-2 border-emerald-500 object-cover"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-slate-800">Photo uploaded successfully</p>
+                      <p className="mb-2 text-xs text-slate-600">{selectedFile?.name}</p>
+                      <button
+                        type="button"
+                        onClick={clearFile}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                      >
+                        <X className="h-3 w-3" />
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {errors.selfie && <p className="mt-2 text-xs text-red-600">{errors.selfie}</p>}
+                {imageUploading && <p className="mt-2 text-sm text-emerald-700">Uploading photo...</p>}
+              </div>
+              
+              <div className="w-full rounded-xl border border-sky-200 bg-sky-50 p-4 md:w-56">
+                <ul className="space-y-1 list-disc pl-4 text-xs font-medium text-sky-800">
+                  <li>Clear face visible</li>
+                  <li>No sunglasses</li>
+                  <li>Recent photo preferred</li>
+                  <li>Max 5MB size</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-6 border-t border-slate-200 pt-6">
+              <FreePassPersonalInfo
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                handleBlur={handleBlur}
+              />
+
+              <FreePassLocationInfo
+                formData={formData}
+                errors={errors}
+                handleInputChange={handleInputChange}
+                handleBlur={handleBlur}
+                countries={countries}
+                states={states}
+                cities={cities}
+              />
+
+              <FreePassMembersInfo
+                formData={formData}
+                errors={errors}
+                memberErrors={memberErrors}
+                handleInputChange={handleInputChange}
+                handleMemberChange={handleMemberChange}
+                handleBlur={handleBlur}
+              />
+
+              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-orange-50 to-rose-50 p-6">
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                  <div>
+                    <p className="bg-gradient-to-r from-emerald-700 to-rose-700 bg-clip-text text-2xl font-bold text-transparent">
+                      Total: Free
+                    </p>
+                    <p className="flex items-center gap-1 text-sm font-medium text-slate-700">
+                      <Ticket className="h-4 w-4" />
+                      {formData.members.length} person(s) for 3 days ({EVENT_DATE_LABEL})
+                    </p>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || loading.countries}
+                    className="group cursor-pointer relative overflow-hidden rounded-xl bg-gradient-to-r from-rose-500 via-rose-400 to-rose-700 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span className="relative  z-10 flex items-center gap-2">
+                      {isSubmitting ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          <span>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4" />
+                          <span>Confirm Free Pass</span>
+                        </>
+                      )}
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-rose-600 via-rose-500 to-rose-800 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </form>
       </div>
-
-      <FreePassSuccessModal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        onGoHome={goHome}
-      />
     </div>
   );
 };

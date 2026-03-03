@@ -1,52 +1,51 @@
-import { db } from '@/lib/firebase';
-import { doc, runTransaction, getDoc, setDoc } from 'firebase/firestore';
+import { db } from "@/lib/firebase";
+import { doc, runTransaction, getDoc, setDoc } from "firebase/firestore";
 
 /**
- * Generate sequential booking IDs in format: sjpr-{type}-{number}
- * Examples: sjpr-havan-00001, sjpr-stall-00002, sjpr-show-00003
+ * Generate sequential booking IDs:
+ * - havan/delegate: sjpr-{type}-00001
+ * - stall: orp-YY-stall-001
+ * - show: orp-YY-show-0001
  */
 
 const BOOKING_TYPES = {
-  HAVAN: 'havan',
-  STALL: 'stall', 
-  SHOW: 'show',
-  DELEGATE: 'delegate' // Optional for future use
+  HAVAN: "havan",
+  STALL: "stall",
+  SHOW: "show",
+  DELEGATE: "delegate"
 };
 
-/**
- * Initialize counter document if it doesn't exist
- */
+const getShowYearCode = () => new Date().getFullYear().toString().slice(-2);
+
+const formatBookingId = (bookingType, count) => {
+  if (bookingType === BOOKING_TYPES.STALL) {
+    return `orp-${getShowYearCode()}-stall-${count.toString().padStart(3, "0")}`;
+  }
+  if (bookingType === BOOKING_TYPES.SHOW) {
+    return `orp-${getShowYearCode()}-show-${count.toString().padStart(4, "0")}`;
+  }
+  return `sjpr-${bookingType}-${count.toString().padStart(5, "0")}`;
+};
+
 const initializeCounters = async () => {
-  try {
-    const counterRef = doc(db, 'counters', 'bookingIds');
-    const counterSnap = await getDoc(counterRef);
-    
-    if (!counterSnap.exists()) {
-      await setDoc(counterRef, {
-        havan: { count: 0 },
-        stall: { count: 0 },
-        show: { count: 0 },
-        delegate: { count: 0 },
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-      console.log('✅ Booking ID counters initialized');
-    }
-  } catch (error) {
-    console.error('❌ Error initializing counters:', error);
-    throw error;
+  const counterRef = doc(db, "counters", "bookingIds");
+  const counterSnap = await getDoc(counterRef);
+
+  if (!counterSnap.exists()) {
+    await setDoc(counterRef, {
+      havan: { count: 0 },
+      stall: { count: 0 },
+      show: { count: 0 },
+      delegate: { count: 0 },
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
   }
 };
 
-/**
- * Generate next sequential booking ID
- * @param {string} bookingType - Type of booking (havan, stall, show)
- * @returns {Promise<string>} Generated booking ID
- */
 export const generateSequentialBookingId = async (bookingType) => {
-  // Validate booking type
   if (!Object.values(BOOKING_TYPES).includes(bookingType)) {
-    throw new Error(`Invalid booking type: ${bookingType}. Must be one of: ${Object.values(BOOKING_TYPES).join(', ')}`);
+    throw new Error(`Invalid booking type: ${bookingType}`);
   }
 
   const maxRetries = 5;
@@ -55,11 +54,10 @@ export const generateSequentialBookingId = async (bookingType) => {
   while (retryCount < maxRetries) {
     try {
       const bookingId = await runTransaction(db, async (transaction) => {
-        const counterRef = doc(db, 'counters', 'bookingIds');
+        const counterRef = doc(db, "counters", "bookingIds");
         const counterDoc = await transaction.get(counterRef);
 
         if (!counterDoc.exists()) {
-          // Initialize counters if document doesn't exist
           const initialData = {
             havan: { count: 0 },
             stall: { count: 0 },
@@ -69,123 +67,86 @@ export const generateSequentialBookingId = async (bookingType) => {
             updatedAt: new Date()
           };
           transaction.set(counterRef, initialData);
-          
-          // Return first ID
-          const nextNumber = 1;
-          const formattedNumber = nextNumber.toString().padStart(5, '0');
-          return `sjpr-${bookingType}-${formattedNumber}`;
+          return formatBookingId(bookingType, 1);
         }
 
         const data = counterDoc.data();
         const currentCount = data[bookingType]?.count || 0;
         const nextCount = currentCount + 1;
-        
-        // Update the counter
+
         transaction.update(counterRef, {
           [`${bookingType}.count`]: nextCount,
           [`${bookingType}.lastUpdated`]: new Date(),
           updatedAt: new Date()
         });
 
-        // Generate the booking ID with 5-digit padding
-        const formattedNumber = nextCount.toString().padStart(5, '0');
-        return `sjpr-${bookingType}-${formattedNumber}`;
+        return formatBookingId(bookingType, nextCount);
       });
 
-      console.log(`✅ Generated booking ID: ${bookingId}`);
       return bookingId;
-
     } catch (error) {
-      retryCount++;
-      console.warn(`⚠️ Transaction retry ${retryCount}/${maxRetries} for ${bookingType}:`, error.message);
-      
+      retryCount += 1;
+
       if (retryCount >= maxRetries) {
-        console.error(`❌ Failed to generate booking ID after ${maxRetries} retries:`, error);
-        // Fallback to timestamp-based ID to prevent booking failure
-        const fallbackId = `sjpr-${bookingType}-${Date.now()}`;
-        console.log(`🔄 Using fallback ID: ${fallbackId}`);
-        return fallbackId;
+        if (bookingType === BOOKING_TYPES.STALL) {
+          return `orp-${getShowYearCode()}-stall-${String(Date.now()).slice(-3)}`;
+        }
+        if (bookingType === BOOKING_TYPES.SHOW) {
+          return `orp-${getShowYearCode()}-show-${String(Date.now()).slice(-4)}`;
+        }
+        return `sjpr-${bookingType}-${Date.now()}`;
       }
 
-      // Wait before retry (exponential backoff)
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 100));
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(2, retryCount) * 100));
     }
   }
 };
 
-/**
- * Get current counter values (for admin dashboard)
- * @returns {Promise<Object>} Current counter values
- */
 export const getCurrentCounters = async () => {
-  try {
-    const counterRef = doc(db, 'counters', 'bookingIds');
-    const counterSnap = await getDoc(counterRef);
-    
-    if (!counterSnap.exists()) {
-      await initializeCounters();
-      return {
-        havan: { count: 0 },
-        stall: { count: 0 },
-        show: { count: 0 },
-        delegate: { count: 0 }
-      };
-    }
-    
-    return counterSnap.data();
-  } catch (error) {
-    console.error('❌ Error getting counters:', error);
-    throw error;
+  const counterRef = doc(db, "counters", "bookingIds");
+  const counterSnap = await getDoc(counterRef);
+
+  if (!counterSnap.exists()) {
+    await initializeCounters();
+    return {
+      havan: { count: 0 },
+      stall: { count: 0 },
+      show: { count: 0 },
+      delegate: { count: 0 }
+    };
   }
+
+  return counterSnap.data();
 };
 
-/**
- * Reset counter for a specific booking type (admin only)
- * @param {string} bookingType - Type to reset
- * @param {number} newCount - New count value (default: 0)
- */
 export const resetCounter = async (bookingType, newCount = 0) => {
-  try {
-    const counterRef = doc(db, 'counters', 'bookingIds');
-    await runTransaction(db, async (transaction) => {
-      const counterDoc = await transaction.get(counterRef);
-      
-      if (!counterDoc.exists()) {
-        throw new Error('Counter document does not exist');
-      }
-      
-      transaction.update(counterRef, {
-        [`${bookingType}.count`]: newCount,
-        [`${bookingType}.resetAt`]: new Date(),
-        updatedAt: new Date()
-      });
+  const counterRef = doc(db, "counters", "bookingIds");
+  await runTransaction(db, async (transaction) => {
+    const counterDoc = await transaction.get(counterRef);
+    if (!counterDoc.exists()) throw new Error("Counter document does not exist");
+
+    transaction.update(counterRef, {
+      [`${bookingType}.count`]: newCount,
+      [`${bookingType}.resetAt`]: new Date(),
+      updatedAt: new Date()
     });
-    
-    console.log(`✅ Reset ${bookingType} counter to ${newCount}`);
-  } catch (error) {
-    console.error(`❌ Error resetting ${bookingType} counter:`, error);
-    throw error;
-  }
+  });
 };
 
-/**
- * Validate booking ID format
- * @param {string} bookingId - Booking ID to validate
- * @returns {boolean} True if valid format
- */
 export const validateBookingIdFormat = (bookingId) => {
-  const pattern = /^sjpr-(havan|stall|show|delegate)-\d{5}$/;
-  return pattern.test(bookingId);
+  const legacyPattern = /^sjpr-(havan|stall|show|delegate)-\d{5}$/;
+  const stallPattern = /^orp-\d{2}-stall-\d{3}$/;
+  const showPattern = /^orp-\d{2}-show-\d{4}$/;
+  return legacyPattern.test(bookingId) || stallPattern.test(bookingId) || showPattern.test(bookingId);
 };
 
-/**
- * Extract booking type from booking ID
- * @param {string} bookingId - Booking ID
- * @returns {string|null} Booking type or null if invalid
- */
 export const extractBookingType = (bookingId) => {
-  const match = bookingId.match(/^sjpr-(havan|stall|show|delegate)-\d{5}$/);
-  return match ? match[1] : null;
+  const legacyMatch = bookingId.match(/^sjpr-(havan|stall|show|delegate)-\d{5}$/);
+  if (legacyMatch) return legacyMatch[1];
+
+  if (/^orp-\d{2}-stall-\d{3}$/.test(bookingId)) return "stall";
+  if (/^orp-\d{2}-show-\d{4}$/.test(bookingId)) return "show";
+  return null;
 };
 
 export { BOOKING_TYPES };

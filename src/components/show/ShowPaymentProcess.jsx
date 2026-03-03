@@ -200,7 +200,7 @@ export default function ShowPaymentProcess({ onBack }) {
                     })()}
                   </div>
                   
-                  <p className="text-xs max-w-lg mt-3 text-orange-600">All payments made for Havan seats, stalls, and show seats will be considered <span className="font-bold text-sm">Donations</span> to <span className="font-bold text-sm">SVS</span>. With your contribution, you will become a valued member of SVS, and your donation will be eligible for exemption under <span className="font-bold text-sm">Section 80G</span> of the Income Tax Act.</p>
+                  <p className="text-xs max-w-lg mt-3 text-orange-600">All payments made for stalls and show seats will be considered <span className="font-bold text-sm">Donations</span> to <span className="font-bold text-sm">SVS</span>. With your contribution, you will become a valued member of SVS, and your donation will be eligible for exemption under <span className="font-bold text-sm">Section 80G</span> of the Income Tax Act.</p>
                 </div>
                 
                 <div className="bg-white px-4 py-6 sm:px-6 rounded-lg sm:rounded-xl shadow-md border-2 border-rose-200">

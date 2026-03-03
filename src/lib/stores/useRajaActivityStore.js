@@ -1,48 +1,52 @@
 // stores/admin/useRajaActivityStore.js
 import { create } from 'zustand';
 import { db } from '@/lib/firebase/config';
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
+import {
+  collection,
+  doc,
+  getDocs,
   addDoc,
-  updateDoc, 
+  updateDoc,
   deleteDoc,
   query,
-  where,
   orderBy,
+  limit,
   serverTimestamp
 } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import useAdminAuthStore from './useAdminAuthStore';
 
+const categoryCollectionMap = {
+  sponsor: 'sponsors',
+  performer: 'performers',
+  award: 'award_applications',
+  kumari: 'raja_kumari_applications',
+  queen: 'raja_queen_applications',
+  drawing: 'drawing_applications'
+};
+
 const useRajaActivityStore = create((set, get) => ({
-  // State for each category
   sponsors: [],
   performers: [],
   awardNominees: [],
   rajaKumari: [],
-  fancyDress: [],
-  
+  rajaQueen: [],
+  drawings: [],
   loading: false,
   error: null,
   selectedItem: null,
   activityLogs: [],
 
-  // Fetch sponsors
   fetchSponsors: async () => {
     set({ loading: true });
     try {
-      const q = query(
-        collection(db, 'sponsors'),
-        orderBy('createdAt', 'desc')
-      );
+      const q = query(collection(db, 'sponsors'), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
-      const sponsors = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.()
+      const sponsors = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        createdAt: docItem.data().createdAt?.toDate?.()
       }));
       set({ sponsors, loading: false });
     } catch (error) {
@@ -52,19 +56,15 @@ const useRajaActivityStore = create((set, get) => ({
     }
   },
 
-  // Fetch performers
   fetchPerformers: async () => {
     set({ loading: true });
     try {
-      const q = query(
-        collection(db, 'performers'),
-        orderBy('createdAt', 'desc')
-      );
+      const q = query(collection(db, 'performers'), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
-      const performers = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.()
+      const performers = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        createdAt: docItem.data().createdAt?.toDate?.()
       }));
       set({ performers, loading: false });
     } catch (error) {
@@ -74,21 +74,92 @@ const useRajaActivityStore = create((set, get) => ({
     }
   },
 
-  // Add sponsor
+  fetchAwardNominees: async () => {
+    set({ loading: true });
+    try {
+      const q = query(collection(db, 'award_applications'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const awardNominees = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        createdAt: docItem.data().createdAt?.toDate?.()
+      }));
+      set({ awardNominees, loading: false });
+    } catch (error) {
+      console.error('Error fetching award nominees:', error);
+      toast.error('Failed to fetch award nominees');
+      set({ loading: false });
+    }
+  },
+
+  fetchRajaKumari: async () => {
+    set({ loading: true });
+    try {
+      const q = query(collection(db, 'raja_kumari_applications'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const rajaKumari = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        createdAt: docItem.data().createdAt?.toDate?.()
+      }));
+      set({ rajaKumari, loading: false });
+    } catch (error) {
+      console.error('Error fetching Raja Kumari applications:', error);
+      toast.error('Failed to fetch Raja Kumari applications');
+      set({ loading: false });
+    }
+  },
+
+  fetchRajaQueen: async () => {
+    set({ loading: true });
+    try {
+      const q = query(collection(db, 'raja_queen_applications'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const rajaQueen = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        createdAt: docItem.data().createdAt?.toDate?.()
+      }));
+      set({ rajaQueen, loading: false });
+    } catch (error) {
+      console.error('Error fetching Raja Queen applications:', error);
+      toast.error('Failed to fetch Raja Queen applications');
+      set({ loading: false });
+    }
+  },
+
+  fetchDrawings: async () => {
+    set({ loading: true });
+    try {
+      const q = query(collection(db, 'drawing_applications'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const drawings = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        createdAt: docItem.data().createdAt?.toDate?.()
+      }));
+      set({ drawings, loading: false });
+    } catch (error) {
+      console.error('Error fetching drawing applications:', error);
+      toast.error('Failed to fetch drawing applications');
+      set({ loading: false });
+    }
+  },
+
   addSponsor: async (data) => {
     const { admin } = useAdminAuthStore.getState();
     set({ loading: true });
-    
+
     try {
       const docRef = await addDoc(collection(db, 'sponsors'), {
         ...data,
-        status: 'pending',
+        status: 'requested',
+        reviewStatus: 'requested',
         createdBy: admin?.id,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
-      // Log activity
       await get().logActivity({
         action: 'CREATE',
         category: 'sponsor',
@@ -107,11 +178,10 @@ const useRajaActivityStore = create((set, get) => ({
     }
   },
 
-  // Update sponsor
   updateSponsor: async (id, data) => {
     const { admin } = useAdminAuthStore.getState();
     set({ loading: true });
-    
+
     try {
       await updateDoc(doc(db, 'sponsors', id), {
         ...data,
@@ -119,12 +189,11 @@ const useRajaActivityStore = create((set, get) => ({
         updatedBy: admin?.id
       });
 
-      // Log activity
       await get().logActivity({
         action: 'UPDATE',
         category: 'sponsor',
         itemId: id,
-        details: `Updated sponsor: ${data.name}`
+        details: `Updated sponsor: ${data.name || id}`
       });
 
       await get().fetchSponsors();
@@ -138,35 +207,105 @@ const useRajaActivityStore = create((set, get) => ({
     }
   },
 
-  // Delete item (only super admin can delete)
+  updateItemStatus: async (category, id, status, notes = '', extraData = {}) => {
+    const { admin } = useAdminAuthStore.getState();
+    set({ loading: true });
+
+    try {
+      const collectionName = categoryCollectionMap[category];
+      if (!collectionName) {
+        toast.error('Unsupported category');
+        set({ loading: false });
+        return { success: false };
+      }
+
+      await updateDoc(doc(db, collectionName, id), {
+        status,
+        reviewStatus: status,
+        adminNotes: notes,
+        ...extraData,
+        ...(status === 'confirmed' ? { confirmedAt: serverTimestamp() } : {}),
+        updatedAt: serverTimestamp(),
+        updatedBy: admin?.id
+      });
+
+      await get().logActivity({
+        action: 'UPDATE',
+        category,
+        itemId: id,
+        details: `Updated ${category} status to ${status}${notes ? ` (${notes})` : ''}`
+      });
+
+      switch (category) {
+        case 'sponsor':
+          await get().fetchSponsors();
+          break;
+        case 'performer':
+          await get().fetchPerformers();
+          break;
+        case 'award':
+          await get().fetchAwardNominees();
+          break;
+        case 'kumari':
+          await get().fetchRajaKumari();
+          break;
+        case 'queen':
+          await get().fetchRajaQueen();
+          break;
+        case 'drawing':
+          await get().fetchDrawings();
+          break;
+        default:
+          break;
+      }
+
+      toast.success(`Status updated to ${status}`);
+      set({ loading: false });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating item status:', error);
+      toast.error('Failed to update status');
+      set({ loading: false });
+      return { success: false };
+    }
+  },
+
   deleteItem: async (category, id) => {
     const { admin } = useAdminAuthStore.getState();
-    
-    // Check if super admin
+
     if (admin?.role !== 'super_admin') {
       toast.error('Only Super Admin can delete items');
       return { success: false };
     }
 
-    if (!confirm('Are you sure you want to delete this item?')) {
+    const confirmation = await Swal.fire({
+      title: 'Delete this record?',
+      text: 'This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true
+    });
+
+    if (!confirmation.isConfirmed) {
       return { success: false };
     }
 
     set({ loading: true });
-    
-    try {
-      const collectionMap = {
-        sponsor: 'sponsors',
-        performer: 'performers',
-        award: 'award_nominees',
-        kumari: 'raja_kumari',
-        fancy: 'fancy_dress'
-      };
 
-      const collectionName = collectionMap[category];
+    try {
+      const collectionName = categoryCollectionMap[category];
+      if (!collectionName) {
+        toast.error('Unsupported category');
+        set({ loading: false });
+        return { success: false };
+      }
+
       await deleteDoc(doc(db, collectionName, id));
 
-      // Log activity
       await get().logActivity({
         action: 'DELETE',
         category,
@@ -174,18 +313,31 @@ const useRajaActivityStore = create((set, get) => ({
         details: `Deleted ${category} with ID: ${id}`
       });
 
-      // Refresh the appropriate list
-      switch(category) {
+      switch (category) {
         case 'sponsor':
           await get().fetchSponsors();
           break;
         case 'performer':
           await get().fetchPerformers();
           break;
-        // Add others as needed
+        case 'award':
+          await get().fetchAwardNominees();
+          break;
+        case 'kumari':
+          await get().fetchRajaKumari();
+          break;
+        case 'queen':
+          await get().fetchRajaQueen();
+          break;
+        case 'drawing':
+          await get().fetchDrawings();
+          break;
+        default:
+          break;
       }
 
       toast.success('Item deleted successfully');
+      set({ loading: false });
       return { success: true };
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -195,10 +347,9 @@ const useRajaActivityStore = create((set, get) => ({
     }
   },
 
-  // Log activity
   logActivity: async (data) => {
     const { admin } = useAdminAuthStore.getState();
-    
+
     try {
       await addDoc(collection(db, 'raja_activity_logs'), {
         ...data,
@@ -211,7 +362,6 @@ const useRajaActivityStore = create((set, get) => ({
     }
   },
 
-  // Fetch activity logs
   fetchActivityLogs: async () => {
     try {
       const q = query(
@@ -220,10 +370,10 @@ const useRajaActivityStore = create((set, get) => ({
         limit(50)
       );
       const snapshot = await getDocs(q);
-      const logs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate?.()
+      const logs = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        timestamp: docItem.data().timestamp?.toDate?.()
       }));
       set({ activityLogs: logs });
     } catch (error) {
@@ -231,23 +381,21 @@ const useRajaActivityStore = create((set, get) => ({
     }
   },
 
-  // Set selected item for editing
   setSelectedItem: (item) => set({ selectedItem: item }),
-
-  // Clear selected item
   clearSelectedItem: () => set({ selectedItem: null }),
 
-  // Reset
-  reset: () => set({
-    sponsors: [],
-    performers: [],
-    awardNominees: [],
-    rajaKumari: [],
-    fancyDress: [],
-    loading: false,
-    error: null,
-    selectedItem: null
-  })
+  reset: () =>
+    set({
+      sponsors: [],
+      performers: [],
+      awardNominees: [],
+      rajaKumari: [],
+      rajaQueen: [],
+      drawings: [],
+      loading: false,
+      error: null,
+      selectedItem: null
+    })
 }));
 
 export default useRajaActivityStore;

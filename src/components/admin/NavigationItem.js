@@ -43,6 +43,12 @@ export const navigationItems = [
     permission: 'view_show_bookings' // Separate permission
   },
   {
+    id: 'entry-pass-management',
+    name: 'Entry Pass Management',
+    icon: UserPlusIcon,
+    permission: 'view_entry_pass_management'
+  },
+  {
     id: 'delegate-bookings',
     name: 'Delegate Bookings',
     icon: UserPlusIcon,

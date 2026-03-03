@@ -13,6 +13,7 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { cancelBooking } from '@/utils/cancellationUtils';
 import adminLogger from '@/lib/adminLogger';
 
@@ -36,6 +37,7 @@ const useShowBookingManagementStore = create((set, get) => ({
   
   // Selected booking
   selectedBooking: null,
+  adminUser: null,
   
   // Modal states
   modals: {
@@ -50,6 +52,10 @@ const useShowBookingManagementStore = create((set, get) => ({
   // Initialize
   initialize: () => {
     get().fetchBookings();
+  },
+
+  setAdminUser: (adminUser) => {
+    set({ adminUser });
   },
 
   // Fetch bookings with filters
@@ -306,7 +312,19 @@ const useShowBookingManagementStore = create((set, get) => ({
 
   // Delete booking
   deleteBooking: async (bookingId) => {
-    if (!confirm('Are you sure you want to permanently delete this booking?')) return;
+    const result = await Swal.fire({
+      title: 'Delete Show Booking?',
+      text: 'This action will permanently remove the booking record.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true,
+      background: '#fffefc'
+    });
+    if (!result.isConfirmed) return;
 
     set({ isUpdating: true });
     
@@ -378,6 +396,7 @@ const useShowBookingManagementStore = create((set, get) => ({
     selectedDate: null,
     bookingDate: null,
     selectedBooking: null,
+    adminUser: null,
     modals: {
       booking: false,
       cancellation: false,

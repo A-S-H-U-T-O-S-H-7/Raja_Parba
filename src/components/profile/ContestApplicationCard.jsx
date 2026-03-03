@@ -49,8 +49,14 @@ const ContestApplicationCard = ({ item, title, accent = 'rose' }) => {
         <div className="rounded-xl border border-black/5 bg-white/85 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Applicant</p>
           <p className="mt-1 text-sm font-semibold text-slate-800">{item.name || 'N/A'}</p>
-          <p className="text-xs text-slate-600">ID: {item.id}</p>
-          {item.photoUrl && <a href={item.photoUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">View uploaded photo</a>}
+          <p className="text-xs text-slate-600">ID: {item.registrationId || item.id}</p>
+          {item.photoUrl && (
+            <div className="mt-2">
+              <div className="h-24 w-24 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                <img src={item.photoUrl} alt={`${item.name || 'Candidate'} photo`} className="h-full w-full object-cover" />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="rounded-xl border border-black/5 bg-white/85 p-3 lg:col-span-2">

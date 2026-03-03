@@ -8,8 +8,9 @@ const formatDate = (date) => {
 };
 
 const SponsorApplicationCard = ({ item }) => {
-  const status = (item.status || item.reviewStatus || 'pending').toLowerCase();
+  const status = (item.status || item.reviewStatus || 'requested').toLowerCase();
   const isConfirmed = status === 'confirmed' || status === 'approved';
+  const isRequested = status === 'requested' || status === 'pending';
   const confirmedDate = item.confirmedAt || item.updatedAt;
 
   return (
@@ -23,7 +24,7 @@ const SponsorApplicationCard = ({ item }) => {
           {isConfirmed ? (
             <span className="inline-flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Confirmed</span>
           ) : (
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Pending</span>
+            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {isRequested ? 'Requested' : 'In Review'}</span>
           )}
         </span>
       </div>
@@ -46,7 +47,7 @@ const SponsorApplicationCard = ({ item }) => {
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Timeline</p>
           <p className="inline-flex items-center gap-1 text-xs text-slate-600"><Calendar className="h-3.5 w-3.5" /> Applied: {formatDate(item.createdAt)}</p>
           <p className="text-xs text-slate-600">ID: {item.id}</p>
-          <p className="text-xs text-slate-600">Review: {item.reviewStatus || item.status || 'pending'}</p>
+          <p className="text-xs text-slate-600">Review: {item.reviewStatus || item.status || 'requested'}</p>
           {isConfirmed && <p className="text-xs font-medium text-green-700">Confirmed: {formatDate(confirmedDate)}</p>}
           {item.adminNotes && <p className="mt-1 rounded-md bg-amber-50 p-2 text-xs text-slate-700">Notes: {item.adminNotes}</p>}
         </div>

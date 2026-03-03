@@ -23,6 +23,10 @@ const useAdminAuthStore = create(
           const result = await adminAuthService.login(username, password);
           
           if (result.success) {
+            const normalizedAdmin = {
+              ...result.admin,
+              uid: result.admin?.uid || result.admin?.id
+            };
             
             // Store session in cookie
             Cookies.set('admin_session', result.sessionToken, { 
@@ -32,7 +36,7 @@ const useAdminAuthStore = create(
             });
             
             set({ 
-              admin: result.admin,
+              admin: normalizedAdmin,
               sessionToken: result.sessionToken,
               isAuthenticated: true,
               loading: false,
@@ -79,8 +83,12 @@ const useAdminAuthStore = create(
           const result = await adminAuthService.verifySession(sessionToken);
           
           if (result.success) {
+            const normalizedAdmin = {
+              ...result.admin,
+              uid: result.admin?.uid || result.admin?.id
+            };
             set({ 
-              admin: result.admin,
+              admin: normalizedAdmin,
               sessionToken,
               isAuthenticated: true,
               loading: false,
@@ -173,6 +181,7 @@ const useAdminAuthStore = create(
       partialize: (state) => ({ 
         admin: state.admin ? {
           id: state.admin.id,
+          uid: state.admin.uid || state.admin.id,
           username: state.admin.username,
           name: state.admin.name,
           role: state.admin.role,
