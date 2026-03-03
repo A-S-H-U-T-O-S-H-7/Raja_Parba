@@ -1,9 +1,8 @@
 "use client";
 import { useState } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import useAuthStore from '@/lib/stores/useAuthStore';
 
 const GoogleSignInButton = ({ 
   text = "Continue with Google", 
@@ -14,17 +13,17 @@ const GoogleSignInButton = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { signInWithGoogle } = useAuthStore();
 
   const handleGoogleSignIn = async () => {
     if (disabled || loading) return;
     
     setLoading(true);
     try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithGoogle();
+      if (!result?.success) {
+        throw new Error(result?.error || 'Failed to sign in with Google');
+      }
       const user = result.user;
       
       toast.success(`Welcome, ${user.displayName || user.email}!`);
@@ -38,7 +37,7 @@ const GoogleSignInButton = ({
       console.error('Google sign-in error:', error);
       
       let errorMessage = 'Failed to sign in with Google';
-      if (error.code === 'auth/popup-closed-by-user') {
+      if (error.code === 'auth/popup-closed-by-user' || error.message?.includes('cancel')) {
         errorMessage = 'Sign-in cancelled';
       } else if (error.code === 'auth/popup-blocked') {
         errorMessage = 'Popup blocked. Please allow popups and try again';

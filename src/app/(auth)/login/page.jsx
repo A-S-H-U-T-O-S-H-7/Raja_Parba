@@ -33,16 +33,16 @@ export default function LoginPage() {
     <div className="relative min-h-screen flex items-center justify-center px-4 py-6 overflow-x-hidden bg-gradient-to-br from-rose-50 via-orange-50 to-yellow-50">
 
       {/* Subtle Mandala Background */}
-      <div className="absolute inset-0 opacity-5 bg-[url('/mandala-pattern.png')] bg-center bg-cover pointer-events-none"></div>
+      <div className="absolute inset-0 opacity-5 bg-[url('/mandala.png')] bg-center bg-cover pointer-events-none"></div>
 
       {/* Decorative Corners */}
       <img
-        src="/raja-flower.png"
+        src="/cornerflower.png"
         className="absolute top-0 left-0 w-24 opacity-60 rotate-180 pointer-events-none"
         alt="flower"
       />
       <img
-        src="/raja-flower.png"
+        src="/cornerflower.png"
         className="absolute bottom-0 right-0 w-24 opacity-60 pointer-events-none"
         alt="flower"
       />

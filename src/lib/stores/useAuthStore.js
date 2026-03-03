@@ -1,302 +1,218 @@
-// stores/useAuthStore.js
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authService } from '@/lib/firebase/auth';
+import { db } from '@/lib/firebase/config';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+
+const buildUserProfile = (user, overrides = {}) => ({
+  uid: user.uid,
+  email: user.email || '',
+  displayName: overrides.displayName || user.displayName || user.email?.split('@')?.[0] || 'User',
+  photoURL: user.photoURL || null,
+  emailVerified: Boolean(user.emailVerified),
+  phone: user.phoneNumber || null,
+  address: null,
+  createdAt: new Date(),
+  lastLoginAt: new Date(),
+  updatedAt: new Date(),
+  status: 'active',
+  role: 'user',
+  signInMethod: overrides.signInMethod || 'email',
+  preferences: {
+    emailNotifications: true,
+    smsNotifications: false,
+    language: 'en'
+  },
+  totalBookings: 0,
+  totalSpent: 0,
+  bookings: []
+});
+
+const ensureUserProfile = async (user, signInMethod = 'email') => {
+  if (!user?.uid) return;
+
+  const userRef = doc(db, 'users', user.uid);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    await setDoc(userRef, buildUserProfile(user, { signInMethod }));
+    return;
+  }
+
+  const existing = userDoc.data() || {};
+  await updateDoc(userRef, {
+    email: user.email || existing.email || '',
+    displayName: user.displayName || existing.displayName || 'User',
+    photoURL: user.photoURL || existing.photoURL || null,
+    emailVerified: Boolean(user.emailVerified),
+    signInMethod: signInMethod || existing.signInMethod || 'email',
+    lastLoginAt: new Date(),
+    updatedAt: new Date()
+  });
+};
 
 const useAuthStore = create(
   persist(
     (set, get) => ({
-      // State
       user: null,
       loading: true,
       error: null,
+      unsubscribe: null,
 
-      // Actions
       setUser: (user) => set({ user }),
-      
       setLoading: (loading) => set({ loading }),
-      
       setError: (error) => set({ error }),
 
-      // Sign up
-signUp: async (email, password, name) => {
-       set({ loading: true, error: null });
-      try {
-    // 1. Create Firebase Auth user
-    const result = await authService.signUp(email, password);
-    
-    if (result.success) {
-      // 2. Create user profile in Firestore
-      const user = result.user;
-      
-      // Prepare user profile data
-      const userProfile = {
-        uid: user.uid,
-        email: user.email,
-        displayName: name || email.split('@')[0],
-        photoURL: user.photoURL || null,
-        emailVerified: user.emailVerified || false,
-        phone: null,
-        address: null,
-        createdAt: new Date(),
-        lastLoginAt: new Date(),
-        updatedAt: new Date(),
-        status: 'active',
-        role: 'user',
-        preferences: {
-          emailNotifications: true,
-          smsNotifications: false,
-          language: 'en'
-        },
-        totalBookings: 0,
-        totalSpent: 0,
-        bookings: []
-      };
-
-      // Save to Firestore
-      await setDoc(doc(db, 'users', user.uid), userProfile);
-      
-      console.log('✅ User profile created in Firestore');
-      
-      set({ 
-        user: result.user,
-        loading: false,
-        error: null 
-      });
-      return { success: true };
-    } else {
-      set({ 
-        error: result.error,
-        loading: false,
-        user: null
-      });
-      return { success: false, error: result.error };
-    }
-  } catch (error) {
-    console.error('Signup error:', error);
-    set({ 
-      error: error.message,
-      loading: false,
-      user: null
-    });
-    return { success: false, error: error.message };
-  }
-},
-
-      // Login
-      signIn: async (email, password) => {
+      signUp: async (email, password, name) => {
         set({ loading: true, error: null });
         try {
-          const result = await authService.signIn(email, password);
-          if (result.success) {
-            set({ 
-              user: result.user,
-              loading: false,
-              error: null 
-            });
-            return { success: true };
-          } else {
-            set({ 
-              error: result.error,
-              loading: false,
-              user: null
-            });
+          const result = await authService.signUp(email, password);
+          if (!result.success || !result.user) {
+            set({ error: result.error, loading: false, user: null });
             return { success: false, error: result.error };
           }
+
+          await setDoc(
+            doc(db, 'users', result.user.uid),
+            buildUserProfile(result.user, {
+              signInMethod: 'email',
+              displayName: name || email.split('@')[0]
+            })
+          );
+
+          set({ user: result.user, loading: false, error: null });
+          return { success: true, user: result.user };
         } catch (error) {
-          set({ 
-            error: error.message,
-            loading: false,
-            user: null
-          });
+          console.error('Signup error:', error);
+          set({ error: error.message, loading: false, user: null });
           return { success: false, error: error.message };
         }
       },
 
-      // Google Sign In
-      signInWithGoogle: async () => {
-  set({ loading: true, error: null });
-  try {
-    const result = await authService.signInWithGoogle();
-    
-    if (result.success) {
-      const user = result.user;
-      
-      // Check if user profile exists in Firestore
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      
-      if (!userDoc.exists()) {
-        // Create new profile for Google user
-        const userProfile = {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName || user.email.split('@')[0],
-          photoURL: user.photoURL || null,
-          emailVerified: user.emailVerified || true,
-          phone: null,
-          address: null,
-          createdAt: new Date(),
-          lastLoginAt: new Date(),
-          updatedAt: new Date(),
-          status: 'active',
-          role: 'user',
-          preferences: {
-            emailNotifications: true,
-            smsNotifications: false,
-            language: 'en'
-          },
-          totalBookings: 0,
-          totalSpent: 0,
-          bookings: []
-        };
-        
-        await setDoc(doc(db, 'users', user.uid), userProfile);
-        console.log('✅ Google user profile created in Firestore');
-      } else {
-        // Update last login for existing user
-        await updateDoc(doc(db, 'users', user.uid), {
-          lastLoginAt: new Date(),
-          updatedAt: new Date()
-        });
-        console.log('✅ Updated last login for existing user');
-      }
-      
-      set({ 
-        user: result.user,
-        loading: false,
-        error: null 
-      });
-      return { success: true };
-    } else {
-      set({ 
-        error: result.error,
-        loading: false,
-        user: null
-      });
-      return { success: false, error: result.error };
-    }
-  } catch (error) {
-    set({ 
-      error: error.message,
-      loading: false,
-      user: null
-    });
-    return { success: false, error: error.message };
-  }
-},
+      signIn: async (email, password) => {
+        set({ loading: true, error: null });
+        try {
+          const result = await authService.signIn(email, password);
+          if (!result.success || !result.user) {
+            set({ error: result.error, loading: false, user: null });
+            return { success: false, error: result.error };
+          }
 
-      // Send Password Reset
+          await ensureUserProfile(result.user, 'email');
+          set({ user: result.user, loading: false, error: null });
+          return { success: true, user: result.user };
+        } catch (error) {
+          set({ error: error.message, loading: false, user: null });
+          return { success: false, error: error.message };
+        }
+      },
+
+      signInWithGoogle: async () => {
+        set({ loading: true, error: null });
+        try {
+          const result = await authService.signInWithGoogle();
+          if (!result.success || !result.user) {
+            set({ error: result.error, loading: false, user: null });
+            return { success: false, error: result.error };
+          }
+
+          await ensureUserProfile(result.user, 'google');
+          set({ user: result.user, loading: false, error: null });
+          return { success: true, user: result.user };
+        } catch (error) {
+          set({ error: error.message, loading: false, user: null });
+          return { success: false, error: error.message };
+        }
+      },
+
       sendPasswordReset: async (email) => {
         set({ loading: true, error: null });
         try {
           const result = await authService.sendPasswordReset(email);
           set({ loading: false });
-          if (result.success) {
-            return { success: true };
-          } else {
+          if (!result.success) {
             set({ error: result.error });
             return { success: false, error: result.error };
           }
+          return { success: true };
         } catch (error) {
-          set({ 
-            error: error.message,
-            loading: false 
-          });
+          set({ error: error.message, loading: false });
           return { success: false, error: error.message };
         }
       },
 
-      // Confirm Password Reset
       confirmPasswordReset: async (oobCode, newPassword) => {
         set({ loading: true, error: null });
         try {
           const result = await authService.confirmPasswordReset(oobCode, newPassword);
           set({ loading: false });
-          if (result.success) {
-            return { success: true };
-          } else {
+          if (!result.success) {
             set({ error: result.error });
             return { success: false, error: result.error };
           }
+          return { success: true };
         } catch (error) {
-          set({ 
-            error: error.message,
-            loading: false 
-          });
+          set({ error: error.message, loading: false });
           return { success: false, error: error.message };
         }
       },
 
-      // Sign Out
       signOut: async () => {
         set({ loading: true });
         try {
           const result = await authService.signOut();
-          if (result.success) {
-            set({ 
-              user: null,
-              loading: false,
-              error: null 
-            });
-            return { success: true };
-          } else {
-            set({ 
-              error: result.error,
-              loading: false 
-            });
+          if (!result.success) {
+            set({ error: result.error, loading: false });
             return { success: false, error: result.error };
           }
+
+          set({ user: null, loading: false, error: null });
+          return { success: true };
         } catch (error) {
-          set({ 
-            error: error.message,
-            loading: false,
-            user: null 
-          });
+          set({ error: error.message, loading: false, user: null });
           return { success: false, error: error.message };
         }
       },
 
-      // Initialize auth state listener
       initializeAuthListener: () => {
-        // Check if already initialized
-        if (get().unsubscribe) return;
-        
-        const unsubscribe = authService.onAuthStateChange((user) => {
-          set({ 
-            user, 
-            loading: false 
-          });
+        if (get().unsubscribe) return get().unsubscribe;
+
+        const unsubscribe = authService.onAuthStateChange(async (user) => {
+          if (user) {
+            const providerId = user.providerData?.[0]?.providerId || '';
+            const signInMethod = providerId.includes('google') ? 'google' : 'email';
+            try {
+              await ensureUserProfile(user, signInMethod);
+            } catch (profileError) {
+              console.error('Failed to sync user profile on auth state change:', profileError);
+            }
+          }
+
+          set({ user, loading: false });
         });
-        
-        // Store unsubscribe function
+
         set({ unsubscribe });
-        
         return unsubscribe;
       },
 
-      // Clear error
       clearError: () => set({ error: null }),
 
-      // Reset store
-      reset: () => set({ 
-        user: null, 
-        loading: false, 
-        error: null 
+      reset: () => set({
+        user: null,
+        loading: false,
+        error: null
       })
     }),
     {
-      name: 'auth-storage', // name for localStorage
-      partialize: (state) => ({ 
-        // Only persist user, not loading/error states
-        user: state.user 
-      }),
+      name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user
+      })
     }
   )
 );
 
-// Initialize auth listener outside of React
 if (typeof window !== 'undefined') {
-  // This will run once when the store is imported
   useAuthStore.getState().initializeAuthListener();
 }
 
