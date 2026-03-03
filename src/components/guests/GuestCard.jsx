@@ -2,47 +2,21 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Playfair_Display, Cinzel, Cormorant_Garamond } from "next/font/google";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
 const colorSchemes = {
   spiritual: {
-    accent: "#7C5C3E",
-    light: "#FBF5EE",
-    border: "#DCC9B0",
-    badge: "SPIRITUAL",
-    ornament: "✦",
+    gradient: "from-emerald-500 to-teal-600",
+    bgColor: "bg-emerald-50",
+    textColor: "text-emerald-900",
   },
   artist: {
-    accent: "#8B3A3A",
-    light: "#FDF5F5",
-    border: "#DDB8B8",
-    badge: "ARTISAN",
-    ornament: "❧",
+    gradient: "from-pink-500 to-rose-600",
+    bgColor: "bg-pink-50",
+    textColor: "text-pink-900",
   },
   special: {
-    accent: "#3A5A4A",
-    light: "#F5FAF7",
-    border: "#B0D0BC",
-    badge: "DISTINGUISHED",
-    ornament: "◆",
+    gradient: "from-blue-700 to-indigo-600",
+    bgColor: "bg-blue-50",
+    textColor: "text-blue-900",
   },
 };
 
@@ -54,168 +28,80 @@ function getAvatar(name, category) {
 
 export default function GuestCard({ guest }) {
   const [imgError, setImgError] = useState(false);
-
   if (!guest) return null;
 
-  const scheme = colorSchemes[guest.category] || colorSchemes.spiritual;
+  const category = colorSchemes[guest.category] || colorSchemes.spiritual;
   const imgSrc = imgError || !guest.imageUrl ? getAvatar(guest.name, guest.category) : guest.imageUrl;
 
   return (
-    <motion.div
-      whileHover={{ y: -6, transition: { duration: 0.3 } }}
-      className="relative"
-    >
+    <motion.div whileHover={{ y: -6, transition: { duration: 0.25 } }} className={`${category.bgColor} rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-white/70 h-full`}>
       <div
-        className="relative overflow-hidden"
-        style={{
-          background: scheme.light,
-          border: `1px solid ${scheme.border}`,
-          boxShadow: "0 2px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(255,255,255,0.9) inset",
-        }}
+        className="h-full"
       >
-        {/* Top gradient bar */}
-        <div
-          style={{
-            height: 3,
-            background: `linear-gradient(to right, ${scheme.border}, ${scheme.accent}, ${scheme.border})`,
-          }}
-        />
+        <div className="p-3 sm:p-4">
+          <div className="flex flex-col items-center text-center sm:hidden">
+            <div className={`flex-shrink-0 w-20 h-20 rounded-full bg-gradient-to-br ${category.gradient} p-0.5 mb-4`}>
+              <div className="w-full h-full rounded-full bg-white p-1">
+                <img
+                  src={imgSrc}
+                  alt={guest.name}
+                  className="w-full h-full rounded-full object-cover"
+                  onError={() => setImgError(true)}
+                  loading="lazy"
+                />
+              </div>
+            </div>
 
-        {/* Corner ornaments */}
-        {["top-2 left-2", "top-2 right-2", "bottom-2 left-2", "bottom-2 right-2"].map((pos, i) => (
-          <span
-            key={i}
-            className={`absolute ${pos} pointer-events-none`}
-            style={{ color: scheme.border, fontSize: 8, opacity: 0.8 }}
-          >
-            ✦
-          </span>
-        ))}
-
-        <div className="px-6 pt-7 pb-6 flex flex-col items-center text-center">
-
-          {/* Category Badge */}
-          <div
-            className="mb-5 px-4 py-1"
-            style={{
-              border: `1px solid ${scheme.border}`,
-              color: scheme.accent,
-              fontFamily: cinzel.style.fontFamily,
-              fontSize: 9,
-              letterSpacing: "0.25em",
-              fontWeight: 600,
-            }}
-          >
-            {scheme.badge}
+            <div className="flex-1 w-full">
+              <h3 className={`font-bold text-base leading-tight mb-2 ${category.textColor}`}>{guest.name}</h3>
+              <p className={`text-sm font-semibold bg-gradient-to-r ${category.gradient} bg-clip-text text-transparent mb-3`}>
+                {guest.title}
+              </p>
+              <p className="text-xs text-gray-600 leading-relaxed mb-3">{guest.description}</p>
+            </div>
           </div>
 
-          {/* Portrait */}
-          <div className="relative mb-5">
-            <div
-              className="rounded-full p-[2px]"
-              style={{ background: `linear-gradient(135deg, ${scheme.accent}66, ${scheme.border})` }}
-            >
-              <div className="rounded-full p-[3px] bg-white">
-                <div className="w-24 h-24 rounded-full overflow-hidden">
+          <div className="hidden sm:flex items-start gap-5">
+            <div className={`flex-shrink-0 w-28 h-28 rounded-full bg-gradient-to-br ${category.gradient} p-0.5`}>
+              <div className="w-full h-full rounded-full bg-white p-1">
+                <div className="w-full h-full rounded-full overflow-hidden">
                   <img
                     src={imgSrc}
                     alt={guest.name}
                     className="w-full h-full object-cover"
                     onError={() => setImgError(true)}
+                    loading="lazy"
                   />
                 </div>
               </div>
             </div>
 
-            {guest.isExpected && (
-              <div
-                className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
-                style={{ background: scheme.accent }}
-                title="Expected"
-              >
-                ⏳
-              </div>
-            )}
+            <div className="flex-1 min-w-0">
+              <h3 className={`font-bold text-lg leading-tight mb-2 ${category.textColor}`}>{guest.name}</h3>
+              <p className={`text-base font-semibold bg-gradient-to-r ${category.gradient} bg-clip-text text-transparent mb-3`}>
+                {guest.title}
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">{guest.description}</p>
+            </div>
           </div>
 
-          {/* Name */}
-          <h3
-            className="text-gray-800 leading-snug mb-0.5"
-            style={{
-              fontFamily: playfair.style.fontFamily,
-              fontSize: "1.15rem",
-              fontWeight: 600,
-            }}
-          >
-            {guest.name}
-          </h3>
+          {guest.isExpected && (
+            <div className="mt-3">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                Expected Guest
+              </span>
+            </div>
+          )}
 
-          {/* Inline ornamental divider */}
-          <div className="flex items-center justify-center gap-3 my-2">
-            <div style={{ height: 1, width: 32, background: `linear-gradient(to right, transparent, ${scheme.accent})` }} />
-            <span style={{ color: scheme.accent, fontSize: 9, letterSpacing: 4 }}>✦</span>
-            <div style={{ height: 1, width: 32, background: `linear-gradient(to left, transparent, ${scheme.accent})` }} />
-          </div>
-
-          {/* Title */}
-          <p
-            className="mb-4 uppercase"
-            style={{
-              color: scheme.accent,
-              fontFamily: cinzel.style.fontFamily,
-              fontSize: "0.62rem",
-              letterSpacing: "0.15em",
-              fontWeight: 500,
-            }}
-          >
-            {guest.title}
-          </p>
-
-          {/* Description */}
-          <p
-            className="text-gray-600 leading-relaxed mb-4"
-            style={{
-              fontFamily: cormorant.style.fontFamily,
-              fontSize: "1.05rem",
-              fontStyle: "italic",
-            }}
-          >
-            {guest.description}
-          </p>
-
-          {/* Significance */}
           {guest.significance && (
-            <div
-              className="w-full pt-4"
-              style={{ borderTop: `1px solid ${scheme.border}` }}
-            >
-              <p
-                style={{
-                  color: scheme.accent,
-                  fontFamily: cormorant.style.fontFamily,
-                  fontSize: "0.9rem",
-                  fontWeight: 500,
-                  opacity: 0.85,
-                }}
-              >
-                <span className="mr-1.5" style={{ fontSize: 10 }}>{scheme.ornament}</span>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-xs sm:text-sm text-gray-600 italic leading-relaxed">
+                <span className="font-semibold text-amber-600">Significance: </span>
                 {guest.significance}
               </p>
             </div>
           )}
         </div>
-
-        {/* Hover bottom bar */}
-        <motion.div
-          className="absolute bottom-0 left-0 right-0"
-          style={{
-            height: 2,
-            background: `linear-gradient(to right, transparent, ${scheme.accent}, transparent)`,
-          }}
-          initial={{ scaleX: 0, opacity: 0 }}
-          whileHover={{ scaleX: 1, opacity: 1 }}
-          transition={{ duration: 0.4 }}
-        />
       </div>
     </motion.div>
   );

@@ -11,11 +11,10 @@ import {
 } from 'lucide-react';
 import useThemeStore from '@/lib/stores/useThemeStore';
 import UserStatusBadge from './UserStatusBadge';
-import UserActions from './UserActions';
 import { format } from 'date-fns';
 
-export default function UserRow({ user, index, onAction }) {
-  const { theme } = useThemeStore();
+export default function UserRow({ user, index }) {
+  const { isDarkMode } = useThemeStore();
   const [expanded, setExpanded] = useState(false);
 
   const getInitials = (name) => {
@@ -36,17 +35,17 @@ export default function UserRow({ user, index, onAction }) {
     <>
       {/* Main Row */}
       <tr className={`transition-colors ${
-        theme === "dark" 
-          ? 'hover:bg-gray-700/50 border-gray-700' 
-          : 'hover:bg-gray-50 border-gray-200'
-      } ${index % 2 === 0 ? (theme === "dark" ? 'bg-gray-800/50' : 'bg-white') : ''}`}>
+        isDarkMode
+          ? 'hover:bg-slate-800/80 border-slate-700' 
+          : 'hover:bg-slate-50 border-slate-200'
+      } ${index % 2 === 0 ? (isDarkMode ? 'bg-slate-900/70' : 'bg-white') : (isDarkMode ? 'bg-slate-900/40' : 'bg-slate-50/60')}`}>
         
         {/* Expand/Collapse for mobile */}
         <td className="lg:hidden px-4 py-3">
           <button
             onClick={() => setExpanded(!expanded)}
             className={`p-1 rounded-lg ${
-              theme === "dark" ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+              isDarkMode ? 'hover:bg-slate-700 text-slate-200' : 'hover:bg-slate-100 text-slate-600'
             }`}
           >
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -60,11 +59,11 @@ export default function UserRow({ user, index, onAction }) {
               {getInitials(user.displayName || user.email)}
             </div>
             <div>
-              <div className={`text-sm font-medium ${theme === "dark" ? 'text-white' : 'text-gray-900'}`}>
+              <div className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 {user.displayName || 'No name'}
               </div>
-              <div className={`text-xs flex items-center gap-1 mt-0.5 ${
-                theme === "dark" ? 'text-gray-400' : 'text-gray-500'
+              <div className={`text-xs flex items-center gap-1 mt-0.5 break-all ${
+                isDarkMode ? 'text-slate-300' : 'text-slate-600'
               }`}>
                 <Mail className="w-3 h-3" />
                 {user.email}
@@ -84,14 +83,14 @@ export default function UserRow({ user, index, onAction }) {
             {user.signInMethod === 'google' ? (
               <>
                 <Smartphone className="w-4 h-4 text-orange-500" />
-                <span className={`text-sm ${theme === "dark" ? 'text-gray-300' : 'text-gray-600'}`}>
+                <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                   Google
                 </span>
               </>
             ) : (
               <>
                 <Mail className="w-4 h-4 text-blue-500" />
-                <span className={`text-sm ${theme === "dark" ? 'text-gray-300' : 'text-gray-600'}`}>
+                <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                   Email
                 </span>
               </>
@@ -102,43 +101,38 @@ export default function UserRow({ user, index, onAction }) {
         {/* Joined Date */}
         <td className="hidden lg:table-cell px-4 py-3">
           <div className="flex items-center gap-1.5">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span className={`text-sm ${theme === "dark" ? 'text-gray-300' : 'text-gray-600'}`}>
+            <Calendar className={`w-4 h-4 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
+            <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
               {user.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'N/A'}
             </span>
           </div>
-        </td>
-
-        {/* Actions */}
-        <td className="px-4 py-3">
-          <UserActions user={user} onAction={onAction} />
         </td>
       </tr>
 
       {/* Expanded Mobile View */}
       {expanded && (
-        <tr className={`lg:hidden ${theme === "dark" ? 'bg-gray-700/30' : 'bg-gray-50'}`}>
+        <tr className={`lg:hidden ${isDarkMode ? 'bg-slate-800/50' : 'bg-slate-100/70'}`}>
           <td colSpan="5" className="px-4 py-3">
             <div className="space-y-3">
               {/* Status */}
               <div className="flex items-center justify-between">
-                <span className={`text-xs ${theme === "dark" ? 'text-gray-400' : 'text-gray-500'}`}>Status:</span>
+                <span className={`text-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Status:</span>
                 <UserStatusBadge status={user.status} />
               </div>
 
               {/* Sign-in Method */}
               <div className="flex items-center justify-between">
-                <span className={`text-xs ${theme === "dark" ? 'text-gray-400' : 'text-gray-500'}`}>Sign-in Method:</span>
+                <span className={`text-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Sign-in Method:</span>
                 <div className="flex items-center gap-1.5">
                   {user.signInMethod === 'google' ? (
                     <>
                       <Smartphone className="w-4 h-4 text-orange-500" />
-                      <span className={`text-sm ${theme === "dark" ? 'text-gray-300' : 'text-gray-600'}`}>Google</span>
+                      <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>Google</span>
                     </>
                   ) : (
                     <>
                       <Mail className="w-4 h-4 text-blue-500" />
-                      <span className={`text-sm ${theme === "dark" ? 'text-gray-300' : 'text-gray-600'}`}>Email</span>
+                      <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>Email</span>
                     </>
                   )}
                 </div>
@@ -146,10 +140,10 @@ export default function UserRow({ user, index, onAction }) {
 
               {/* Joined Date */}
               <div className="flex items-center justify-between">
-                <span className={`text-xs ${theme === "dark" ? 'text-gray-400' : 'text-gray-500'}`}>Joined:</span>
+                <span className={`text-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Joined:</span>
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <span className={`text-sm ${theme === "dark" ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <Calendar className={`w-4 h-4 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
+                  <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                     {user.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'N/A'}
                   </span>
                 </div>
@@ -158,10 +152,10 @@ export default function UserRow({ user, index, onAction }) {
               {/* Phone if available */}
               {user.phone && (
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs ${theme === "dark" ? 'text-gray-400' : 'text-gray-500'}`}>Phone:</span>
+                  <span className={`text-xs ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Phone:</span>
                   <div className="flex items-center gap-1.5">
-                    <Phone className="w-4 h-4 text-gray-400" />
-                    <span className={`text-sm ${theme === "dark" ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <Phone className={`w-4 h-4 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
+                    <span className={`text-sm ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                       {user.phone}
                     </span>
                   </div>

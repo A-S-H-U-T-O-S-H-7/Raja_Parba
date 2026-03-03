@@ -10,7 +10,7 @@ import UserTable from './UserTable';
 import Pagination from '../shared/Pagination';
 
 export default function UsersPage() {
-  const { theme } = useThemeStore();
+  const { isDarkMode } = useThemeStore();
   const { 
     users, 
     totalUsers, 
@@ -79,10 +79,10 @@ export default function UsersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className={`text-2xl font-bold ${theme === "dark" ? 'text-white' : 'text-gray-900'}`}>
+          <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             User Management
           </h1>
-          <p className={`text-sm mt-1 ${theme === "dark" ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Manage and monitor all registered users
           </p>
         </div>
@@ -92,7 +92,7 @@ export default function UsersPage() {
             onClick={handleRefresh}
             disabled={loading}
             className={`px-4 py-2 rounded-xl border text-sm font-medium flex items-center gap-2 transition-all ${
-              theme === "dark" 
+              isDarkMode
                 ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50' 
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50'
             }`}
@@ -105,7 +105,7 @@ export default function UsersPage() {
             onClick={handleExport}
             disabled={users.length === 0}
             className={`px-4 py-2 rounded-xl border text-sm font-medium flex items-center gap-2 transition-all ${
-              theme === "dark" 
+              isDarkMode
                 ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 disabled:opacity-50' 
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50'
             }`}

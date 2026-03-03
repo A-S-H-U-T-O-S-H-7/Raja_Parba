@@ -2,32 +2,12 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Playfair_Display, Cinzel, Cormorant_Garamond, Satisfy } from "next/font/google";
 import Image from "next/image";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const satisfy = Satisfy({
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-});
+const playfair = { style: { fontFamily: "'Playfair Display', 'Times New Roman', serif" } };
+const cinzel = { style: { fontFamily: "'Cinzel', 'Times New Roman', serif" } };
+const cormorant = { style: { fontFamily: "'Cormorant Garamond', 'Times New Roman', serif" } };
+const satisfy = { style: { fontFamily: "'Satisfy', 'Brush Script MT', cursive" } };
 
 export default function GuestBanner() {
   return (
@@ -70,7 +50,8 @@ export default function GuestBanner() {
             >
               <div className="w-14 h-px bg-gradient-to-r from-transparent to-[#C9A96E]" />
               <span
-                className={`${cinzel.className} text-[#C9A96E] text-[0.6rem] tracking-[0.35em] uppercase`}
+                className="text-[#C9A96E] text-[0.6rem] tracking-[0.35em] uppercase"
+                style={{ fontFamily: cinzel.style.fontFamily }}
               >
                 Raja Parba 2025
               </span>
@@ -82,8 +63,9 @@ export default function GuestBanner() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className={`${playfair.className} text-[#2C1E10] font-bold tracking-tight`}
+              className="text-[#2C1E10] font-bold tracking-tight"
               style={{
+                fontFamily: playfair.style.fontFamily,
                 fontSize: "clamp(2rem, 4vw, 3.5rem)",
                 lineHeight: 1.15,
               }}
@@ -96,8 +78,9 @@ export default function GuestBanner() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className={`${playfair.className} text-[#8B6B45] font-bold italic tracking-tight mb-4`}
+              className="text-[#8B6B45] font-bold italic tracking-tight mb-4"
               style={{
+                fontFamily: playfair.style.fontFamily,
                 fontSize: "clamp(2rem, 4vw, 3.5rem)",
                 lineHeight: 1.15,
               }}
@@ -110,8 +93,9 @@ export default function GuestBanner() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className={`${cormorant.className} max-w-lg mx-auto lg:mx-0 text-[#7A6248] italic leading-relaxed`}
+              className="max-w-lg mx-auto lg:mx-0 text-[#7A6248] italic leading-relaxed"
               style={{
+                fontFamily: cormorant.style.fontFamily,
                 fontSize: "clamp(1rem, 1.6vw, 1.15rem)",
               }}
             >
@@ -170,7 +154,7 @@ export default function GuestBanner() {
               {/* Image caption */}
               <div className="absolute bottom-4 left-4 right-4 text-center z-20">
                 <div className="inline-block px-4 py-1 bg-black/30 backdrop-blur-sm rounded-full">
-                  <span className={`${satisfy.className} text-white text-sm`}>
+                  <span className="text-white text-sm" style={{ fontFamily: satisfy.style.fontFamily }}>
                     Raja Parba 2025
                   </span>
                 </div>

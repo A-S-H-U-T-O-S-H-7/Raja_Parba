@@ -76,7 +76,7 @@ const navigation = [
   },
   {
     name: 'Our Guests',
-    href: '/admin/guests',
+    href: '/admin/distinguished-guests',
     icon: User,
     permission: 'view_guests'
   },

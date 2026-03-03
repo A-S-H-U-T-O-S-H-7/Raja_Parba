@@ -3,23 +3,35 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 
-export default function ProtectedAdminRoute({ children, requiredPermission = null }) {
-  const { adminUser, loading, hasPermission } = useAdminAuthStore();
+export default function ProtectedAdminRoute({
+  children,
+  requiredPermission = null,
+  requiredPermissions = null
+}) {
+  const { admin, adminUser, loading, hasPermission } = useAdminAuthStore();
   const router = useRouter();
+  const currentAdmin = admin || adminUser || null;
+  const permissionsToCheck = Array.isArray(requiredPermissions)
+    ? requiredPermissions
+    : requiredPermission
+      ? [requiredPermission]
+      : [];
+  const hasRequiredAccess =
+    permissionsToCheck.length === 0 || permissionsToCheck.some((permission) => hasPermission(permission));
 
   useEffect(() => {
     if (!loading) { 
-      if (!adminUser) {
+      if (!currentAdmin) {
         router.push('/admin/login');
         return;
       }
 
-      if (requiredPermission && !hasPermission(requiredPermission)) {
+      if (!hasRequiredAccess) {
         router.push('/admin/dashboard');
         return;
       }
     }
-  }, [adminUser, loading, router, requiredPermission, hasPermission]);
+  }, [currentAdmin, loading, router, hasRequiredAccess]);
 
   if (loading) {
     return (
@@ -32,11 +44,11 @@ export default function ProtectedAdminRoute({ children, requiredPermission = nul
     );
   }
 
-  if (!adminUser) {
+  if (!currentAdmin) {
     return null;
   }
 
-  if (requiredPermission && !hasPermission(requiredPermission)) {
+  if (!hasRequiredAccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
