@@ -1,34 +1,27 @@
 import { NextResponse } from 'next/server';
 
+const getBaseUrl = (request) => new URL(request.url).origin;
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const encResp = searchParams.get('encResp');
-    
-    console.log('Direct GET redirect - encResp length:', encResp ? encResp.length : 'null');
-    
+    const baseUrl = getBaseUrl(request);
+
     if (encResp) {
-      // Process via our response API
-      const processedUrl = new URL('/payment/status', 'https://rajaparba.svsamiti.com');
+      const processedUrl = new URL('/payment/status', baseUrl);
       processedUrl.searchParams.set('encResp', encResp);
-      
       return NextResponse.redirect(processedUrl.toString());
     }
-    
-    // No encrypted response, redirect to generic success page
-    const errorUrl = new URL('/payment/success', 'https://rajaparba.svsamiti.com');
+
+    const errorUrl = new URL('/payment/success', baseUrl);
     errorUrl.searchParams.set('status', 'error');
     errorUrl.searchParams.set('message', 'No payment response received');
-    
     return NextResponse.redirect(errorUrl.toString());
-    
   } catch (error) {
-    console.error('❌ Redirect GET error:', error);
-    
-    const errorUrl = new URL('/payment/success', 'https://rajaparba.svsamiti.com');
+    const errorUrl = new URL('/payment/success', getBaseUrl(request));
     errorUrl.searchParams.set('status', 'error');
-    errorUrl.searchParams.set('message', encodeURIComponent(error.message || 'Redirect failed'));
-    
+    errorUrl.searchParams.set('message', error.message || 'Redirect failed');
     return NextResponse.redirect(errorUrl.toString());
   }
 }
@@ -36,47 +29,34 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     let encResp;
-    
-    // Try to get the content type
     const contentType = request.headers.get('content-type') || '';
-    
+    const baseUrl = getBaseUrl(request);
+
     if (contentType.includes('application/x-www-form-urlencoded')) {
-      // Handle form data (typical for CCAvenue)
       const formData = await request.formData();
       encResp = formData.get('encResp');
     } else {
-      // Fallback: try to parse as text and extract encResp
       const text = await request.text();
-      console.log('Raw redirect POST body:', text);
-      
       if (text.includes('encResp=')) {
         const urlParams = new URLSearchParams(text);
         encResp = urlParams.get('encResp');
       }
     }
-    
-    console.log('Direct POST redirect - encResp length:', encResp ? encResp.length : 'null');
-    
+
     if (encResp) {
-      const processedUrl = new URL('/payment/status', 'https://rajaparba.svsamiti.com');
+      const processedUrl = new URL('/payment/status', baseUrl);
       processedUrl.searchParams.set('encResp', encResp);
-      
-      return NextResponse.redirect(processedUrl.toString());
+      return NextResponse.redirect(processedUrl.toString(), 303);
     }
-    
-    const errorUrl = new URL('/payment/success', 'https://rajaparba.svsamiti.com');
+
+    const errorUrl = new URL('/payment/success', baseUrl);
     errorUrl.searchParams.set('status', 'error');
     errorUrl.searchParams.set('message', 'No payment response received');
-    
-    return NextResponse.redirect(errorUrl.toString());
-    
+    return NextResponse.redirect(errorUrl.toString(), 303);
   } catch (error) {
-    console.error('❌ Redirect POST error:', error);
-    
-    const errorUrl = new URL('/payment/success', 'https://rajaparba.svsamiti.com');
+    const errorUrl = new URL('/payment/success', getBaseUrl(request));
     errorUrl.searchParams.set('status', 'error');
-    errorUrl.searchParams.set('message', encodeURIComponent(error.message || 'Redirect failed'));
-    
-    return NextResponse.redirect(errorUrl.toString());
+    errorUrl.searchParams.set('message', error.message || 'Redirect failed');
+    return NextResponse.redirect(errorUrl.toString(), 303);
   }
 }

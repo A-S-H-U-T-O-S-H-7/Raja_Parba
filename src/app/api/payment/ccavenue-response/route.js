@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const BASE_URL = 'https://rajaparba.svsamiti.com';
+const getBaseUrl = (request) => new URL(request.url).origin;
 
 const getUiStatusFromOrderStatus = (orderStatus = '') => {
   const normalized = String(orderStatus).toLowerCase();
@@ -13,8 +13,8 @@ const getUiStatusFromOrderStatus = (orderStatus = '') => {
   return 'failed';
 };
 
-const buildPaymentRedirectUrl = (paymentInfo = {}, fallbackMessage = '') => {
-  const redirectUrl = new URL('/payment/success', BASE_URL);
+const buildPaymentRedirectUrl = (paymentInfo = {}, baseUrl, fallbackMessage = '') => {
+  const redirectUrl = new URL('/payment/success', baseUrl);
   const uiStatus = getUiStatusFromOrderStatus(paymentInfo.order_status);
 
   redirectUrl.searchParams.set('status', uiStatus);
@@ -46,15 +46,21 @@ async function updateBookingState(paymentInfo) {
   }
 }
 
-async function processPaymentResponse(encResp, wantsRedirect = false) {
+async function processPaymentResponse(encResp, options = {}) {
+  const {
+    wantsRedirect = false,
+    baseUrl,
+    redirectStatus = 302
+  } = options;
+
   if (!encResp) {
     const message = 'Missing encrypted response';
 
     if (wantsRedirect) {
-      const redirectUrl = new URL('/payment/success', BASE_URL);
+      const redirectUrl = new URL('/payment/success', baseUrl);
       redirectUrl.searchParams.set('status', 'error');
       redirectUrl.searchParams.set('message', message);
-      return NextResponse.redirect(redirectUrl.toString());
+      return NextResponse.redirect(redirectUrl.toString(), redirectStatus);
     }
 
     return NextResponse.json({ status: false, message }, { status: 400 });
@@ -77,10 +83,10 @@ async function processPaymentResponse(encResp, wantsRedirect = false) {
     const message = 'Could not parse payment response';
 
     if (wantsRedirect) {
-      const redirectUrl = new URL('/payment/success', BASE_URL);
+      const redirectUrl = new URL('/payment/success', baseUrl);
       redirectUrl.searchParams.set('status', 'error');
       redirectUrl.searchParams.set('message', message);
-      return NextResponse.redirect(redirectUrl.toString());
+      return NextResponse.redirect(redirectUrl.toString(), redirectStatus);
     }
 
     return NextResponse.json(
@@ -93,16 +99,16 @@ async function processPaymentResponse(encResp, wantsRedirect = false) {
     await updateBookingState(parsed.data);
 
     if (wantsRedirect) {
-      const redirectUrl = buildPaymentRedirectUrl(parsed.data);
-      return NextResponse.redirect(redirectUrl.toString());
+      const redirectUrl = buildPaymentRedirectUrl(parsed.data, baseUrl);
+      return NextResponse.redirect(redirectUrl.toString(), redirectStatus);
     }
   }
 
   if (wantsRedirect && (!parsed?.status || !parsed?.data)) {
-    const redirectUrl = new URL('/payment/success', BASE_URL);
+    const redirectUrl = new URL('/payment/success', baseUrl);
     redirectUrl.searchParams.set('status', 'error');
     redirectUrl.searchParams.set('message', parsed?.message || 'Invalid payment response');
-    return NextResponse.redirect(redirectUrl.toString());
+    return NextResponse.redirect(redirectUrl.toString(), redirectStatus);
   }
 
   return NextResponse.json(parsed);
@@ -113,6 +119,7 @@ export async function POST(request) {
     let encResp;
     const contentType = request.headers.get('content-type') || '';
     const wantsRedirect = !contentType.includes('application/json');
+    const baseUrl = getBaseUrl(request);
 
     if (contentType.includes('application/x-www-form-urlencoded')) {
       const formData = await request.formData();
@@ -122,7 +129,11 @@ export async function POST(request) {
       encResp = body.encResp;
     }
 
-    return processPaymentResponse(encResp, wantsRedirect);
+    return processPaymentResponse(encResp, {
+      wantsRedirect,
+      baseUrl,
+      redirectStatus: wantsRedirect ? 303 : 302
+    });
   } catch (error) {
     console.error('Error processing CCAvenue response:', error);
     return NextResponse.json(
@@ -138,7 +149,12 @@ export async function POST(request) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const encResp = searchParams.get('encResp');
+  const baseUrl = getBaseUrl(request);
 
-  if (!encResp) return NextResponse.redirect(new URL('/', BASE_URL));
-  return processPaymentResponse(encResp, true);
+  if (!encResp) return NextResponse.redirect(new URL('/', baseUrl));
+  return processPaymentResponse(encResp, {
+    wantsRedirect: true,
+    baseUrl,
+    redirectStatus: 302
+  });
 }

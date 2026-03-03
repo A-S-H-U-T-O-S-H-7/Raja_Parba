@@ -25,6 +25,18 @@ const MemberPass = ({ booking, participantName, purpose }) => {
 
   const passType = getPassType();
 
+  const showSeatNumbers = (booking?.showDetails?.selectedSeats || [])
+    .map((seat) => {
+      if (typeof seat === "string") return seat;
+      if (typeof seat === "object") return seat?.seatId || seat?.id || seat?.number || "";
+      return String(seat || "");
+    })
+    .filter(Boolean);
+
+  const stallNumbers = (booking?.stallIds || [])
+    .map((stall) => String(stall))
+    .filter(Boolean);
+
   // Format date for show reservation
   const getShowDate = () => {
     if (booking?.showDetails?.date) {
@@ -207,6 +219,20 @@ const MemberPass = ({ booking, participantName, purpose }) => {
                     {passType}
                   </p>
                 </div>
+              </div>
+            )}
+
+            {passType === "SHOW RESERVATION" && showSeatNumbers.length > 0 && (
+              <div className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50/70 p-3">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">Seat No.</p>
+                <p className="break-words text-sm font-bold text-indigo-900">{showSeatNumbers.join(", ")}</p>
+              </div>
+            )}
+
+            {passType === "STALL RESERVATION" && stallNumbers.length > 0 && (
+              <div className="mb-4 rounded-lg border border-fuchsia-200 bg-fuchsia-50/70 p-3">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-fuchsia-700">Stall No.</p>
+                <p className="break-words text-sm font-bold text-fuchsia-900">{stallNumbers.join(", ")}</p>
               </div>
             )}
 
