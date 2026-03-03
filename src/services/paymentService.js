@@ -373,48 +373,50 @@ function getCollectionName(bookingType) {
  */
 export async function getBookingTypeFromOrderId(orderId, purpose) {
   console.log('🔍 Detecting booking type for:', { orderId, purpose });
+  const normalizedOrderId = String(orderId || '').toLowerCase().trim();
+  const normalizedPurpose = String(purpose || '').toLowerCase().trim();
   
-  if (purpose) {
-    if (purpose.includes('donation')) {
+  if (normalizedPurpose) {
+    if (normalizedPurpose.includes('donation')) {
       console.log('✅ Detected donation from purpose');
       return 'donation';
     }
-    if (purpose.includes('havan')) {
+    if (normalizedPurpose.includes('havan')) {
       console.log('✅ Detected havan from purpose');
       return 'havan';
     }
-    if (purpose.includes('show')) {
+    if (normalizedPurpose.includes('show')) {
       console.log('✅ Detected show from purpose');
       return 'show';
     }
-    if (purpose.includes('stall')) {
+    if (normalizedPurpose.includes('stall')) {
       console.log('✅ Detected stall from purpose');
       return 'stall';
     }
-    if (purpose.includes('delegate')) {
+    if (normalizedPurpose.includes('delegate')) {
       console.log('✅ Detected delegate from purpose');
       return 'delegate';
     }
   }
   
   // Fallback to order ID pattern  
-  if (orderId.startsWith('DN')) {
+  if (normalizedOrderId.startsWith('dn')) {
     console.log('✅ Detected donation from ID prefix');
     return 'donation';
   }
-  if (orderId.startsWith('BK')) {
+  if (normalizedOrderId.startsWith('bk')) {
     console.log('✅ Detected havan from ID prefix');
     return 'havan';
   }
-  if (orderId.startsWith('SHOW-') || orderId.includes('show')) {
+  if (normalizedOrderId.startsWith('show-') || normalizedOrderId.includes('show')) {
     console.log('✅ Detected show from ID pattern');
     return 'show';
   }
-  if (orderId.startsWith('STALL-') || orderId.includes('stall')) {
+  if (normalizedOrderId.startsWith('stall-') || normalizedOrderId.includes('stall')) {
     console.log('✅ Detected stall from ID pattern');
     return 'stall';
   }
-  if (orderId.startsWith('DELEGATE-') || orderId.includes('delegate')) {
+  if (normalizedOrderId.startsWith('delegate-') || normalizedOrderId.includes('delegate')) {
     console.log('✅ Detected delegate from ID pattern');
     return 'delegate';
   }

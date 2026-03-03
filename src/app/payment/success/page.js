@@ -127,14 +127,15 @@ function PaymentSuccessContent() {
 
           let bookingData = null;
           let detectedType = null;
-          const orderId = String(paymentInfo.order_id);
+          const orderId = String(paymentInfo.order_id || "").trim();
+          const orderIdLower = orderId.toLowerCase();
 
-          if (orderId.startsWith("SHOW-")) {
+          if (orderIdLower.startsWith("show-") || orderIdLower.includes("-show-")) {
             detectedType = "show";
             const bookingRef = doc(db, "showBookings", orderId);
             const bookingSnap = await getDoc(bookingRef);
             if (bookingSnap.exists()) bookingData = bookingSnap.data();
-          } else if (orderId.startsWith("STALL-")) {
+          } else if (orderIdLower.startsWith("stall-") || orderIdLower.includes("-stall-")) {
             detectedType = "stall";
             const bookingRef = doc(db, "stallBookings", orderId);
             const bookingSnap = await getDoc(bookingRef);
@@ -157,11 +158,18 @@ function PaymentSuccessContent() {
               detectedType = "show";
               bookingData = showBookingSnap.data();
             } else {
+              const stallBookingRef = doc(db, "stallBookings", orderId);
+              const stallBookingSnap = await getDoc(stallBookingRef);
+              if (stallBookingSnap.exists()) {
+                detectedType = "stall";
+                bookingData = stallBookingSnap.data();
+              } else {
               // Default to havan booking
               detectedType = "havan";
               const bookingRef = doc(db, "bookings", orderId);
               const bookingSnap = await getDoc(bookingRef);
               if (bookingSnap.exists()) bookingData = bookingSnap.data();
+              }
             }
           }
 

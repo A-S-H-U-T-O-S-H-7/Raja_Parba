@@ -4,7 +4,7 @@ import { doc, runTransaction, getDoc, setDoc } from "firebase/firestore";
 /**
  * Generate sequential booking IDs:
  * - havan/delegate: sjpr-{type}-00001
- * - stall: orp-YY-stall-001
+ * - stall: orp-YY-stall-0001
  * - show: orp-YY-show-0001
  */
 
@@ -19,7 +19,7 @@ const getShowYearCode = () => new Date().getFullYear().toString().slice(-2);
 
 const formatBookingId = (bookingType, count) => {
   if (bookingType === BOOKING_TYPES.STALL) {
-    return `orp-${getShowYearCode()}-stall-${count.toString().padStart(3, "0")}`;
+    return `orp-${getShowYearCode()}-stall-${count.toString().padStart(4, "0")}`;
   }
   if (bookingType === BOOKING_TYPES.SHOW) {
     return `orp-${getShowYearCode()}-show-${count.toString().padStart(4, "0")}`;
@@ -89,7 +89,7 @@ export const generateSequentialBookingId = async (bookingType) => {
 
       if (retryCount >= maxRetries) {
         if (bookingType === BOOKING_TYPES.STALL) {
-          return `orp-${getShowYearCode()}-stall-${String(Date.now()).slice(-3)}`;
+          return `orp-${getShowYearCode()}-stall-${String(Date.now()).slice(-4)}`;
         }
         if (bookingType === BOOKING_TYPES.SHOW) {
           return `orp-${getShowYearCode()}-show-${String(Date.now()).slice(-4)}`;
@@ -135,7 +135,7 @@ export const resetCounter = async (bookingType, newCount = 0) => {
 
 export const validateBookingIdFormat = (bookingId) => {
   const legacyPattern = /^sjpr-(havan|stall|show|delegate)-\d{5}$/;
-  const stallPattern = /^orp-\d{2}-stall-\d{3}$/;
+  const stallPattern = /^orp-\d{2}-stall-\d{4}$/;
   const showPattern = /^orp-\d{2}-show-\d{4}$/;
   return legacyPattern.test(bookingId) || stallPattern.test(bookingId) || showPattern.test(bookingId);
 };
@@ -144,7 +144,7 @@ export const extractBookingType = (bookingId) => {
   const legacyMatch = bookingId.match(/^sjpr-(havan|stall|show|delegate)-\d{5}$/);
   if (legacyMatch) return legacyMatch[1];
 
-  if (/^orp-\d{2}-stall-\d{3}$/.test(bookingId)) return "stall";
+  if (/^orp-\d{2}-stall-\d{4}$/.test(bookingId)) return "stall";
   if (/^orp-\d{2}-show-\d{4}$/.test(bookingId)) return "show";
   return null;
 };

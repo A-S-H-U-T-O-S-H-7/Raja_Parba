@@ -66,13 +66,15 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
 
   const showPass = (activeTab === "pass" || isFreeBooking) && !receiptOnly;
   const showReceipt = (activeTab === "receipt" || receiptOnly) && booking;
+  const isReceiptView = showReceipt && !showPass;
+  const modalMaxWidthClass = isReceiptView ? "max-w-4xl" : "max-w-lg";
 
   const modalContent = (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in duration-300">
+      <div className={`relative w-full ${modalMaxWidthClass} overflow-hidden rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in duration-300`}>
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-20 rounded-full bg-white/90 p-1.5 shadow-md transition-all duration-200 hover:scale-105 hover:bg-white"
@@ -121,7 +123,7 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
           )}
 
           {showReceipt && (
-            <div className="p-4">
+            <div className="p-4 md:p-6">
               <DonationReceipt booking={booking} />
             </div>
           )}

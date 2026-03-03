@@ -45,9 +45,8 @@ export default function AdminStallPayment() {
   const [bookingId, setBookingId] = useState(null);
 
   const generateBookingId = async () => {
-    const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `STALL${timestamp}${random}`;
+    const { generateSequentialBookingId } = await import('@/services/bookingIdService');
+    return generateSequentialBookingId('stall');
   };
 
   const handleConfirmBooking = async () => {
