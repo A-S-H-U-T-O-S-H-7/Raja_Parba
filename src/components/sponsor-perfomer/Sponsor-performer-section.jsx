@@ -6,7 +6,6 @@ import SponsorModal from './SponsorModal';
 import PerformerModal from './PerformerModal';
 import { createSponsorApplication, createPerformerApplication } from '@/services/sponsorPerformerService';
 import Image from 'next/image';
-import DonationBanner from '../home/DonationBanner';
 
 export default function SponsorPerformerSection() {
   const [showSponsorModal, setShowSponsorModal] = useState(false);

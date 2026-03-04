@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req) {
     try {
-        const emailData = await req.json();
+        const emailData = await req.json(); 
         console.log('📧 Booking email API received data:', emailData);
 
         // Validate required fields

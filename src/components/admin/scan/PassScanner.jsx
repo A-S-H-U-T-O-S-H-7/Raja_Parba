@@ -137,6 +137,7 @@ export default function PassScanner() {
       if (!raw) return;
 
       scanLockRef.current = true;
+      stopCamera();
       await verifyScanText(raw);
     } catch (error) {
       console.error("Scan frame error:", error);
@@ -215,21 +216,7 @@ export default function PassScanner() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <section className={`rounded-2xl border p-4 ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={cameraReady ? stopCamera : startCamera}
-                disabled={startingCamera || verifying}
-                className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  cameraReady
-                    ? "bg-red-100 text-red-700 hover:bg-red-200"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700"
-                } disabled:cursor-not-allowed disabled:opacity-60`}
-              >
-                {startingCamera ? <Loader2 className="h-4 w-4 animate-spin" /> : cameraReady ? <CameraOff className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
-                {cameraReady ? "Stop Camera" : "Start Camera"}
-              </button>
-
+            <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={resetState}
@@ -250,10 +237,26 @@ export default function PassScanner() {
                 <div className="absolute inset-0 flex items-center justify-center bg-black/70">
                   <div className="text-center text-white">
                     <QrCode className="mx-auto mb-2 h-8 w-8" />
-                    <p className="text-sm">Start camera to scan QR code</p>
+                    <p className="text-sm">Tap Scan to read QR code</p>
                   </div>
                 </div>
               )}
+            </div>
+
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={cameraReady ? stopCamera : startCamera}
+                disabled={startingCamera || verifying}
+                className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors ${
+                  cameraReady
+                    ? "bg-red-100 text-red-700 hover:bg-red-200"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                } disabled:cursor-not-allowed disabled:opacity-60`}
+              >
+                {startingCamera ? <Loader2 className="h-4 w-4 animate-spin" /> : cameraReady ? <CameraOff className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
+                {cameraReady ? "Stop Scan" : "Scan"}
+              </button>
             </div>
 
             {cameraError && (
