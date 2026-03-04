@@ -29,6 +29,7 @@ export const AVAILABLE_PERMISSIONS = [
   { id: 'view_show_bookings', name: 'Show Booking', category: 'Bookings' },
   { id: 'manage_show_seats', name: 'Show Seats', category: 'Seats' },
   { id: 'view_entry_pass_management', name: 'Entry Pass Management', category: 'Bookings' },
+  { id: 'view_pass_scanner', name: 'Pass Scanner', category: 'Bookings' },
   { id: 'view_sponsor_performer', name: 'Raja Activity', category: 'Management' },
   { id: 'view_guests', name: 'Our Guests', category: 'Management' },
   { id: 'manage_gallery', name: 'Manage Gallery', category: 'Content' },
@@ -44,7 +45,7 @@ export const AVAILABLE_PERMISSIONS = [
 // Group permissions by category
 export const PERMISSION_CATEGORIES = {
   'Dashboard': ['view_overview'],
-  'Bookings': ['view_stall_bookings', 'view_show_bookings', 'view_entry_pass_management'],
+  'Bookings': ['view_stall_bookings', 'view_show_bookings', 'view_entry_pass_management', 'view_pass_scanner'],
   'Seats': ['manage_stalls', 'manage_show_seats'],
   'Management': ['view_sponsor_performer', 'view_guests', 'view_donations', 'view_users', 'manage_admins', 'view_logs'],
   'Content': ['manage_gallery'],

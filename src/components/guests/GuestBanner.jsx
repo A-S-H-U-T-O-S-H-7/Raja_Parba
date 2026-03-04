@@ -11,7 +11,49 @@ const satisfy = { style: { fontFamily: "'Satisfy', 'Brush Script MT', cursive" }
 
 export default function GuestBanner() {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-[#FEFCF7] via-[#FDF6E8] to-[#FAF0DC] border-b border-[#E8D9BF]">
+    <div className="relative py-5 md:py-10 overflow-hidden bg-gradient-to-br from-[#FEFCF7] via-[#FDF6E8] to-[#FAF0DC] border-b border-[#E8D9BF]">
+
+      {/* Golden Corner Designs */}
+            {/* Top-left */}
+            <div className="absolute top-0 left-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+              <Image
+                src="/greenflower1.png"
+                alt="corner design"
+                fill
+                className="object-contain rotate-90 scale-y-[1]"
+              />
+            </div>
+      
+            {/* Top-right */}
+            <div className="absolute top-0 right-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+              <Image
+                src="/greenflower1.png"
+                alt="corner design"
+                fill
+                className="object-contain rotate-180 "
+              />
+            </div>
+      
+            {/* Bottom-left */}
+            <div className="absolute bottom-0 left-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+              <Image
+                src="/greenflower1.png"
+                alt="corner design"
+                fill
+                className="object-contain "
+              />
+            </div>
+      
+            {/* Bottom-right */}
+            <div className="absolute bottom-0 right-0 w-20 h-20 md:w-30 md:h-30 lg:w-42 lg:h-42 z-20 pointer-events-none">
+              <Image
+                src="/greenflower1.png"
+                alt="corner design"
+                fill
+                className="object-contain scale-x-[-1]"
+              />
+            </div>
+            
       {/* Subtle diagonal pattern */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -144,7 +186,7 @@ export default function GuestBanner() {
               
               {/* Static image - replace with your actual image path */}
               <Image
-                src="/images/raja-parba-guest.jpg" // Replace with your actual image path
+                src="/guest.JPG" 
                 alt="Raja Parba Festival Guest"
                 fill
                 className="object-cover"

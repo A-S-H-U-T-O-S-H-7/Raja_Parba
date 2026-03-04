@@ -18,7 +18,8 @@ import {
   IndianRupee,
   Image,
   User,
-  Sparkles
+  Sparkles,
+  ScanLine
 } from 'lucide-react';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import useThemeStore from '@/lib/stores/useThemeStore';
@@ -67,6 +68,12 @@ const navigation = [
     href: '/admin/entry-pass-management',
     icon: Ticket,
     permission: 'view_entry_pass_management'
+  },
+  {
+    name: 'Pass Scanner',
+    href: '/admin/scan',
+    icon: ScanLine,
+    permission: 'view_pass_scanner'
   },
   {
     name: 'Our Guests',
@@ -124,6 +131,12 @@ export default function AdminSidebar() {
   const { admin, hasPermission, adminLogout } = useAdminAuthStore();
   const { isDarkMode } = useThemeStore();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await adminLogout();
+    setIsMobileOpen(false);
+    router.replace('/admin/login');
+  };
 
   const filteredNav = navigation.filter(item => 
     !item.permission || hasPermission(item.permission)
@@ -233,8 +246,3 @@ export default function AdminSidebar() {
     </>
   );
 }
-  const handleLogout = async () => {
-    await adminLogout();
-    setIsMobileOpen(false);
-    router.replace('/admin/login');
-  };

@@ -31,88 +31,110 @@ const EntryPassCard = ({ booking }) => {
   const eventDetails = booking?.eventDetails || {};
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 shadow-md">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-200 bg-amber-100/70 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Ticket className="h-4 w-4 text-amber-700" />
-          <p className="text-sm font-semibold text-amber-900">{isFreePass ? 'Free Entry Pass' : 'Entry Pass'}</p>
+    <div className="overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 via-orange-50 to-rose-50 shadow-md">
+      {/* ── Header ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-200 bg-gradient-to-r from-purple-100 via-orange-50 to-rose-100 px-5 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 via-purple-400 to-purple-700 shadow-sm">
+            <Ticket className="h-4 w-4 text-white" />
+          </div>
+          <p className="text-sm font-bold tracking-tight text-slate-800">
+            {isFreePass ? 'Free Entry Pass' : 'Entry Pass'}
+          </p>
         </div>
-        <span className={`rounded-full border px-2 py-1 text-xs font-medium ${getStatusClasses(booking.status)}`}>
+
+        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClasses(booking.status)}`}>
           {booking.status === 'confirmed' ? (
-            <span className="inline-flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Confirmed</span>
+            <span className="inline-flex items-center gap-1">
+              <CheckCircle className="h-3.5 w-3.5" /> Confirmed
+            </span>
           ) : (
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {booking.status || 'Pending'}</span>
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" /> {booking.status || 'Pending'}
+            </span>
           )}
         </span>
       </div>
 
-      <div className="space-y-4 px-4 py-4">
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
-          <div className="rounded-xl border border-amber-100 bg-white/80 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Primary Contact</p>
-            <p className="mt-1 text-sm font-semibold text-slate-800">{details?.name || 'N/A'}</p>
-            <p className="text-xs text-slate-600">{details?.email || 'No email'}</p>
-            <p className="inline-flex items-center gap-1 text-xs text-slate-600"><Phone className="h-3.5 w-3.5" /> {details?.mobile || 'No mobile'}</p>
-            <p className="text-xs text-slate-600">Aadhar: {details?.aadharno || 'N/A'}</p>
+      {/* ── Body ── */}
+      <div className="space-y-4 px-5 py-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+
+          {/* Primary Contact */}
+          <div className="rounded-xl border border-purple-200 bg-white/80 p-3.5 shadow-sm">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-purple-500">Primary Contact</p>
+            <p className="text-sm font-bold leading-snug text-slate-800">{details?.name || 'N/A'}</p>
+            <p className="mt-1 text-xs text-slate-500">{details?.email || 'No email'}</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-slate-500">
+              <Phone className="h-3 w-3 text-purple-500" /> {details?.mobile || 'No mobile'}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-400">Aadhar: {details?.aadharno || 'N/A'}</p>
           </div>
 
-          <div className="rounded-xl border border-amber-100 bg-white/80 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pass Details</p>
-            <p className="text-sm font-semibold text-slate-800">
-              {isFreePass ? '13, 14, 15 June 2026' : `${eventDetails?.duration || '3'} day(s) pass`}
+          {/* Pass Details */}
+          <div className="rounded-xl border border-orange-200 bg-white/80 p-3.5 shadow-sm">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-orange-500">Pass Details</p>
+            <p className="text-sm font-bold leading-snug text-slate-800">
+              {isFreePass ? '13, 14, 15 June 2026' : `${eventDetails?.duration || '3'} Day Pass`}
             </p>
-            <p className="text-xs text-slate-600">Type: {isFreePass ? 'Free Entry Pass' : 'Entry Pass'}</p>
-            <p className="text-xs text-slate-500">ID: {booking?.bookingId || booking?.id}</p>
+            <p className="mt-1 text-xs text-slate-500">Type: {isFreePass ? 'Free Entry Pass' : 'Entry Pass'}</p>
+            <p className="mt-0.5 text-xs text-slate-400">ID: {booking?.bookingId || booking?.id}</p>
           </div>
 
-          <div className="rounded-xl border border-amber-100 bg-white/80 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Attendance</p>
-            <p className="inline-flex items-center gap-1 text-sm font-semibold text-slate-800">
-              <Users className="h-4 w-4 text-amber-700" />
-              {eventDetails?.numberOfPersons || members.length || 1}
+          {/* Attendance */}
+          <div className="rounded-xl border border-sky-200 bg-white/80 p-3.5 shadow-sm">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-sky-500">Attendance</p>
+            <p className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-800">
+              <Users className="h-4 w-4 text-sky-500" />
+              {(Number(eventDetails?.numberOfPersons || members.length || 0) + 1)} Person(s)
             </p>
-            <p className="inline-flex items-center gap-1 text-xs text-slate-500">
-              <Calendar className="h-3.5 w-3.5" />
-              {formatDate(booking?.createdAt)}
-            </p>
+            <div className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
+              <Calendar className="h-3 w-3 text-sky-500" />
+              <span>{formatDate(booking?.createdAt)}</span>
+            </div>
           </div>
 
-          <div className="rounded-xl border border-amber-100 bg-white/80 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Address</p>
-            <p className="inline-flex items-start gap-1 text-xs text-slate-700">
-              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span>
+          {/* Address */}
+          <div className="rounded-xl border border-rose-200 bg-white/80 p-3.5 shadow-sm">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-rose-500">Address</p>
+            <div className="flex items-start gap-1.5">
+              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-500" />
+              <p className="text-xs leading-relaxed text-slate-600">
                 {details?.address || 'N/A'}
                 {details?.city ? `, ${details.city}` : ''}
                 {details?.state ? `, ${details.state}` : ''}
                 {details?.country ? `, ${details.country}` : ''}
                 {details?.pincode ? ` - ${details.pincode}` : ''}
-              </span>
-            </p>
+              </p>
+            </div>
           </div>
         </div>
 
+        {/* Members */}
         {isFreePass && members.length > 0 && (
-          <div className="rounded-xl border border-amber-200 bg-white/85 p-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">Member Details</p>
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <div className="rounded-xl border border-purple-200 bg-white/70 p-4 shadow-sm">
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-purple-500">Member Details</p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {members.map((member, index) => (
-                <div key={`${booking.id}-member-${index}`} className="rounded-lg border border-amber-100 bg-amber-50/60 p-3">
+                <div key={`${booking.id}-member-${index}`} className="rounded-lg border border-purple-200 bg-purple-100/60 p-3">
                   <p className="text-sm font-semibold text-slate-800">{member.name || `Member ${index + 1}`}</p>
-                  <p className="text-xs text-slate-600">{member.phone || 'No phone'} | {member.gender || 'NA'} | Age {member.age || 'NA'}</p>
-                  <p className="text-xs text-slate-600">Aadhar: {member.aadhar || 'N/A'}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    {member.phone || 'No phone'} · {member.gender || 'NA'} · Age {member.age || 'NA'}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-400">Aadhar: {member.aadhar || 'N/A'}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
+        {/* CTA */}
         {booking.status === 'confirmed' && (
-          <div className="text-right">
+          <div className="flex justify-end pt-1">
             <button
               type="button"
               onClick={() => setIsPassModalOpen(true)}
-              className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
+              className="rounded-md bg-gradient-to-r from-purple-500 via-purple-400 to-purple-700 px-5 py-2 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg active:scale-95"
             >
               Pass & Receipt
             </button>
@@ -120,7 +142,12 @@ const EntryPassCard = ({ booking }) => {
         )}
       </div>
 
-      <PassReceiptModal isOpen={isPassModalOpen} onClose={() => setIsPassModalOpen(false)} booking={booking} />
+      {/* Modal — untouched */}
+      <PassReceiptModal
+        isOpen={isPassModalOpen}
+        onClose={() => setIsPassModalOpen(false)}
+        booking={booking}
+      />
     </div>
   );
 };

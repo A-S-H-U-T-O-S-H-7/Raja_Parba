@@ -14,7 +14,6 @@ import EntryPassCard from '@/components/profile/EntryPassCard';
 import SponsorApplicationCard from '@/components/profile/SponsorApplicationCard';
 import PerformerApplicationCard from '@/components/profile/PerformerApplicationCard';
 import ContestApplicationCard from '@/components/profile/ContestApplicationCard';
-import ImageModal from '@/components/ImageModal';
 import useAuthStore from '@/lib/stores/useAuthStore';
 import useUserProfileStore from '@/lib/stores/useUserProfileStore';
 
@@ -126,13 +125,13 @@ const ProfilePage = () => {
       case 'performer':
         return performers.map((item) => <PerformerApplicationCard key={item.id} item={item} />);
       case 'award':
-        return awards.map((item) => <ContestApplicationCard key={item.id} item={item} title="Award Application" accent="amber" />);
+        return awards.map((item) => <ContestApplicationCard key={item.id} item={item} title="Award Application" accent="blueIndigo" />);
       case 'rajaKumari':
-        return rajaKumari.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Kumari Application" accent="rose" />);
+        return rajaKumari.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Kumari Application" accent="emeraldTeal" />);
       case 'rajaQueen':
-        return rajaQueen.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Queen Application" accent="pink" />);
+        return rajaQueen.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Queen Application" accent="redPink" />);
       case 'drawing':
-        return drawings.map((item) => <ContestApplicationCard key={item.id} item={item} title="Drawing Application" accent="emerald" />);
+        return drawings.map((item) => <ContestApplicationCard key={item.id} item={item} title="Drawing Application" accent="green" />);
       default:
         return null;
     }
@@ -183,14 +182,6 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
-
-        <ImageModal
-          show={showEventLayoutModal}
-          onClose={() => setShowEventLayoutModal(false)}
-          imageSrc="/layout2.png"
-          imageAlt="Event Layout"
-          title="Event Layout"
-        />
       </div>
     </ProtectedRoute>
   );
