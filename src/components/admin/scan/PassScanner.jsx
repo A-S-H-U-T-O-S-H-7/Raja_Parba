@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import useThemeStore from "@/lib/stores/useThemeStore";
@@ -43,6 +45,7 @@ export default function PassScanner() {
   const [verifying, setVerifying] = useState(false);
   const [lastRawScan, setLastRawScan] = useState("");
   const [result, setResult] = useState(null);
+  const [manualOpen, setManualOpen] = useState(false);
 
   const supportsBarcodeDetector =
     typeof window !== "undefined" && "BarcodeDetector" in window;
@@ -273,63 +276,94 @@ export default function PassScanner() {
           </section>
 
           <section className={`rounded-2xl border p-4 ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
-            <h2 className={`mb-3 text-sm font-semibold ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>Manual Verify</h2>
-            <form onSubmit={handleManualVerify} className="space-y-3">
-              <textarea
-                value={manualInput}
-                onChange={(event) => setManualInput(event.target.value)}
-                placeholder="Paste QR text here (example: RAJA PARBA 2026 | ID:... | Name:... | Type:...)"
-                rows={4}
-                className={`w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 ${
-                  isDarkMode
-                    ? "border-gray-600 bg-gray-900 text-gray-100 focus:ring-indigo-500"
-                    : "border-gray-300 bg-white text-gray-800 focus:ring-indigo-300"
-                }`}
-              />
-              <button
-                type="submit"
-                disabled={verifying}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
-              >
-                {verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                Verify Pass
-              </button>
-            </form>
+            <button
+              type="button"
+              onClick={() => setManualOpen((prev) => !prev)}
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-semibold ${
+                isDarkMode ? "bg-gray-700 text-gray-100 hover:bg-gray-600" : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+              }`}
+            >
+              <span>Manual Verify</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${manualOpen ? "rotate-180" : ""}`} />
+            </button>
 
-            {lastRawScan && (
-              <div className={`mt-4 rounded-lg border p-3 ${isDarkMode ? "border-gray-600 bg-gray-900" : "border-gray-200 bg-gray-50"}`}>
-                <p className={`mb-1 text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Last Scanned Data</p>
-                <p className={`text-xs break-words ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>{lastRawScan}</p>
+            {manualOpen && (
+              <div className="mt-3">
+                <form onSubmit={handleManualVerify} className="space-y-3">
+                  <textarea
+                    value={manualInput}
+                    onChange={(event) => setManualInput(event.target.value)}
+                    placeholder="Paste QR text here (example: RAJA PARBA 2026 | ID:... | Name:... | Type:...)"
+                    rows={4}
+                    className={`w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 ${
+                      isDarkMode
+                        ? "border-gray-600 bg-gray-900 text-gray-100 focus:ring-indigo-500"
+                        : "border-gray-300 bg-white text-gray-800 focus:ring-indigo-300"
+                    }`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={verifying}
+                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                  >
+                    {verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    Verify Pass
+                  </button>
+                </form>
+
+                {lastRawScan && (
+                  <div className={`mt-4 rounded-lg border p-3 ${isDarkMode ? "border-gray-600 bg-gray-900" : "border-gray-200 bg-gray-50"}`}>
+                    <p className={`mb-1 text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Last Scanned Data</p>
+                    <p className={`text-xs break-words ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>{lastRawScan}</p>
+                  </div>
+                )}
               </div>
             )}
           </section>
         </div>
 
         {result && (
-          <section className={`rounded-2xl border p-5 ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
-            <div className="mb-4 flex items-center gap-2">
-              {result.status === "valid" ? (
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-              ) : result.status === "used" ? (
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
-              ) : (
-                <XCircle className="h-5 w-5 text-red-500" />
-              )}
-              <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusColor[result.status] || statusColor.invalid}`}>
-                {result.status?.toUpperCase() || "INVALID"}
-              </span>
-              <p className={`text-sm font-medium ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>{result.message}</p>
-            </div>
-
-            {result.details ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <InfoCard label="Booking ID" value={result.details.bookingId} icon={Ticket} />
-                <InfoCard label="Pass Type" value={result.details.passType} icon={QrCode} />
-                <InfoCard label="Name" value={result.details.name} icon={User} />
-                <InfoCard label="Status" value={result.details.bookingStatus} icon={ShieldCheck} />
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+            onClick={() => setResult(null)}
+          >
+            <section
+              className={`w-full max-w-3xl rounded-2xl border p-5 shadow-2xl ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  {result.status === "valid" ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  ) : result.status === "used" ? (
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                  <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusColor[result.status] || statusColor.invalid}`}>
+                    {result.status?.toUpperCase() || "INVALID"}
+                  </span>
+                  <p className={`text-sm font-medium ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>{result.message}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setResult(null)}
+                  className={`rounded-lg p-1.5 ${isDarkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-            ) : null}
-          </section>
+
+              {result.details ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <InfoCard label="Booking ID" value={result.details.bookingId} icon={Ticket} />
+                  <InfoCard label="Pass Type" value={result.details.passType} icon={QrCode} />
+                  <InfoCard label="Name" value={result.details.name} icon={User} />
+                  <InfoCard label="Status" value={result.details.bookingStatus} icon={ShieldCheck} />
+                </div>
+              ) : null}
+            </section>
+          </div>
         )}
       </div>
     </PermissionGate>
