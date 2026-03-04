@@ -1,7 +1,7 @@
 // components/admin/layout/AdminSidebar.jsx
 "use client";
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
@@ -69,12 +69,6 @@ const navigation = [
     permission: 'view_entry_pass_management'
   },
   {
-    name: 'Cancellation & Refund',
-    href: '/admin/cancellations',
-    icon: Receipt,
-    permission: 'manage_cancellations'
-  },
-  {
     name: 'Our Guests',
     href: '/admin/distinguished-guests',
     icon: User,
@@ -126,6 +120,7 @@ const navigation = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { admin, hasPermission, adminLogout } = useAdminAuthStore();
   const { isDarkMode } = useThemeStore();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -213,7 +208,7 @@ export default function AdminSidebar() {
             </div>
           </div>
           <button
-            onClick={() => adminLogout()}
+            onClick={handleLogout}
             className={`w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg transition-colors
               ${isDarkMode 
                 ? 'text-red-400 bg-red-900/20 hover:bg-red-900/40' 
@@ -238,3 +233,8 @@ export default function AdminSidebar() {
     </>
   );
 }
+  const handleLogout = async () => {
+    await adminLogout();
+    setIsMobileOpen(false);
+    router.replace('/admin/login');
+  };

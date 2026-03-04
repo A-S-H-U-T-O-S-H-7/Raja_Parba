@@ -6,7 +6,6 @@ import {
   Cog6ToothIcon,
   UserPlusIcon,
   DocumentTextIcon,
-  BanknotesIcon,
   HeartIcon,
   StarIcon
 } from '@heroicons/react/24/outline';
@@ -65,12 +64,6 @@ export const navigationItems = [
     name: 'Sponsors & Performers',
     icon: UserPlusIcon,
     permission: 'view_sponsor_performer'
-  },
-  {
-    id: 'cancellations',
-    name: 'Cancellation & Refunds',
-    icon: BanknotesIcon,
-    permission: 'manage_cancellations'
   },
   {
     id: 'users',

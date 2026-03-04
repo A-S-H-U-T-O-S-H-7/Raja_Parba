@@ -1,16 +1,22 @@
 // components/admin/layout/AdminHeader.jsx
 "use client";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Sun, Moon, Calendar } from 'lucide-react';
+import { Home, Sun, Moon, Calendar, LogOut } from 'lucide-react';
 import useThemeStore from '@/lib/stores/useThemeStore';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import { format } from 'date-fns';
 
 export default function AdminHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isDarkMode, toggleTheme } = useThemeStore();
-  const { admin } = useAdminAuthStore();
+  const { adminLogout } = useAdminAuthStore();
+
+  const handleLogout = async () => {
+    await adminLogout();
+    router.replace('/admin/login');
+  };
 
   // Get page title from pathname
   const getPageTitle = () => {
@@ -69,6 +75,18 @@ export default function AdminHeader() {
               <Home className="w-4 h-4" />
               <span>Back to Site</span>
             </Link>
+
+            <button
+              onClick={handleLogout}
+              className={`inline-flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isDarkMode
+                  ? 'bg-red-900/30 text-red-300 hover:bg-red-900/50'
+                  : 'bg-red-50 text-red-700 hover:bg-red-100'
+              }`}
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </div>

@@ -36,7 +36,6 @@ export const PERMISSIONS = {
   // Advanced Features
   ACTIVITY_LOGS: 'activity_logs',
   REAL_TIME_SYNC: 'real_time_sync',
-  CANCELLATION_MANAGEMENT: 'cancellation_management',
   
   // Admin Management
   MANAGE_ADMINS: 'manage_admins'
@@ -86,7 +85,6 @@ export const PERMISSION_GROUPS = [
     permissions: [
       PERMISSIONS.ACTIVITY_LOGS,
       PERMISSIONS.REAL_TIME_SYNC,
-      PERMISSIONS.CANCELLATION_MANAGEMENT,
       PERMISSIONS.MANAGE_ADMINS
     ]
   }
@@ -201,7 +199,6 @@ export const getReadablePermissions = (admin) => {
     [PERMISSIONS.SYSTEM_SETTINGS]: 'System Settings',
     [PERMISSIONS.ACTIVITY_LOGS]: 'Activity Logs',
     [PERMISSIONS.REAL_TIME_SYNC]: 'Real-time Sync Status',
-    [PERMISSIONS.CANCELLATION_MANAGEMENT]: 'Cancellation Management',
     [PERMISSIONS.MANAGE_ADMINS]: 'Manage Admins'
   };
   
@@ -230,7 +227,6 @@ export const canAccessRoute = (admin, route) => {
     '/admin/settings': [PERMISSIONS.SYSTEM_SETTINGS],
     '/admin/logs': [PERMISSIONS.ACTIVITY_LOGS],
     '/admin/sync': [PERMISSIONS.REAL_TIME_SYNC],
-    '/admin/cancellations': [PERMISSIONS.CANCELLATION_MANAGEMENT],
     '/admin/admins': [PERMISSIONS.MANAGE_ADMINS]
   };
   

@@ -200,7 +200,7 @@ export default function Header() {
                             <div className="w-8 h-8 bg-amber-100 group-hover:bg-amber-200 rounded-xl flex items-center justify-center"><User className="w-4 h-4 text-amber-600" /></div>
                             <div className="flex-1"><p className="text-sm font-medium">My Profile</p><p className="text-xs text-gray-500">View and edit profile</p></div>
                           </Link>
-                          <Link href="/tickets" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-700 transition-all duration-200 group">
+                          <Link href="/free-pass" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-700 transition-all duration-200 group">
                             <div className="w-8 h-8 bg-green-100 group-hover:bg-green-200 rounded-xl flex items-center justify-center"><Ticket className="w-4 h-4 text-green-600" /></div>
                             <div className="flex-1"><p className="text-sm font-medium">Get Free Entry Pass</p><p className="text-xs text-gray-500">Purchase event pass</p></div>
                           </Link>

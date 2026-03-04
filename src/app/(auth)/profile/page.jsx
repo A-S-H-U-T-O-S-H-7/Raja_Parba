@@ -156,21 +156,7 @@ const ProfilePage = () => {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
         <Header />
         <div className="mx-auto max-w-[96rem] px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mb-6 rounded-3xl border border-orange-200 bg-gradient-to-r from-orange-100 via-amber-50 to-yellow-100 p-5 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-black text-slate-900 sm:text-3xl">My Festival Dashboard</h1>
-                <p className="text-sm text-slate-600">Track all bookings, passes, and applications in one place.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowEventLayoutModal(true)}
-                className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-indigo-600 hover:to-violet-700"
-              >
-                View Event Layout
-              </button>
-            </div>
-          </div>
+          
           <div className="mb-8">
             <SimpleUserProfile user={user} />
           </div>

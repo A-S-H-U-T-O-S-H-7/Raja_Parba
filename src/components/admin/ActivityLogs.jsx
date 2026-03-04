@@ -4,8 +4,8 @@ import { db } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs, limit, startAfter, where, Timestamp } from 'firebase/firestore';
 import { format, isToday, isYesterday, subDays, startOfDay, endOfDay } from 'date-fns';
 import { toast } from 'react-hot-toast';
-import { useAdmin } from '@/context/AdminContext';
-import { useTheme } from '@/context/ThemeContext';
+import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
+import useThemeStore from '@/lib/stores/useThemeStore';
 import { 
   DocumentTextIcon,
   MagnifyingGlassIcon,
@@ -26,8 +26,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function ActivityLogs() {
-  const { adminUser, hasPermission } = useAdmin();
-  const { isDarkMode } = useTheme();
+  const { admin, hasPermission } = useAdminAuthStore();
+  const { isDarkMode } = useThemeStore();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,14 +42,14 @@ export default function ActivityLogs() {
   const logsPerPage = 50;
 
   useEffect(() => {
-    if (hasPermission('view_logs') || adminUser?.role === 'super_admin') {
+    if (hasPermission('view_logs') || admin?.role === 'super_admin') {
       fetchAdmins();
       fetchLogs();
     } else {
       setError('You do not have permission to view activity logs');
       setLoading(false);
     }
-  }, [currentPage, filterBy, actionFilter, adminFilter]);
+  }, [currentPage, filterBy, actionFilter, adminFilter, hasPermission, admin?.role]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function ActivityLogs() {
 
   const fetchAdmins = async () => {
     try {
-      const adminsRef = collection(db, 'admins');
+      const adminsRef = collection(db, 'admin_users');
       const snapshot = await getDocs(adminsRef);
       const adminsData = [];
       
@@ -226,12 +226,14 @@ export default function ActivityLogs() {
     }
   };
 
-  const getAdminName = (adminId) => {
+  const getAdminName = (adminId, fallbackName = '') => {
+    if (fallbackName) return fallbackName;
     const admin = admins.find(a => a.id === adminId);
-    return admin ? admin.name : 'Unknown Admin';
+    return admin ? (admin.name || admin.username || 'Unknown Admin') : 'Unknown Admin';
   };
 
-  const getAdminRole = (adminId) => {
+  const getAdminRole = (adminId, fallbackRole = '') => {
+    if (fallbackRole) return fallbackRole;
     const admin = admins.find(a => a.id === adminId);
     return admin ? admin.role : 'unknown';
   };
@@ -270,8 +272,8 @@ export default function ActivityLogs() {
       "Timestamp,Admin,Role,Action,Entity Type,Entity ID,Description,IP Address\n" +
       logs.map(log => [
         getTimeDisplay(log.timestamp),
-        getAdminName(log.adminId),
-        getAdminRole(log.adminId),
+        getAdminName(log.adminId, log.adminName),
+        getAdminRole(log.adminId, log.adminRole),
         log.action,
         log.entityType || '',
         log.entityId || '',
@@ -293,7 +295,7 @@ export default function ActivityLogs() {
     if (!searchTerm) return true;
     
     const searchLower = searchTerm.toLowerCase();
-    const adminName = getAdminName(log.adminId).toLowerCase();
+    const adminName = getAdminName(log.adminId, log.adminName).toLowerCase();
     const description = formatDescription(log).toLowerCase();
     const action = (log.action || '').toLowerCase();
     const entityType = (log.entityType || '').toLowerCase();
@@ -428,7 +430,7 @@ export default function ActivityLogs() {
             >
               <option value="all">All Admins</option>
               {admins.map(admin => (
-                <option key={admin.id} value={admin.id}>{admin.name}</option>
+                <option key={admin.id} value={admin.id}>{admin.name || admin.username}</option>
               ))}
             </select>
           </div>
@@ -442,7 +444,8 @@ export default function ActivityLogs() {
             {filteredLogs.map((log, index) => {
               const ActionIcon = getActionIcon(log.action);
               const actionColor = getActionColor(log.action);
-              const adminRole = getAdminRole(log.adminId);
+              const adminRole = getAdminRole(log.adminId, log.adminRole);
+              const adminName = getAdminName(log.adminId, log.adminName);
               
               return (
                 <div key={log.id} className={`p-6 ${isDarkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'} transition-colors duration-150`}>
@@ -458,11 +461,11 @@ export default function ActivityLogs() {
                         <div className="flex items-center space-x-2">
                           {/* Admin Info */}
                           <div className={`w-8 h-8 ${isDarkMode ? 'bg-purple-900 text-purple-300' : 'bg-purple-100 text-purple-600'} rounded-full flex items-center justify-center font-bold text-xs`}>
-                            {getAdminName(log.adminId).charAt(0).toUpperCase()}
+                            {adminName.charAt(0).toUpperCase()}
                           </div>
                           <div>
                             <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                              {getAdminName(log.adminId)}
+                              {adminName}
                             </span>
                             <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                               adminRole === 'super_admin' 

@@ -8,7 +8,6 @@ import {
   EyeOff, 
   Trash2,
   Plus,
-  IndianRupee,
   Ticket,
   Star,
   Users,
@@ -174,6 +173,13 @@ export default function ShowSettings() {
           <Settings className="w-5 h-5 mr-2" />
           Show Seat Layout
         </h3>
+        <div className={`mb-4 p-3 rounded-md ${
+          isDarkMode ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200'
+        }`}>
+          <p className={`text-sm ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>
+            Seat pricing, discounts, and offers are managed only from Price Settings.
+          </p>
+        </div>
 
         {/* Premium Blocks */}
         <div className={`mb-6 p-4 rounded-md ${
@@ -209,7 +215,7 @@ export default function ShowSettings() {
                   }`}>
                     {block.name} ({block.id})
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <label className={`block text-xs font-medium mb-1 ${
                         isDarkMode ? 'text-gray-300' : 'text-gray-700'
@@ -239,23 +245,6 @@ export default function ShowSettings() {
                         max="15"
                         value={block.maxPairsPerRow}
                         onChange={(e) => updatePremiumBlock(index, 'maxPairsPerRow', parseInt(e.target.value) || 1)}
-                        className={`w-full px-2 py-1 text-sm rounded border ${
-                          isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'
-                        }`}
-                      />
-                    </div>
-                    <div>
-                      <label className={`block text-xs font-medium mb-1 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        Price (₹)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="100"
-                        value={block.price}
-                        onChange={(e) => updatePremiumBlock(index, 'price', parseInt(e.target.value) || 0)}
                         className={`w-full px-2 py-1 text-sm rounded border ${
                           isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'
                         }`}
@@ -314,7 +303,7 @@ export default function ShowSettings() {
                   }`}>
                     {block.name} ({block.id})
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <label className={`block text-xs font-medium mb-1 ${
                         isDarkMode ? 'text-gray-300' : 'text-gray-700'
@@ -344,23 +333,6 @@ export default function ShowSettings() {
                         max="25"
                         value={block.maxSeatsPerRow}
                         onChange={(e) => updateRegularBlock(index, 'maxSeatsPerRow', parseInt(e.target.value) || 1)}
-                        className={`w-full px-2 py-1 text-sm rounded border ${
-                          isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'
-                        }`}
-                      />
-                    </div>
-                    <div>
-                      <label className={`block text-xs font-medium mb-1 ${
-                        isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
-                        Price (₹)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="100"
-                        value={block.price}
-                        onChange={(e) => updateRegularBlock(index, 'price', parseInt(e.target.value) || 0)}
                         className={`w-full px-2 py-1 text-sm rounded border ${
                           isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'
                         }`}

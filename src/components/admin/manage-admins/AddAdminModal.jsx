@@ -131,102 +131,106 @@ export default function AddAdminModal({ isOpen, onClose, onSuccess }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-8rem)]">
-          <div className="px-6 py-4 space-y-4">
-            {/* Username */}
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
-                <Key className="w-4 h-4 inline mr-1" />
-                Username *
-              </label>
-              <input
-                type="text"
-                value={formData.username}
-                onChange={(e) => setFormData({...formData, username: e.target.value})}
-                className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                } ${errors.username ? 'border-red-500' : ''}`}
-                placeholder="johndoe"
-              />
-              {errors.username && (
-                <p className="text-red-500 text-xs mt-1">{errors.username}</p>
-              )}
-            </div>
+	          <div className="px-6 py-4 space-y-4">
+	            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+	              {/* Username */}
+	              <div>
+	                <label className={`block text-sm font-medium mb-1 ${
+	                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+	                }`}>
+	                  <Key className="w-4 h-4 inline mr-1" />
+	                  Username *
+	                </label>
+	                <input
+	                  type="text"
+	                  value={formData.username}
+	                  onChange={(e) => setFormData({...formData, username: e.target.value})}
+	                  className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+	                    isDarkMode 
+	                      ? 'bg-gray-700 border-gray-600 text-white' 
+	                      : 'bg-white border-gray-300 text-gray-900'
+	                  } ${errors.username ? 'border-red-500' : ''}`}
+	                  placeholder="user"
+	                />
+	                {errors.username && (
+	                  <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+	                )}
+	              </div>
 
-            {/* Password */}
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
-                <Lock className="w-4 h-4 inline mr-1" />
-                Password *
-              </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                } ${errors.password ? 'border-red-500' : ''}`}
-                placeholder="••••••••"
-              />
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-              )}
-            </div>
+	              {/* Password */}
+	              <div>
+	                <label className={`block text-sm font-medium mb-1 ${
+	                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+	                }`}>
+	                  <Lock className="w-4 h-4 inline mr-1" />
+	                  Password *
+	                </label>
+	                <input
+	                  type="text"
+	                  value={formData.password}
+	                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+	                  className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+	                    isDarkMode 
+	                      ? 'bg-gray-700 border-gray-600 text-white' 
+	                      : 'bg-white border-gray-300 text-gray-900'
+	                  } ${errors.password ? 'border-red-500' : ''}`}
+	                  placeholder="user@123"
+	                />
+	                {errors.password && (
+	                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+	                )}
+	              </div>
+	            </div>
 
-            {/* Name */}
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
-                <User className="w-4 h-4 inline mr-1" />
-                Full Name *
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                } ${errors.name ? 'border-red-500' : ''}`}
-                placeholder="John Doe"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-              )}
-            </div>
+	            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+	              {/* Name */}
+	              <div>
+	                <label className={`block text-sm font-medium mb-1 ${
+	                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+	                }`}>
+	                  <User className="w-4 h-4 inline mr-1" />
+	                  Full Name *
+	                </label>
+	                <input
+	                  type="text"
+	                  value={formData.name}
+	                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+	                  className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+	                    isDarkMode 
+	                      ? 'bg-gray-700 border-gray-600 text-white' 
+	                      : 'bg-white border-gray-300 text-gray-900'
+	                  } ${errors.name ? 'border-red-500' : ''}`}
+	                  placeholder="User Name"
+	                />
+	                {errors.name && (
+	                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+	                )}
+	              </div>
 
-            {/* Email */}
-            <div>
-              <label className={`block text-sm font-medium mb-1 ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
-                <Mail className="w-4 h-4 inline mr-1" />
-                Email *
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 border-gray-600 text-white' 
-                    : 'bg-white border-gray-300 text-gray-900'
-                } ${errors.email ? 'border-red-500' : ''}`}
-                placeholder="john@example.com"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-              )}
-            </div>
+	              {/* Email */}
+	              <div>
+	                <label className={`block text-sm font-medium mb-1 ${
+	                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+	                }`}>
+	                  <Mail className="w-4 h-4 inline mr-1" />
+	                  Email *
+	                </label>
+	                <input
+	                  type="email"
+	                  value={formData.email}
+	                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+	                  className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-purple-500 ${
+	                    isDarkMode 
+	                      ? 'bg-gray-700 border-gray-600 text-white' 
+	                      : 'bg-white border-gray-300 text-gray-900'
+	                  } ${errors.email ? 'border-red-500' : ''}`}
+	                  placeholder="user@example.com"
+	                />
+	                {errors.email && (
+	                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+	                )}
+	              </div>
+	            </div>
 
             {/* Role */}
             <div>
@@ -276,24 +280,35 @@ export default function AddAdminModal({ isOpen, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                <div className={`border rounded-lg p-4 max-h-60 overflow-y-auto space-y-4 ${
-                  isDarkMode ? 'border-gray-700' : 'border-gray-200'
-                }`}>
-                  {Object.entries(permissionsByCategory).map(([category, perms]) => (
-                    <div key={category}>
-                      <h4 className={`text-xs font-semibold mb-2 ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
-                        {category}
-                      </h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        {perms.map(perm => (
-                          <label key={perm.id} className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={formData.permissions.includes(perm.id)}
-                              onChange={() => togglePermission(perm.id)}
-                              className="rounded text-purple-600 focus:ring-purple-500"
+	                <div className={`border rounded-lg p-4 max-h-60 overflow-y-auto space-y-4 ${
+	                  isDarkMode ? 'border-gray-700' : 'border-gray-200'
+	                }`}>
+	                  {Object.entries(permissionsByCategory).map(([category, perms]) => (
+	                    <div key={category}>
+	                      <h4 className={`text-xs font-semibold mb-2 ${
+	                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+	                      }`}>
+	                        {category}
+	                      </h4>
+	                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+	                        {perms.map(perm => (
+	                          <label
+	                            key={`${category}-${perm.id}`}
+	                            className={`flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 border transition-colors ${
+	                              formData.permissions.includes(perm.id)
+	                                ? isDarkMode
+	                                  ? 'bg-purple-900/30 border-purple-700'
+	                                  : 'bg-purple-50 border-purple-300'
+	                                : isDarkMode
+	                                  ? 'border-gray-700 hover:border-gray-600'
+	                                  : 'border-gray-200 hover:border-gray-300'
+	                            }`}
+	                          >
+	                            <input
+	                              type="checkbox"
+	                              checked={formData.permissions.includes(perm.id)}
+	                              onChange={() => togglePermission(perm.id)}
+	                              className="rounded text-purple-600 focus:ring-purple-500"
                             />
                             <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                               {perm.name}

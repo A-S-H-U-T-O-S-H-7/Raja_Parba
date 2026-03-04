@@ -17,6 +17,9 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import useAdminAuthStore from './useAdminAuthStore';
+import { hash } from 'bcryptjs';
+
+const SALT_ROUNDS = 10;
 
 // Available permissions based on your sidebar navigation
 export const AVAILABLE_PERMISSIONS = [
@@ -26,8 +29,7 @@ export const AVAILABLE_PERMISSIONS = [
   { id: 'view_show_bookings', name: 'Show Booking', category: 'Bookings' },
   { id: 'manage_show_seats', name: 'Show Seats', category: 'Seats' },
   { id: 'view_entry_pass_management', name: 'Entry Pass Management', category: 'Bookings' },
-  { id: 'view_sponsor_performer', name: 'Sponsors and Performer', category: 'Management' },
-  { id: 'manage_cancellations', name: 'Cancellation & Refund', category: 'Management' },
+  { id: 'view_sponsor_performer', name: 'Raja Activity', category: 'Management' },
   { id: 'view_guests', name: 'Our Guests', category: 'Management' },
   { id: 'manage_gallery', name: 'Manage Gallery', category: 'Content' },
   { id: 'view_donations', name: 'Donation', category: 'Management' },
@@ -36,7 +38,6 @@ export const AVAILABLE_PERMISSIONS = [
   { id: 'manage_pricing', name: 'Price Setting', category: 'Settings' },
   { id: 'manage_settings', name: 'System Settings', category: 'Settings' },
   { id: 'view_logs', name: 'Activity Log', category: 'Management' },
-  { id: 'view_sponsor_performer', name: 'Raja Activity', category: 'Management' },
 
 ];
 
@@ -45,7 +46,7 @@ export const PERMISSION_CATEGORIES = {
   'Dashboard': ['view_overview'],
   'Bookings': ['view_stall_bookings', 'view_show_bookings', 'view_entry_pass_management'],
   'Seats': ['manage_stalls', 'manage_show_seats'],
-  'Management': ['view_sponsor_performer', 'manage_cancellations', 'view_guests', 'view_donations', 'view_users', 'manage_admins', 'view_logs'],
+  'Management': ['view_sponsor_performer', 'view_guests', 'view_donations', 'view_users', 'manage_admins', 'view_logs'],
   'Content': ['manage_gallery'],
   'Settings': ['manage_pricing', 'manage_settings']
 };
@@ -96,6 +97,12 @@ const useAdminManagementStore = create((set, get) => ({
     const { admin } = useAdminAuthStore.getState();
     
     try {
+      if (!adminData.password || typeof adminData.password !== 'string' || !adminData.password.trim()) {
+        set({ loading: false });
+        toast.error('Password is required');
+        return { success: false, error: 'Password is required' };
+      }
+
       // Check if username already exists
       const usernameQuery = query(
         collection(db, 'admin_users'), 
@@ -124,11 +131,13 @@ const useAdminManagementStore = create((set, get) => ({
         }
       }
       
+      const hashedPassword = await hash(adminData.password, SALT_ROUNDS);
+
       // Create admin document
       const adminRef = await addDoc(collection(db, 'admin_users'), {
         username: adminData.username.toLowerCase(),
         email: adminData.email?.toLowerCase(),
-        password: adminData.password, // Plain text for now (you'll hash later)
+        password: hashedPassword,
         name: adminData.name,
         role: adminData.role,
         permissions: adminData.role === 'super_admin' ? [] : (adminData.permissions || []),
@@ -159,14 +168,23 @@ const useAdminManagementStore = create((set, get) => ({
     
     try {
       const adminRef = doc(db, 'admin_users', adminId);
+      const sanitizedUpdates = { ...updates };
       
       // Don't allow username change
-      delete updates.username;
-      delete updates.id;
+      delete sanitizedUpdates.username;
+      delete sanitizedUpdates.id;
+
+      if (typeof sanitizedUpdates.password === 'string') {
+        if (sanitizedUpdates.password.trim()) {
+          sanitizedUpdates.password = await hash(sanitizedUpdates.password, SALT_ROUNDS);
+        } else {
+          delete sanitizedUpdates.password;
+        }
+      }
       
       await updateDoc(adminRef, {
-        ...updates,
-        permissions: updates.role === 'super_admin' ? [] : (updates.permissions || []),
+        ...sanitizedUpdates,
+        permissions: sanitizedUpdates.role === 'super_admin' ? [] : (sanitizedUpdates.permissions || []),
         updatedAt: new Date(),
         updatedBy: admin?.id
       });
@@ -174,10 +192,10 @@ const useAdminManagementStore = create((set, get) => ({
       // Update local state
       set(state => ({
         admins: state.admins.map(a => 
-          a.id === adminId ? { ...a, ...updates, updatedAt: new Date() } : a
+          a.id === adminId ? { ...a, ...sanitizedUpdates, updatedAt: new Date() } : a
         ),
         selectedAdmin: state.selectedAdmin?.id === adminId 
-          ? { ...state.selectedAdmin, ...updates, updatedAt: new Date() }
+          ? { ...state.selectedAdmin, ...sanitizedUpdates, updatedAt: new Date() }
           : state.selectedAdmin,
         loading: false
       }));

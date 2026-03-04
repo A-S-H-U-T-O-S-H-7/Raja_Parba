@@ -210,22 +210,33 @@ export default function EditAdminModal({ isOpen, onClose, onSuccess }) {
                   </div>
                 </div>
 
-                <div className={`border rounded-lg p-4 max-h-60 overflow-y-auto space-y-4 ${
-                  isDarkMode ? 'border-gray-700' : 'border-gray-200'
-                }`}>
-                  {Object.entries(permissionsByCategory).map(([category, perms]) => (
-                    <div key={category}>
+	                <div className={`border rounded-lg p-4 max-h-60 overflow-y-auto space-y-4 ${
+	                  isDarkMode ? 'border-gray-700' : 'border-gray-200'
+	                }`}>
+	                  {Object.entries(permissionsByCategory).map(([category, perms]) => (
+	                    <div key={category}>
                       <h4 className={`text-xs font-semibold mb-2 ${
                         isDarkMode ? 'text-gray-400' : 'text-gray-500'
                       }`}>
                         {category}
                       </h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        {perms.map(perm => (
-                          <label key={perm.id} className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={formData.permissions.includes(perm.id)}
+	                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+	                        {perms.map(perm => (
+	                          <label
+	                            key={`${category}-${perm.id}`}
+	                            className={`flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 border transition-colors ${
+	                              formData.permissions.includes(perm.id)
+	                                ? isDarkMode
+	                                  ? 'bg-purple-900/30 border-purple-700'
+	                                  : 'bg-purple-50 border-purple-300'
+	                                : isDarkMode
+	                                  ? 'border-gray-700 hover:border-gray-600'
+	                                  : 'border-gray-200 hover:border-gray-300'
+	                            }`}
+	                          >
+	                            <input
+	                              type="checkbox"
+	                              checked={formData.permissions.includes(perm.id)}
                               onChange={() => togglePermission(perm.id)}
                               className="rounded text-purple-600 focus:ring-purple-500"
                             />

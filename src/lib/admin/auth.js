@@ -15,9 +15,12 @@ import {
   limit
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { hash, compare } from 'bcryptjs';
+
+const SALT_ROUNDS = 10;
 
 class AdminAuthService {
-  // Admin login with plain text password (TEMPORARY FOR TESTING)
+  // Admin login
   async login(username, password) {
     try {
       console.log('🔐 Login attempt:', username);
@@ -40,8 +43,13 @@ class AdminAuthService {
       
       console.log('✅ User found:', adminData.username);
 
-      // 🔓 TEMPORARY: Plain text password comparison
-      if (adminData.password !== password) {
+      const storedPassword = String(adminData.password || '');
+      const isHashedPassword = storedPassword.startsWith('$2');
+      const passwordMatches = isHashedPassword
+        ? await compare(password, storedPassword)
+        : storedPassword === password;
+
+      if (!passwordMatches) {
         console.log('❌ Password mismatch');
         return { 
           success: false, 
@@ -59,11 +67,18 @@ class AdminAuthService {
         };
       }
 
-      // Update last login
-      await updateDoc(doc(db, 'admin_users', adminDoc.id), {
+      // Update last login and auto-upgrade legacy plain-text passwords
+      const loginUpdates = {
         lastLogin: serverTimestamp(),
         lastLoginIp: null
-      });
+      };
+
+      if (!isHashedPassword) {
+        loginUpdates.password = await hash(password, SALT_ROUNDS);
+        loginUpdates.passwordUpgradedAt = serverTimestamp();
+      }
+
+      await updateDoc(doc(db, 'admin_users', adminDoc.id), loginUpdates);
 
       // Remove password from response
       const { password: _, ...adminWithoutPassword } = adminData;
@@ -160,6 +175,9 @@ class AdminAuthService {
   async createAdmin(adminData) {
     try {
       const { username, password, name, email, role, permissions, createdBy } = adminData;
+      if (!password || typeof password !== 'string' || !password.trim()) {
+        return { success: false, error: 'Password is required' };
+      }
 
       // Check if username already exists
       const usernameCheck = await getDocs(
@@ -187,11 +205,13 @@ class AdminAuthService {
         }
       }
 
-      // Create admin document (store password as plain text for testing)
+      const hashedPassword = await hash(password, SALT_ROUNDS);
+
+      // Create admin document
       const adminRef = await addDoc(collection(db, 'admin_users'), {
         username: username.toLowerCase(),
         email: email?.toLowerCase(),
-        password: password, // Plain text for testing
+        password: hashedPassword,
         name,
         role: role || 'admin',
         permissions: permissions || [],
@@ -228,12 +248,21 @@ class AdminAuthService {
   async updateAdmin(adminId, updates, updatedBy) {
     try {
       const adminRef = doc(db, 'admin_users', adminId);
+      const sanitizedUpdates = { ...updates };
 
       // Don't allow username change (for security)
-      delete updates.username;
+      delete sanitizedUpdates.username;
+
+      if (typeof sanitizedUpdates.password === 'string') {
+        if (sanitizedUpdates.password.trim()) {
+          sanitizedUpdates.password = await hash(sanitizedUpdates.password, SALT_ROUNDS);
+        } else {
+          delete sanitizedUpdates.password;
+        }
+      }
 
       await updateDoc(adminRef, {
-        ...updates,
+        ...sanitizedUpdates,
         updatedAt: serverTimestamp(),
         updatedBy
       });
@@ -243,7 +272,7 @@ class AdminAuthService {
         adminId: updatedBy,
         action: 'UPDATE_ADMIN',
         target: adminId,
-        details: { updates: Object.keys(updates) }
+        details: { updates: Object.keys(sanitizedUpdates) }
       });
 
       return { success: true, error: null };
