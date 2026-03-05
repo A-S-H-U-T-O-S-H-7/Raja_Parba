@@ -67,7 +67,13 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
   const showPass = (activeTab === "pass" || isFreeBooking) && !receiptOnly;
   const showReceipt = (activeTab === "receipt" || receiptOnly) && booking;
   const isReceiptView = showReceipt && !showPass;
+  const isFreePassBooking = booking?.category === "free_pass" || booking?.eventDetails?.delegateType === "freePass";
   const modalMaxWidthClass = isReceiptView ? "max-w-4xl" : "max-w-lg";
+  const modalHeightClass = isReceiptView
+    ? "max-h-[78vh] md:max-h-[84vh]"
+    : isFreePassBooking
+      ? "max-h-[72vh] md:max-h-[78vh]"
+      : "max-h-[65vh] md:max-h-[70vh]";
 
   const modalContent = (
     <div
@@ -115,7 +121,7 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
           </div>
         )}
 
-        <div className="scrollbar-hide max-h-[65vh] overflow-y-auto md:max-h-[70vh]">
+        <div className={`scrollbar-hide overflow-y-auto ${modalHeightClass}`}>
           {showPass && (
             <div className="py-0">
               <MemberPass booking={booking} />
@@ -129,7 +135,7 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
           )}
         </div>
 
-        {!receiptOnly && (
+        {!receiptOnly && activeTab !== "receipt" && (
           <>
             <DonationPart />
             <div className="border-t border-rose-200 bg-rose-50 px-4 py-3 text-center text-sm font-semibold text-rose-600">

@@ -23,6 +23,10 @@ export default function EntryPassDetailsModal({ isOpen, booking, onClose }) {
   const details = booking.delegateDetails || {};
   const event = booking.eventDetails || {};
   const members = Array.isArray(event.members) ? event.members : [];
+  const personsFromField = Number(event.numberOfPersons || 0);
+  const totalPersons = personsFromField
+    ? (members.length === personsFromField ? personsFromField + 1 : personsFromField)
+    : (members.length + 1);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
@@ -79,7 +83,7 @@ export default function EntryPassDetailsModal({ isOpen, booking, onClose }) {
             <p className={`mb-2 text-xs font-semibold uppercase ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>Booking Info</p>
             <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-3">
               <p className={isDarkMode ? "text-white" : "text-gray-900"}>Status: <span className="font-semibold">{booking.status || "N/A"}</span></p>
-              <p className={isDarkMode ? "text-white" : "text-gray-900"}>Persons: <span className="font-semibold">{event.numberOfPersons || members.length || 0}</span></p>
+              <p className={isDarkMode ? "text-white" : "text-gray-900"}>Persons: <span className="font-semibold">{totalPersons}</span></p>
               <p className={isDarkMode ? "text-white" : "text-gray-900"}>Created: <span className="font-semibold">{formatDate(booking.createdAt)}</span></p>
               <p className={isDarkMode ? "text-white" : "text-gray-900"}>Participated: <span className="font-semibold">{booking.participated ? "Yes" : "No"}</span></p>
               <p className={isDarkMode ? "text-white" : "text-gray-900"}>Participated At: <span className="font-semibold">{formatDate(booking.participatedAt)}</span></p>
@@ -97,10 +101,8 @@ export default function EntryPassDetailsModal({ isOpen, booking, onClose }) {
                     <tr className={isDarkMode ? "text-gray-300" : "text-gray-700"}>
                       <th className="px-2 py-2 text-left">#</th>
                       <th className="px-2 py-2 text-left">Name</th>
-                      <th className="px-2 py-2 text-left">Phone</th>
                       <th className="px-2 py-2 text-left">Gender</th>
                       <th className="px-2 py-2 text-left">Age</th>
-                      <th className="px-2 py-2 text-left">Aadhar</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -108,10 +110,8 @@ export default function EntryPassDetailsModal({ isOpen, booking, onClose }) {
                       <tr key={`${member.name || "member"}-${index}`} className={`border-t ${isDarkMode ? "border-gray-700 text-gray-200" : "border-gray-200 text-gray-800"}`}>
                         <td className="px-2 py-2">{index + 1}</td>
                         <td className="px-2 py-2">{member.name || "N/A"}</td>
-                        <td className="px-2 py-2">{member.phone || "N/A"}</td>
                         <td className="px-2 py-2">{member.gender || "N/A"}</td>
                         <td className="px-2 py-2">{member.age || "N/A"}</td>
-                        <td className="px-2 py-2">{member.aadhar || "N/A"}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -29,10 +29,14 @@ const EntryPassCard = ({ booking }) => {
   const members = booking?.eventDetails?.members || [];
   const details = booking?.delegateDetails || {};
   const eventDetails = booking?.eventDetails || {};
+  const personsFromField = Number(eventDetails?.numberOfPersons || 0);
+  const totalPersons = personsFromField
+    ? (members.length === personsFromField ? personsFromField + 1 : personsFromField)
+    : (members.length + 1);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 via-orange-50 to-rose-50 shadow-md">
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-200 bg-gradient-to-r from-purple-100 via-orange-50 to-rose-100 px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 via-purple-400 to-purple-700 shadow-sm">
@@ -56,7 +60,7 @@ const EntryPassCard = ({ booking }) => {
         </span>
       </div>
 
-      {/* ── Body ── */}
+      {/* â”€â”€ Body â”€â”€ */}
       <div className="space-y-4 px-5 py-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -86,7 +90,7 @@ const EntryPassCard = ({ booking }) => {
             <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-sky-500">Attendance</p>
             <p className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-800">
               <Users className="h-4 w-4 text-sky-500" />
-              {(Number(eventDetails?.numberOfPersons || members.length || 0) + 1)} Person(s)
+              {totalPersons} Person(s)
             </p>
             <div className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
               <Calendar className="h-3 w-3 text-sky-500" />
@@ -118,10 +122,7 @@ const EntryPassCard = ({ booking }) => {
               {members.map((member, index) => (
                 <div key={`${booking.id}-member-${index}`} className="rounded-lg border border-purple-200 bg-purple-100/60 p-3">
                   <p className="text-sm font-semibold text-slate-800">{member.name || `Member ${index + 1}`}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    {member.phone || 'No phone'} · {member.gender || 'NA'} · Age {member.age || 'NA'}
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate-400">Aadhar: {member.aadhar || 'N/A'}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">{member.gender || 'NA'} - Age {member.age || 'NA'}</p>
                 </div>
               ))}
             </div>
@@ -142,7 +143,7 @@ const EntryPassCard = ({ booking }) => {
         )}
       </div>
 
-      {/* Modal — untouched */}
+      {/* Modal â€” untouched */}
       <PassReceiptModal
         isOpen={isPassModalOpen}
         onClose={() => setIsPassModalOpen(false)}
@@ -153,3 +154,4 @@ const EntryPassCard = ({ booking }) => {
 };
 
 export default EntryPassCard;
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Minus, Plus } from 'lucide-react';
 
 const GENDERS = ['Male', 'Female', 'Other'];
 
@@ -7,49 +7,57 @@ const FreePassMembersInfo = ({
   formData,
   errors,
   memberErrors,
-  handleInputChange,
+  totalPersons,
+  onIncrementPersons,
+  onDecrementPersons,
   handleMemberChange,
-  handleBlur,
 }) => {
   return (
     <div className="rounded-2xl border border-rose-200 bg-rose-50/60 p-4 md:p-5">
-      <div className="mb-4 flex justify-end">
-        <div className="rounded-full border border-rose-300 bg-white px-4 py-1.5 text-sm font-semibold text-rose-700">
-          Event: 13, 14, 15 June 2026
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-semibold text-slate-700">Number of Persons *</label>
-          <input
-            type="number"
-            name="numberOfPersons"
-            min={0}
-            max={20}
-            value={formData.numberOfPersons}
-            onChange={handleInputChange}
-            onBlur={handleBlur}
-            className={`w-full rounded-xl border bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100 ${
-              errors.numberOfPersons ? 'border-red-400' : 'border-slate-300'
-            }`}
-          />
+          <div className={`flex items-center justify-between rounded-xl border bg-white px-2 py-1.5 ${
+            errors.numberOfPersons ? 'border-red-400' : 'border-slate-300'
+          }`}>
+            <button
+              type="button"
+              onClick={onDecrementPersons}
+              disabled={totalPersons <= 1}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-rose-200 text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Decrease persons"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <div className="px-3 text-center">
+              <p className="text-xl font-bold text-slate-900">{totalPersons}</p>
+            </div>
+            <button
+              type="button"
+              onClick={onIncrementPersons}
+              disabled={totalPersons >= 20}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-rose-200 text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Increase persons"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
           {errors.numberOfPersons && <p className="mt-1 text-xs text-red-600">{errors.numberOfPersons}</p>}
         </div>
 
-        <div className="rounded-xl border border-rose-200 bg-white p-3">
+        <div className="rounded-xl border border-rose-300 bg-gradient-to-r from-rose-100 via-orange-50 to-emerald-100 p-3 shadow-sm">
           <p className="text-sm font-semibold text-rose-700">Free Pass Benefit</p>
-          <p className="mt-1 text-xs text-slate-600">Single registration covers all 3 event days for all members.</p>
+          <p className="mt-1 text-xs text-slate-700">Single registration covers all 3 event days for all members.</p>
         </div>
       </div>
 
-      {Number(formData.numberOfPersons) > 0 ? (
+      {totalPersons > 1 ? (
         <div className="mt-5 space-y-4">
           {formData.members.map((member, index) => (
             <div key={`member-${index}`} className="rounded-xl border border-rose-200 bg-white p-4">
-              <h4 className="mb-3 text-base font-semibold text-slate-800">Member {index + 1}</h4>
+              <h4 className="mb-3 text-base font-semibold text-slate-800"> Member {index + 1}</h4>
 
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-slate-700">Full Name *</label>
                   <input
@@ -62,21 +70,6 @@ const FreePassMembersInfo = ({
                     placeholder="Member full name"
                   />
                   {memberErrors[index]?.name && <p className="mt-1 text-xs text-red-600">{memberErrors[index].name}</p>}
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-700">Phone *</label>
-                  <input
-                    type="text"
-                    value={member.phone}
-                    onChange={(e) => handleMemberChange(index, 'phone', e.target.value)}
-                    maxLength={10}
-                    className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100 ${
-                      memberErrors[index]?.phone ? 'border-red-400' : 'border-slate-300'
-                    }`}
-                    placeholder="10 digit mobile"
-                  />
-                  {memberErrors[index]?.phone && <p className="mt-1 text-xs text-red-600">{memberErrors[index].phone}</p>}
                 </div>
 
                 <div>
@@ -113,30 +106,11 @@ const FreePassMembersInfo = ({
                   />
                   {memberErrors[index]?.age && <p className="mt-1 text-xs text-red-600">{memberErrors[index].age}</p>}
                 </div>
-
-                <div className="md:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-slate-700">Aadhar Number *</label>
-                  <input
-                    type="text"
-                    value={member.aadhar}
-                    onChange={(e) => handleMemberChange(index, 'aadhar', e.target.value)}
-                    maxLength={12}
-                    className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100 ${
-                      memberErrors[index]?.aadhar ? 'border-red-400' : 'border-slate-300'
-                    }`}
-                    placeholder="12 digit Aadhar"
-                  />
-                  {memberErrors[index]?.aadhar && <p className="mt-1 text-xs text-red-600">{memberErrors[index].aadhar}</p>}
-                </div>
               </div>
             </div>
           ))}
         </div>
-      ) : (
-        <div className="mt-5 rounded-xl border border-rose-200 bg-white p-6 text-center">
-          <p className="text-sm text-slate-600">Member details will appear after selecting number of persons.</p>
-        </div>
-      )}
+      ) : null}
 
       <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3">
         <p className="inline-flex items-center gap-2 text-sm font-semibold text-amber-800">

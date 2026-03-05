@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 const MemberPass = ({ booking, participantName, purpose }) => {
   const bookingId = booking?.id || booking?.bookingId || "N/A";
+  const isFreePass = booking?.category === "free_pass" || booking?.eventDetails?.delegateType === "freePass";
 
   const name =
     booking?.delegateDetails?.name ||
@@ -55,6 +56,11 @@ const MemberPass = ({ booking, participantName, purpose }) => {
   };
 
   const showDate = getShowDate();
+  const freePassMembersCountRaw = Number(booking?.eventDetails?.numberOfPersons || 0);
+  const freePassMembersLength = Array.isArray(booking?.eventDetails?.members) ? booking.eventDetails.members.length : 0;
+  const freePassMembersCount = freePassMembersCountRaw
+    ? (freePassMembersLength === freePassMembersCountRaw ? freePassMembersCountRaw + 1 : freePassMembersCountRaw)
+    : (freePassMembersLength + 1);
 
   const qrData = `RAJA PARBA 2026 | ID:${bookingId} | Name:${name} | Type:${passType}`;
   
@@ -159,6 +165,14 @@ const MemberPass = ({ booking, participantName, purpose }) => {
                 <span className="inline-block px-4 py-1.5 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 rounded-full text-sm font-semibold shadow-sm">
                   📅 Show Date: {showDate}
                 </span>
+              </div>
+            )}
+
+            {isFreePass && (
+              <div className="mb-4 rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 p-3 text-center">
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Free Pass Details</p>
+                <p className="mt-1 text-sm font-bold text-emerald-900">Members: {freePassMembersCount}</p>
+                <p className="mt-0.5 text-sm font-semibold text-teal-800">Date: 13 June - 15 June, 2026</p>
               </div>
             )}
 

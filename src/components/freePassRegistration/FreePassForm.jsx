@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { setDoc, doc, serverTimestamp, Timestamp, runTransaction } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
@@ -16,10 +16,8 @@ import FreePassMembersInfo from './FreePassMembersInfo';
 
 const createEmptyMember = () => ({
   name: '',
-  phone: '',
   gender: '',
   age: '',
-  aadhar: '',
 });
 
 const EVENT_DATE_LABEL = '13, 14, 15 June 2026';
@@ -39,7 +37,7 @@ const FreePassForm = () => {
     city: '',
     address: '',
     pincode: '',
-    numberOfPersons: '0',
+    numberOfPersons: '1',
     members: [],
   });
 
@@ -51,38 +49,32 @@ const FreePassForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { countries, states, cities, loading } = useLocationData(formData);
+  const totalPersons = Math.min(20, Math.max(1, parseInt(formData.numberOfPersons, 10) || 1));
 
   useEffect(() => {
-    const persons = Math.max(0, parseInt(formData.numberOfPersons, 10) || 0);
+    const persons = Math.min(20, Math.max(1, parseInt(formData.numberOfPersons, 10) || 1));
+    const additionalMembers = Math.max(0, persons - 1);
     setFormData((prev) => {
-      if (prev.members.length === persons) return prev;
+      if (prev.members.length === additionalMembers) return prev;
       const nextMembers = [...prev.members];
-      if (nextMembers.length < persons) {
-        while (nextMembers.length < persons) nextMembers.push(createEmptyMember());
+      if (nextMembers.length < additionalMembers) {
+        while (nextMembers.length < additionalMembers) nextMembers.push(createEmptyMember());
       } else {
-        nextMembers.length = persons;
+        nextMembers.length = additionalMembers;
       }
       return { ...prev, members: nextMembers };
     });
 
     setMemberErrors((prev) => {
       const next = [...prev];
-      if (next.length < persons) {
-        while (next.length < persons) next.push({});
+      if (next.length < additionalMembers) {
+        while (next.length < additionalMembers) next.push({});
       } else {
-        next.length = persons;
+        next.length = additionalMembers;
       }
       return next;
     });
   }, [formData.numberOfPersons]);
-
-  const primaryAddress = useMemo(
-    () =>
-      [formData.address, formData.city, formData.state, formData.country, formData.pincode]
-        .filter(Boolean)
-        .join(', '),
-    [formData.address, formData.city, formData.state, formData.country, formData.pincode]
-  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -92,8 +84,8 @@ const FreePassForm = () => {
     if (name === 'pincode') nextValue = value.replace(/\D/g, '').slice(0, 6);
     if (name === 'numberOfPersons') {
       const digits = value.replace(/\D/g, '').slice(0, 2);
-      const parsed = parseInt(digits || '0', 10);
-      nextValue = String(Math.min(20, Math.max(0, parsed)));
+      const parsed = parseInt(digits || '1', 10);
+      nextValue = String(Math.min(20, Math.max(1, parsed)));
     }
     if (name === 'aadharno') nextValue = value.replace(/\D/g, '').slice(0, 12);
 
@@ -111,9 +103,7 @@ const FreePassForm = () => {
 
   const handleMemberChange = (index, key, value) => {
     let nextValue = value;
-    if (key === 'phone') nextValue = value.replace(/\D/g, '').slice(0, 10);
     if (key === 'age') nextValue = value.replace(/\D/g, '').slice(0, 3);
-    if (key === 'aadhar') nextValue = value.replace(/\D/g, '').slice(0, 12);
 
     setFormData((prev) => {
       const members = [...prev.members];
@@ -128,9 +118,19 @@ const FreePassForm = () => {
     });
   };
 
+  const setPersonCount = (count) => {
+    setFormData((prev) => ({ ...prev, numberOfPersons: String(Math.min(20, Math.max(1, count))) }));
+    if (errors.numberOfPersons) {
+      setErrors((prev) => ({ ...prev, numberOfPersons: '' }));
+    }
+  };
+
+  const incrementPersons = () => setPersonCount(totalPersons + 1);
+  const decrementPersons = () => setPersonCount(totalPersons - 1);
+
   const handleBlur = (e) => {
     const { name } = e.target;
-    const validation = validateForm(formData, selectedFile);
+    const validation = validateForm(formData);
     if (validation.errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: validation.errors[name] }));
     } else {
@@ -160,7 +160,7 @@ const FreePassForm = () => {
     if (photoInput) photoInput.value = '';
   };
 
-  const validateForm = (data, file) => {
+  const validateForm = (data) => {
     const nextErrors = {};
     const nextMemberErrors = data.members.map(() => ({}));
 
@@ -180,20 +180,17 @@ const FreePassForm = () => {
     if (!/^\d{6}$/.test(data.pincode)) nextErrors.pincode = 'Pincode must be 6 digits';
 
     const persons = parseInt(data.numberOfPersons, 10) || 0;
+    if (persons < 1) nextErrors.numberOfPersons = 'Minimum 1 person is required';
     if (persons > 20) nextErrors.numberOfPersons = 'Maximum 20 persons allowed per booking';
 
-    if (persons > 0) {
+    if (persons > 1) {
       data.members.forEach((member, index) => {
         if (!member.name.trim()) nextMemberErrors[index].name = 'Name is required';
-        if (!/^[6-9]\d{9}$/.test(member.phone)) nextMemberErrors[index].phone = 'Valid 10-digit phone required';
         if (!member.gender) nextMemberErrors[index].gender = 'Gender is required';
         const age = parseInt(member.age, 10);
         if (!age || age < 1 || age > 120) nextMemberErrors[index].age = 'Enter valid age (1-120)';
-        if (!/^\d{12}$/.test(member.aadhar)) nextMemberErrors[index].aadhar = 'Aadhar must be 12 digits';
       });
     }
-
-    if (!file) nextErrors.selfie = 'Photo is required';
 
     return { errors: nextErrors, memberErrors: nextMemberErrors };
   };
@@ -252,7 +249,7 @@ const FreePassForm = () => {
       city: '',
       address: '',
       pincode: '',
-      numberOfPersons: '0',
+      numberOfPersons: '1',
       members: [],
     });
     setErrors({});
@@ -262,7 +259,7 @@ const FreePassForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validation = validateForm(formData, selectedFile);
+    const validation = validateForm(formData);
     setErrors(validation.errors);
     setMemberErrors(validation.memberErrors);
 
@@ -280,12 +277,14 @@ const FreePassForm = () => {
     setIsSubmitting(true);
     try {
       const bookingId = await generateBookingId();
-
-      setImageUploading(true);
-      const imageUploadResult = await uploadDelegateImage(selectedFile, bookingId);
-      setImageUploading(false);
-      if (!imageUploadResult.success) {
-        throw new Error(imageUploadResult.error || 'Failed to upload photo');
+      let imageUploadResult = null;
+      if (selectedFile) {
+        setImageUploading(true);
+        imageUploadResult = await uploadDelegateImage(selectedFile, bookingId);
+        setImageUploading(false);
+        if (!imageUploadResult.success) {
+          throw new Error(imageUploadResult.error || 'Failed to upload photo');
+        }
       }
 
       const bookingData = {
@@ -315,20 +314,22 @@ const FreePassForm = () => {
           city: formData.city,
           address: formData.address,
           pincode: formData.pincode,
-          fileInfo: {
-            fileName: imageUploadResult.fileName,
-            originalName: imageUploadResult.originalName,
-            fileSize: imageUploadResult.size,
-            fileType: imageUploadResult.type,
-            fileUploaded: true,
-            imageUrl: imageUploadResult.url,
-          },
+          fileInfo: imageUploadResult
+            ? {
+                fileName: imageUploadResult.fileName,
+                originalName: imageUploadResult.originalName,
+                fileSize: imageUploadResult.size,
+                fileType: imageUploadResult.type,
+                fileUploaded: true,
+                imageUrl: imageUploadResult.url,
+              }
+            : { fileUploaded: false },
         },
         eventDetails: {
           participationType: 'Free Pass',
           delegateType: 'freePass',
           duration: '3',
-          numberOfPersons: String(formData.members.length),
+          numberOfPersons: String(totalPersons),
           eventDates: EVENT_DATE_RANGE,
           members: formData.members,
         },
@@ -406,11 +407,11 @@ const FreePassForm = () => {
               </div>
             </div>
 
-            <div className="flex flex-col items-start gap-6 md:flex-row">
-              <div className="flex-1">
+            <div className="flex justify-center">
+              <div className="w-full max-w-xl">
                 <p className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-700">
                   <Camera className="h-4 w-4" />
-                  Please upload a clear photo where your face is clearly visible
+                  Upload photo (optional)
                 </p>
                 
                 <input id="free-pass-photo" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -446,17 +447,7 @@ const FreePassForm = () => {
                   </div>
                 )}
                 
-                {errors.selfie && <p className="mt-2 text-xs text-red-600">{errors.selfie}</p>}
                 {imageUploading && <p className="mt-2 text-sm text-emerald-700">Uploading photo...</p>}
-              </div>
-              
-              <div className="w-full rounded-xl border border-sky-200 bg-sky-50 p-4 md:w-56">
-                <ul className="space-y-1 list-disc pl-4 text-xs font-medium text-sky-800">
-                  <li>Clear face visible</li>
-                  <li>No sunglasses</li>
-                  <li>Recent photo preferred</li>
-                  <li>Max 5MB size</li>
-                </ul>
               </div>
             </div>
 
@@ -482,10 +473,23 @@ const FreePassForm = () => {
                 formData={formData}
                 errors={errors}
                 memberErrors={memberErrors}
-                handleInputChange={handleInputChange}
+                totalPersons={totalPersons}
+                onIncrementPersons={incrementPersons}
+                onDecrementPersons={decrementPersons}
                 handleMemberChange={handleMemberChange}
-                handleBlur={handleBlur}
               />
+
+              <div className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
+                <h3 className="mb-3 text-base font-bold text-slate-900">Terms & Conditions</h3>
+                <ul className="space-y-2 text-sm text-slate-700">
+                  <li>• For security reasons, firearms are strictly not permitted inside the venue.</li>
+                  <li>• The complimentary pass must be produced for entry to any event.</li>
+                  <li>• The organizers reserve the right to add, withdraw or substitute artists and/or vary advertised programs, prices, venues, seating arrangements, and audience capacity without prior notice.</li>
+                  <li>• Admission is subject to the organizers and the venue&apos;s terms of admission. Late arrivals may result in non-admittance until a suitable break in the performance.</li>
+                  <li>• It may be a condition of entry that a search of person and/or their possessions is required at the time of entry.</li>
+                  <li>• Entry may be refused if passes are damaged, defaced, or not issued by the organizers.</li>
+                </ul>
+              </div>
 
               <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-orange-50 to-rose-50 p-6">
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -495,7 +499,7 @@ const FreePassForm = () => {
                     </p>
                     <p className="flex items-center gap-1 text-sm font-medium text-slate-700">
                       <Ticket className="h-4 w-4" />
-                      {formData.members.length} person(s) for 3 days ({EVENT_DATE_LABEL})
+                      {totalPersons} person(s) for 3 days ({EVENT_DATE_LABEL})
                     </p>
                   </div>
                   <button

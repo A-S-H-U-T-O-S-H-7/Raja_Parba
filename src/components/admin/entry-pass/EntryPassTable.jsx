@@ -81,7 +81,11 @@ export default function EntryPassTable({
             {bookings.map((booking, index) => {
               const details = booking.delegateDetails || {};
               const event = booking.eventDetails || {};
-              const persons = Number(event.numberOfPersons || event.members?.length || 0);
+              const personsFromField = Number(event.numberOfPersons || 0);
+              const membersCount = event.members?.length || 0;
+              const persons = personsFromField
+                ? (membersCount === personsFromField ? personsFromField + 1 : personsFromField)
+                : (membersCount + 1);
               return (
                 <tr
                   key={booking.id}
