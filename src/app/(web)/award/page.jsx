@@ -173,6 +173,7 @@ export default function AwardPage() {
           ...payload,
           id: result.id,
           registrationId: result.registrationId || result.id,
+          category: payload.awardField,
         });
       } catch (emailError) {
         console.error("Failed to send Award email:", emailError);

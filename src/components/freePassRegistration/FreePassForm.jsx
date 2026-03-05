@@ -222,23 +222,14 @@ const FreePassForm = () => {
     return `orp-epass-${yearShort}-${padded}`;
   };
 
-  const sendConfirmationEmail = async (bookingId, members) => {
+  const sendConfirmationEmail = async (bookingId) => {
     const emailPayload = {
       name: formData.name,
       email: formData.email,
-      order_id: bookingId,
-      event_date: EVENT_DATE_LABEL,
-      booking_type: 'Delegate Free Pass Registration',
-      amount: '0',
-      mobile: formData.mobile,
-      address: primaryAddress,
-      delegate_type: 'normal',
-      duration: '3',
-      number_of_person: String(members.length),
-      details: `Free pass confirmed for ${members.length} person(s). Event dates: ${EVENT_DATE_LABEL}.`,
+      pass_no: bookingId,
     };
 
-    const response = await fetch('/api/emails/delegate', {
+    const response = await fetch('/api/emails/entry-pass', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(emailPayload),
@@ -346,7 +337,7 @@ const FreePassForm = () => {
       await setDoc(doc(db, 'delegateBookings', bookingId), bookingData);
 
       try {
-        await sendConfirmationEmail(bookingId, formData.members);
+        await sendConfirmationEmail(bookingId);
       } catch (mailError) {
         toast.error(`Booking saved but email failed: ${mailError.message}`);
       }

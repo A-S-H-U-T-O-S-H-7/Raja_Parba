@@ -153,11 +153,14 @@ export default function RajaKumariPage() {
 
       try {
         const { sendRajaKumariConfirmationEmail } = await import("@/services/emailService");
-        await sendRajaKumariConfirmationEmail({
+        const emailResult = await sendRajaKumariConfirmationEmail({
           ...payload,
           id: result.id,
           registrationId: result.registrationId || result.id,
         });
+        if (!emailResult?.success) {
+          console.error("Raja Kumari email failed:", emailResult);
+        }
       } catch (emailError) {
         console.error("Failed to send Raja Kumari email:", emailError);
       }

@@ -146,6 +146,14 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
           if (!emailResult.success) {
             console.error('❌ Email error details:', emailResult.error);
           }
+        } else if (bookingType === 'show') {
+          const { sendShowSeatConfirmationEmail } = await import('@/services/showSeatEmailService');
+          const emailResult = await sendShowSeatConfirmationEmail(enrichedBookingData);
+          console.log('📧 Show confirmation email sent:', emailResult.success ? 'Success' : emailResult.error);
+        } else if (bookingType === 'stall') {
+          const { sendStallBookingConfirmationEmail } = await import('@/services/stallBookingEmailService');
+          const emailResult = await sendStallBookingConfirmationEmail(enrichedBookingData);
+          console.log('📧 Stall confirmation email sent:', emailResult.success ? 'Success' : emailResult.error);
         } else {
           const { sendBookingConfirmationEmail } = await import('@/services/emailService');
           const emailResult = await sendBookingConfirmationEmail(enrichedBookingData, bookingType);

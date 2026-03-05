@@ -154,11 +154,14 @@ export default function RajaQueenPage() {
 
       try {
         const { sendRajaQueenConfirmationEmail } = await import("@/services/emailService");
-        await sendRajaQueenConfirmationEmail({
+        const emailResult = await sendRajaQueenConfirmationEmail({
           ...payload,
           id: result.id,
           registrationId: result.registrationId || result.id,
         });
+        if (!emailResult?.success) {
+          console.error("Raja Queen email failed:", emailResult);
+        }
       } catch (emailError) {
         console.error("Failed to send Raja Queen email:", emailError);
       }

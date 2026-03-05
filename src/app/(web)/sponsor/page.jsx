@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { createSponsorApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { toast } from "react-hot-toast";
 
 const initialForm = {
   name: "",
@@ -105,9 +106,16 @@ export default function SponsorPage() {
 
       try {
         const { sendSponsorConfirmationEmail } = await import("@/services/emailService");
-        await sendSponsorConfirmationEmail(payload);
+        const emailResult = await sendSponsorConfirmationEmail(payload);
+        if (!emailResult?.success) {
+          console.error("Sponsor email failed:", emailResult);
+          toast.error(`Email not sent: ${emailResult?.error || "Backend issue"}`);
+        } else {
+          toast.success(`Email sent (${emailResult.method || "ok"})`);
+        }
       } catch (emailError) {
         console.error("Failed to send sponsor email:", emailError);
+        toast.error("Email service failed");
       }
 
       await showSuccessAlert();

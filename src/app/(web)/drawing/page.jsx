@@ -173,11 +173,14 @@ export default function DrawingPage() {
 
       try {
         const { sendDrawingConfirmationEmail } = await import("@/services/emailService");
-        await sendDrawingConfirmationEmail({
+        const emailResult = await sendDrawingConfirmationEmail({
           ...payload,
           id: result.id,
           registrationId: result.registrationId || result.id,
         });
+        if (!emailResult?.success) {
+          console.error("Drawing email failed:", emailResult);
+        }
       } catch (emailError) {
         console.error("Failed to send Drawing email:", emailError);
       }
