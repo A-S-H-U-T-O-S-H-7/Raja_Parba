@@ -128,7 +128,12 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
     // Send confirmation email on successful payment
     if (paymentData.order_status === 'Success') {
       try {
-        const enrichedBookingData = { ...bookingData, amount: paymentData.amount, order_id: orderId, payment_id: paymentData.tracking_id };
+        const enrichedBookingData = {
+          ...bookingData,
+          amount: paymentData.amount,
+          order_id: orderId,
+          payment_id: paymentData.tracking_id || paymentData.order_id || bookingData?.payment?.transactionId || orderId
+        };
         
         if (bookingType === 'donation') {
           const { sendDonationConfirmationEmail } = await import('@/services/emailService');

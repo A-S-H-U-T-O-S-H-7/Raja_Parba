@@ -130,12 +130,23 @@ export async function POST(req) {
 
 export const sendDonationConfirmationEmail = async (donationData) => {
   try {
+    const donorName = (donationData.donorDetails?.name || donationData.name || '').trim();
+    const donorEmail = (donationData.donorDetails?.email || donationData.email || '').trim();
+    const donationAmount = donationData.amount?.toString() || donationData.totalAmount?.toString() || '0';
+    const donationId = donationData.donationId || donationData.order_id || donationData.id || '';
+    const paymentId =
+      donationData.payment?.transactionId ||
+      donationData.payment_id ||
+      donationData.payment?.paymentId ||
+      donationData.order_id ||
+      donationId;
+
     const formData = new FormData();
-    formData.append('name', donationData.donorDetails?.name || donationData.name || '');
-    formData.append('email', donationData.donorDetails?.email || donationData.email || '');
-    formData.append('donation_amount', donationData.amount?.toString() || donationData.totalAmount?.toString() || '0');
-    formData.append('payment_id', donationData.payment?.transactionId || donationData.payment_id || '');
-    formData.append('donation_id', donationData.donationId || donationData.order_id || donationData.id || '');
+    formData.append('name', donorName);
+    formData.append('email', donorEmail);
+    formData.append('donation_amount', donationAmount);
+    formData.append('payment_id', paymentId);
+    formData.append('donation_id', donationId || paymentId);
     formData.append('transaction_date', new Date().toLocaleDateString('en-GB').replace(/\//g, '-'));
     
     const response = await fetch('https://svsamiti.com/rajaparba/donation.php', {
