@@ -82,19 +82,23 @@ const useUserShowBookingStore = create(
           if (docSnap.exists()) {
             const data = docSnap.data();
             const seatTypes = data.seatTypes || {};
+            const blockAPrice = Number(seatTypes.blockA?.price || 0);
+            const blockBPrice = Number(seatTypes.blockB?.price || 0);
+            const blockCPrice = Number(seatTypes.blockC?.price || 0);
+            const blockDPrice = Number(seatTypes.blockD?.price || 0);
             const newPriceSettings = {
               seatTypes: {
                 VIP: { 
-                  price: seatTypes.blockA?.price || seatTypes.blockB?.price || 1200 
+                  price: blockAPrice || blockBPrice || 1200 
                 },
                 REGULAR_C: { 
-                  price: seatTypes.blockC?.price || 600 
+                  price: blockCPrice || 600 
                 },
-                REGULAR_D: { price: data.seatTypes?.blockD?.price || 400 }
+                REGULAR_D: { price: blockDPrice || 400 }
               },
               earlyBirdDiscounts: data.earlyBirdDiscounts || [],
               bulkBookingDiscounts: data.bulkBookingDiscounts || [],
-              taxRate: data.taxRate || 0
+              taxRate: Number(data.taxRate || 0)
             };
             
             set({ priceSettings: newPriceSettings });
@@ -169,20 +173,22 @@ const useUserShowBookingStore = create(
         const premiumBlock = premiumBlocks.find((block) => block.id === blockId);
         const regularBlock = regularBlocks.find((block) => block.id === blockId);
 
-        if (premiumBlock?.price != null) {
-          return premiumBlock.price;
-        }
-
-        if (regularBlock?.price != null) {
-          return regularBlock.price;
-        }
-        
+        // Price Settings must be the source of truth for user-facing seat prices.
         if (seatStr.startsWith('A-') || seatStr.startsWith('B-')) {
-          return priceSettings.seatTypes.VIP.price;
+          const vipPrice = Number(priceSettings?.seatTypes?.VIP?.price);
+          if (vipPrice > 0) return vipPrice;
+          if (premiumBlock?.price != null) return Number(premiumBlock.price) || 1200;
+          return 1200;
         } else if (seatStr.startsWith('C-')) {
-          return priceSettings.seatTypes.REGULAR_C.price;
+          const regularCPrice = Number(priceSettings?.seatTypes?.REGULAR_C?.price);
+          if (regularCPrice > 0) return regularCPrice;
+          if (regularBlock?.price != null) return Number(regularBlock.price) || 600;
+          return 600;
         } else if (seatStr.startsWith('D-')) {
-          return priceSettings.seatTypes.REGULAR_D.price;
+          const regularDPrice = Number(priceSettings?.seatTypes?.REGULAR_D?.price);
+          if (regularDPrice > 0) return regularDPrice;
+          if (regularBlock?.price != null) return Number(regularBlock.price) || 400;
+          return 400;
         }
         return 500;
       },
