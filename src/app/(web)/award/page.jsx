@@ -259,22 +259,24 @@ export default function AwardPage() {
             {/* Award Field & Photo in one row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
               {/* Award Field Dropdown */}
-              <div className="relative">
-                <Medal className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 z-10" />
-                <select
-                  value={form.awardField}
-                  onChange={(e) => updateField("awardField", e.target.value)}
-                  className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-8 text-sm text-gray-700 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-all appearance-none"
-                  required
-                >
-                  <option value="" disabled>Select Award Field *</option>
-                  {awardFieldOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
+              <div className="self-start">
+                <div className="relative">
+                  <Medal className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-400 z-10" />
+                  <select
+                    value={form.awardField}
+                    onChange={(e) => updateField("awardField", e.target.value)}
+                    className="h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100"
+                    required
+                  >
+                    <option value="" disabled>Select Award Field *</option>
+                    {awardFieldOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-400" />
+                </div>
               </div>
 
               {/* Photo Upload with Preview */}
@@ -359,11 +361,11 @@ export default function AwardPage() {
 
                 {/* Gender Dropdown */}
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 z-10" />
+                  <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-400 z-10" />
                   <select
                     value={form.gender}
                     onChange={(e) => updateField("gender", e.target.value)}
-                    className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-8 text-sm text-gray-700 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-all appearance-none"
+                    className="h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100"
                     required
                   >
                     <option value="" disabled>Select Gender *</option>
@@ -371,7 +373,7 @@ export default function AwardPage() {
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-400" />
                 </div>
 
                 {/* Address - Full Width */}
@@ -407,11 +409,11 @@ export default function AwardPage() {
 
               {/* Education Qualification Dropdown */}
               <div className="relative">
-                <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-400 z-10" />
+                <GraduationCap className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-400 z-10" />
                 <select
                   value={form.educationQualification}
                   onChange={(e) => updateField("educationQualification", e.target.value)}
-                  className="w-full rounded-lg border border-orange-200 bg-white py-2.5 pl-9 pr-8 text-sm text-gray-700 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-100 transition-all appearance-none"
+                  className="h-11 w-full rounded-lg border border-orange-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none focus:border-orange-400 focus:ring-1 focus:ring-orange-100"
                   required
                 >
                   <option value="" disabled>Select Education *</option>
@@ -421,7 +423,7 @@ export default function AwardPage() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-400 pointer-events-none" />
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-400" />
               </div>
 
               {/* Age */}

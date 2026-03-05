@@ -9,6 +9,7 @@ import DonationBanner from './DonationBanner';
 import BookingSection from './BookingSection';
 import GallerySection from './GallerySection';
 import EventParticipation from './EventParticipation';
+import YouTubeVideosSection from './YouTubeVideosSection';
 
 function HeroSection({ user }) {
   return (
@@ -23,6 +24,7 @@ function HeroSection({ user }) {
     <GallerySection/>
     {/* <SponsorPerformerSection /> */}
     <DonationBanner user={user}/>
+    <YouTubeVideosSection />
     <BookingSection user={user} />
 
 

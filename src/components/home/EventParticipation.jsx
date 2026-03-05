@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Ticket, ArrowRight, Sparkles, MapPin, Star } from 'lucide-react';
+import { Ticket, ArrowRight, Sparkles, MapPin, Star, Play } from 'lucide-react';
 import Link from 'next/link';
 
 export default function EventBanner() {
@@ -7,12 +7,17 @@ export default function EventBanner() {
   const [hovered, setHovered] = useState(false);
   const [particles, setParticles] = useState([]);
   const [dayIndex, setDayIndex] = useState(0);
+  const [isDesktopVideoPlaying, setIsDesktopVideoPlaying] = useState(false);
 
   const days = [
     { label: '13 June', emoji: '🌸' },
     { label: '14 June', emoji: '🌺' },
     { label: '15 June', emoji: '🌼' },
   ];
+  const promoVideoId = 'z-J4x825vYU';
+  const promoVideoEmbedUrl = `https://www.youtube.com/embed/${promoVideoId}?rel=0&modestbranding=1&playsinline=1`;
+  const promoVideoAutoplayUrl = `https://www.youtube.com/embed/${promoVideoId}?rel=0&modestbranding=1&playsinline=1&autoplay=1`;
+  const promoThumbnailUrl = `https://img.youtube.com/vi/${promoVideoId}/hqdefault.jpg`;
 
   useEffect(() => {
     const pts = Array.from({ length: 14 }, (_, i) => ({
@@ -86,7 +91,7 @@ export default function EventBanner() {
       <div className="hidden md:flex relative items-center h-full px-8 gap-6" style={{ minHeight: '165px' }}>
 
         {/* Left block — festival identity */}
-        <div className="flex flex-col gap-2 shrink-0 w-48">
+        <div className="flex w-fit shrink-0 flex-col gap-2">
           <div className="flex items-center gap-2">
             <div
               className="flex items-center gap-1.5 rounded-full px-3 py-1"
@@ -96,15 +101,56 @@ export default function EventBanner() {
               <span className="text-indigo-200 text-[10px] font-bold tracking-widest uppercase">Live Event</span>
             </div>
           </div>
-          <div>
-            <p className="text-yellow-400 text-lg font-black leading-none tracking-tight" style={{ textShadow: '0 0 20px rgba(251,191,36,0.5)' }}>
-              Raja Parba
-            </p>
-            <p className="text-indigo-300 text-xs font-medium mt-0.5">Odisha's Sacred Festival</p>
-          </div>
-          <div className="flex items-center gap-1.5 mt-1">
-            <MapPin className="w-3 h-3 text-indigo-400" />
-            <span className="text-indigo-300 text-xs">Noida, Delhi NCR</span>
+          <div className="mt-1 flex items-center justify-start gap-3">
+            <div className="w-40 self-center">
+              <p className="text-yellow-400 text-lg font-black leading-none tracking-tight" style={{ textShadow: '0 0 20px rgba(251,191,36,0.5)' }}>
+                Raja Parba
+              </p>
+              <p className="text-indigo-300 text-xs font-medium mt-0.5">Odisha's Sacred Festival</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <MapPin className="w-3 h-3 text-indigo-400" />
+                <span className="text-indigo-300 text-xs">Noida, Delhi NCR</span>
+              </div>
+            </div>
+
+            <div
+              className="w-72 shrink-0 self-center overflow-hidden rounded-xl border border-indigo-300/40 bg-indigo-950/40 p-1.5 shadow-lg"
+              style={{ boxShadow: '0 8px 22px rgba(15,23,42,0.38)' }}
+            >
+              <div className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-wider text-indigo-200">
+                Festival Glimpse
+              </div>
+              <div className="overflow-hidden rounded-lg border border-indigo-200/30">
+                {isDesktopVideoPlaying ? (
+                  <iframe
+                    className="h-40 w-full"
+                    src={promoVideoAutoplayUrl}
+                    title="Raja Parba promo video"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsDesktopVideoPlaying(true)}
+                    className="group relative block h-40 w-full"
+                    aria-label="Play Raja Parba promo video"
+                  >
+                    <img
+                      src={promoThumbnailUrl}
+                      alt="Raja Parba promo thumbnail"
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/25 transition-colors group-hover:bg-black/35" />
+                    <span className="absolute left-1/2 top-1/2 inline-flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-red-600 text-white shadow-md">
+                      <Play className="ml-0.5 h-4 w-4 fill-current" />
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -208,6 +254,28 @@ export default function EventBanner() {
           <div className="flex items-center gap-1">
             <MapPin className="w-3 h-3 text-indigo-400" />
             <span className="text-indigo-300 text-[10px]">Noida, Delhi NCR</span>
+          </div>
+        </div>
+
+        <div className="w-full max-w-[290px]">
+          <div
+            className="overflow-hidden rounded-xl border border-indigo-300/40 bg-indigo-950/35 p-1.5 shadow-lg"
+            style={{ boxShadow: '0 8px 20px rgba(15,23,42,0.34)' }}
+          >
+            <div className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-wider text-indigo-200">
+              Festival Glimpse
+            </div>
+            <div className="overflow-hidden rounded-lg border border-indigo-200/30">
+              <iframe
+                className="h-32 w-full"
+                src={promoVideoEmbedUrl}
+                title="Raja Parba promo video"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
           </div>
         </div>
 

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { setDoc, doc, serverTimestamp, Timestamp, runTransaction } from 'firebase/firestore';
+import { setDoc, doc, serverTimestamp, Timestamp, runTransaction, collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import { Ticket, Sparkles, Flower2, Camera, UploadCloud, X } from 'lucide-react';
@@ -238,6 +238,20 @@ const FreePassForm = () => {
     }
   };
 
+  const hasExistingFreePass = async (userId) => {
+    if (!userId) return false;
+
+    const existingPassQuery = query(
+      collection(db, 'delegateBookings'),
+      where('userId', '==', userId),
+      where('category', '==', 'free_pass'),
+      limit(1)
+    );
+
+    const existingPassSnap = await getDocs(existingPassQuery);
+    return !existingPassSnap.empty;
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -276,6 +290,32 @@ const FreePassForm = () => {
 
     setIsSubmitting(true);
     try {
+      const alreadyHasPass = await hasExistingFreePass(user.uid);
+      if (alreadyHasPass) {
+        await Swal.fire({
+          html: `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;">
+              <div style="width:58px;height:58px;border-radius:9999px;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:700;box-shadow:0 8px 18px rgba(249,115,22,.35);">!</div>
+              <h2 style="margin:0;font-size:1.2rem;color:#1f2937;font-weight:700;">Entry Pass Already Booked</h2>
+              <p style="margin:0;font-size:0.95rem;color:#4b5563;text-align:center;line-height:1.45;">
+                You already have an Entry Pass.<br/>Redirecting to your profile.
+              </p>
+            </div>
+          `,
+          confirmButtonText: 'Go to Profile',
+          confirmButtonColor: '#ea580c',
+          background: '#fff7ed',
+          color: '#7c2d12',
+          iconColor: '#f59e0b',
+          customClass: {
+            popup: 'rounded-2xl shadow-2xl',
+            confirmButton: 'rounded-lg px-5 py-2 font-semibold',
+          },
+        });
+        router.push('/profile?tab=entryPass');
+        return;
+      }
+
       const bookingId = await generateBookingId();
       let imageUploadResult = null;
       if (selectedFile) {
