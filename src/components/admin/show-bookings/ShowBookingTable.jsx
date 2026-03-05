@@ -1,253 +1,151 @@
 // components/admin/show-bookings/ShowBookingTable.jsx
 "use client";
-
-import {
-  Eye,
-  CheckCircle,
-  XCircle,
+import { 
+  Eye, 
+  CheckCircle, 
+  XCircle, 
   Clock,
-  AlertTriangle,
+  Star,
   UserCheck,
-  Ticket,
+  Loader2,
+  Calendar,
   Mail,
   Phone,
-  Loader2
-} from "lucide-react";
-import { format } from "date-fns";
-import useThemeStore from "@/lib/stores/useThemeStore";
+  Users,
+  Ticket
+} from 'lucide-react';
+import useThemeStore from '@/lib/stores/useThemeStore';
+import { format } from 'date-fns';
+import Pagination from '../shared/Pagination';
 
 export default function ShowBookingTable({
   bookings,
   loading,
   isUpdating,
-  currentPage = 1,
-  bookingsPerPage = 10,
-  canManageBookings = true,
   onViewDetails,
-  onConfirm,
   onCancel,
-  onDelete,
+  onParticipation,
+  onConfirm,
   onApproveCancellation,
   onRejectCancellation,
-  onParticipation
+  currentPage,
+  totalPages,
+  totalBookings,
+  bookingsPerPage,
+  onPageChange
 }) {
   const { isDarkMode } = useThemeStore();
+  const isDark = isDarkMode;
 
   const formatCurrency = (amount) => {
-    if (!amount || Number.isNaN(Number(amount))) return "INR 0";
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
+    if (!amount || isNaN(amount)) return '₹0';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
       maximumFractionDigits: 0
     }).format(amount);
   };
 
-  const formatDateTime = (dateValue) => {
-    if (!dateValue) return "N/A";
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
     try {
-      const date = dateValue?.toDate?.() || new Date(dateValue);
-      if (Number.isNaN(date.getTime())) return "N/A";
-      return format(date, "MMM dd, yyyy HH:mm");
+      return format(new Date(date), 'dd/MM/yyyy, hh:mm:ss a');
     } catch {
-      return "N/A";
+      return 'N/A';
     }
   };
 
-  const formatShowDate = (value, timeText = "") => {
-    if (!value) return "N/A";
+  const formatShowDate = (date) => {
+    if (!date) return 'N/A';
     try {
-      const date = value?.toDate?.() || (value?.seconds ? new Date(value.seconds * 1000) : new Date(value));
-      if (Number.isNaN(date.getTime())) return "N/A";
-      return `${format(date, "MMM dd, yyyy")}${timeText ? ` (${timeText})` : ""}`;
+      return format(new Date(date), 'dd/MM/yyyy');
     } catch {
-      return "N/A";
+      return 'N/A';
     }
   };
 
-  const getStatusBadge = (status) => {
-    const config = {
-      confirmed: {
-        icon: CheckCircle,
-        bg: isDarkMode ? "bg-green-900/30 text-green-300 border-green-600" : "bg-green-50 text-green-700 border-green-200",
-        label: "Confirmed"
-      },
-      pending: {
-        icon: Clock,
-        bg: isDarkMode ? "bg-yellow-900/30 text-yellow-300 border-yellow-600" : "bg-yellow-50 text-yellow-700 border-yellow-200",
-        label: "Pending"
-      },
-      cancelled: {
-        icon: XCircle,
-        bg: isDarkMode ? "bg-red-900/30 text-red-300 border-red-600" : "bg-red-50 text-red-700 border-red-200",
-        label: "Cancelled"
-      },
-      "cancellation-requested": {
-        icon: AlertTriangle,
-        bg: isDarkMode ? "bg-orange-900/30 text-orange-300 border-orange-600" : "bg-orange-50 text-orange-700 border-orange-200",
-        label: "Cancellation Requested"
+  const getStatusColors = (status) => {
+    if (isDark) {
+      switch(status) {
+        case 'confirmed': return 'bg-green-900/60 text-green-200 border border-green-700';
+        case 'pending': return 'bg-yellow-900/60 text-yellow-200 border border-yellow-700';
+        case 'cancelled': return 'bg-red-900/60 text-red-200 border border-red-700';
+        case 'cancellation-requested': return 'bg-orange-900/60 text-orange-200 border border-orange-700';
+        default: return 'bg-gray-700 text-gray-200 border border-gray-600';
       }
-    };
-
-    const { icon: Icon, bg, label } = config[status] || config.pending;
-    return (
-      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${bg}`}>
-        <Icon className="mr-1 h-3 w-3" />
-        {label}
-      </span>
-    );
+    }
+    switch(status) {
+      case 'confirmed': return 'bg-green-100 text-green-700 border border-green-300';
+      case 'pending': return 'bg-yellow-100 text-yellow-700 border border-yellow-300';
+      case 'cancelled': return 'bg-red-100 text-red-700 border border-red-300';
+      case 'cancellation-requested': return 'bg-orange-100 text-orange-700 border border-orange-300';
+      default: return 'bg-gray-100 text-gray-700 border border-gray-300';
+    }
   };
 
-  const getSeatCategory = (seatId) => {
-    if (!seatId) return "Standard";
+  const getSeatCategoryColors = (seatId) => {
+    if (!seatId) return isDark ? 'bg-gray-700 text-gray-300 border border-gray-600' : 'bg-gray-100 text-gray-700 border border-gray-300';
+    
     const seatStr = String(seatId);
-    if (seatStr.startsWith("A") || seatStr.startsWith("B")) return "VIP";
-    if (seatStr.startsWith("C")) return "Premium";
-    return "Standard";
-  };
-
-  const getSeatStyle = (category) => {
-    if (category === "VIP") {
-      return isDarkMode
-        ? "bg-yellow-900/50 text-yellow-300 border-yellow-700"
-        : "bg-yellow-50 text-yellow-700 border-yellow-200";
+    if (seatStr.startsWith("A") || seatStr.startsWith("B")) {
+      return isDark 
+        ? 'bg-yellow-900/60 text-yellow-200 border border-yellow-700'
+        : 'bg-yellow-100 text-yellow-700 border border-yellow-300';
     }
-    if (category === "Premium") {
-      return isDarkMode
-        ? "bg-blue-900/50 text-blue-300 border-blue-700"
-        : "bg-blue-50 text-blue-700 border-blue-200";
+    if (seatStr.startsWith("C")) {
+      return isDark
+        ? 'bg-blue-900/60 text-blue-200 border border-blue-700'
+        : 'bg-blue-100 text-blue-700 border border-blue-300';
     }
-    return isDarkMode
-      ? "bg-gray-600 text-gray-300 border-gray-700"
-      : "bg-gray-100 text-gray-700 border-gray-300";
+    return isDark
+      ? 'bg-gray-700 text-gray-300 border border-gray-600'
+      : 'bg-gray-100 text-gray-700 border border-gray-300';
   };
 
-  const renderActionButtons = (booking) => {
-    const baseClass = "inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50";
-    const status = String(booking?.status || "pending").toLowerCase().trim();
-    const isCancelled = status === "cancelled";
-    const isCancellationRequested = status === "cancellation-requested";
-    const isPending = status === "pending";
-    const isConfirmed = status === "confirmed";
+  // Table headers configuration
+  const tableHeaders = [
+    { label: "S.No", width: "70px" },
+    { label: "Booking Details", width: "150px" },
+    { label: "Customer Information", width: "250px" },
+    { label: "Show Details", width: "250px" },
+    { label: "Amount", width: "100px" },
+    { label: "Status", width: "130px" },
+    { label: "Actions", width: "180px" }
+  ];
 
-    return (
-      <div className="flex min-w-[220px] flex-wrap items-center justify-center gap-2">
-        <button
-          onClick={() => onViewDetails(booking)}
-          className={`${baseClass} ${
-            isDarkMode
-              ? "border-gray-600 bg-gray-700 text-gray-300 hover:bg-gray-600"
-              : "border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-          title="View Details"
-        >
-          <Eye className="h-4 w-4" />
-          <span>View</span>
-        </button>
-
-        {canManageBookings && isPending && (
-          <>
-            <button
-              onClick={() => onConfirm(booking)}
-              disabled={isUpdating}
-              className={`${baseClass} ${
-                isDarkMode
-                  ? "border-green-600 bg-green-700 text-green-100 hover:bg-green-600"
-                  : "border-green-600 bg-green-600 text-white hover:bg-green-700"
-              }`}
-              title="Confirm Booking"
-            >
-              <CheckCircle className="h-4 w-4" />
-              <span>Confirm</span>
-            </button>
-          </>
-        )}
-
-        {canManageBookings && isConfirmed && (
-          <>
-            <button
-              onClick={() => onParticipation(booking)}
-              disabled={isUpdating}
-              className={`${baseClass} ${
-                booking.participated
-                  ? isDarkMode
-                    ? "cursor-default border-green-600 bg-green-700 text-green-100"
-                    : "cursor-default border-green-600 bg-green-600 text-white"
-                  : isDarkMode
-                  ? "border-blue-600 bg-blue-700 text-blue-100 hover:bg-blue-600"
-                  : "border-blue-600 bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-              title={booking.participated ? "Already Participated" : "Mark Participation"}
-            >
-              <UserCheck className="h-4 w-4" />
-              <span>Participate</span>
-            </button>
-          </>
-        )}
-
-        {canManageBookings && isCancellationRequested && (
-          <>
-            <button
-              onClick={() => onApproveCancellation(booking)}
-              disabled={isUpdating}
-              className={`${baseClass} ${
-                isDarkMode
-                  ? "border-green-600 bg-green-700 text-green-100 hover:bg-green-600"
-                  : "border-green-600 bg-green-600 text-white hover:bg-green-700"
-              }`}
-              title="Approve Cancellation"
-            >
-              <CheckCircle className="h-4 w-4" />
-              <span>Approve</span>
-            </button>
-            <button
-              onClick={() => onRejectCancellation(booking)}
-              disabled={isUpdating}
-              className={`${baseClass} ${
-                isDarkMode
-                  ? "border-red-600 bg-red-700 text-red-100 hover:bg-red-600"
-                  : "border-red-600 bg-red-600 text-white hover:bg-red-700"
-              }`}
-              title="Reject Cancellation"
-            >
-              <XCircle className="h-4 w-4" />
-              <span>Reject</span>
-            </button>
-          </>
-        )}
-
-        {canManageBookings && !isCancelled && !isCancellationRequested && (
-          <button
-            onClick={() => onCancel(booking)}
-            disabled={isUpdating}
-            className={`${baseClass} ${
-              isDarkMode
-                ? "border-red-600 bg-red-700 text-red-100 hover:bg-red-600"
-                : "border-red-600 bg-red-600 text-white hover:bg-red-700"
-            }`}
-            title="Cancel Booking"
-          >
-            <XCircle className="h-4 w-4" />
-            <span>Cancel</span>
-          </button>
-        )}
-      </div>
-    );
-  };
+  const headerStyle = `px-4 py-3 text-center text-sm font-bold border-r ${
+    isDark 
+      ? "text-blue-100 border-indigo-700/50" 
+      : "text-indigo-900 border-indigo-200/70"
+  }`;
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      <div className={`flex justify-center items-center h-64 rounded-2xl border-2 ${
+        isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+      }`}>
+        <div className="text-center">
+          <Loader2 className={`w-8 h-8 animate-spin mx-auto mb-4 ${
+            isDark ? "text-indigo-400" : "text-indigo-600"
+          }`} />
+          <p className={`text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+            Loading show bookings...
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (!bookings?.length) {
+  if (!bookings.length) {
     return (
-      <div className={`rounded-xl border p-12 text-center ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
-        <Ticket className={`mx-auto mb-4 h-16 w-16 ${isDarkMode ? "text-gray-600" : "text-gray-400"}`} />
-        <h3 className={`mb-2 text-lg font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>No Show Bookings Found</h3>
-        <p className={isDarkMode ? "text-gray-400" : "text-gray-500"}>
+      <div className={`rounded-2xl border-2 p-12 text-center ${
+        isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+      }`}>
+        <Star className={`w-16 h-16 mx-auto mb-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+        <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          No Show Bookings Found
+        </h3>
+        <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>
           There are no show bookings to display at the moment.
         </p>
       </div>
@@ -255,121 +153,330 @@ export default function ShowBookingTable({
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-xl border ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
+    <div className={`relative rounded-2xl shadow-2xl border-2 overflow-hidden ${
+      isDark
+        ? "bg-gray-800 border-indigo-600/50 shadow-indigo-900/20"
+        : "bg-white border-indigo-300 shadow-indigo-500/10"
+    }`}>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className={isDarkMode ? "bg-gray-700/50" : "bg-gray-50/50"}>
+        <table className="w-full min-w-max" style={{ minWidth: "1200px" }}>
+          <thead className={`border-b-2 ${
+            isDark
+              ? "bg-gradient-to-r from-indigo-950 via-indigo-900 to-blue-900 border-indigo-600/50"
+              : "bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-100 border-indigo-300"
+          }`}>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">S.No</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Booking</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Customer</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Show Details</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Amount</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
-              <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
+              {tableHeaders.map((header, index) => (
+                <th 
+                  key={index}
+                  className={headerStyle}
+                  style={{ minWidth: header.width }}
+                >
+                  {header.label}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className={`divide-y ${isDarkMode ? "divide-gray-700" : "divide-gray-200"}`}>
-            {bookings.map((booking, index) => (
-              <tr
-                key={booking.id}
-                className={`transition-colors ${
-                  booking.participated
-                    ? isDarkMode
-                      ? "border-l-4 border-green-500 bg-green-900/20 hover:bg-green-800/30"
-                      : "border-l-4 border-green-400 bg-green-50 hover:bg-green-100/70"
-                    : isDarkMode
-                    ? "hover:bg-gray-700/50"
-                    : "hover:bg-gray-50/50"
-                }`}
-              >
-                <td className="whitespace-nowrap px-4 py-3">
-                  <span className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                    {((currentPage - 1) * bookingsPerPage + index + 1).toString().padStart(2, "0")}
-                  </span>
-                </td>
+          <tbody className={isDark ? "bg-gray-800" : "bg-white"}>
+            {bookings.map((booking, index) => {
+              const serialNo = (currentPage - 1) * bookingsPerPage + index + 1;
+              const isParticipated = booking.participated;
+              const rowBgColor = isDark 
+                ? index % 2 === 0 
+                  ? 'bg-gray-800' 
+                  : 'bg-gray-700/30'
+                : index % 2 === 0 
+                  ? 'bg-white' 
+                  : 'bg-gray-50';
+              
+              return (
+                <tr 
+                  key={booking.id} 
+                  className={`border-b transition-all duration-200 hover:shadow-lg ${
+                    isDark
+                      ? "border-gray-700 hover:bg-gray-700/50"
+                      : "border-gray-200 hover:bg-indigo-50/50"
+                  } ${rowBgColor} ${isParticipated ? isDark ? "bg-green-900/20" : "bg-green-50/50" : ""}`}
+                >
+                  {/* S.No */}
+                  <td className={`px-4 py-4 text-center border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <span className={`font-medium ${isDark ? "text-gray-100" : "text-gray-900"}`}>
+                      {serialNo.toString().padStart(2, '0')}
+                    </span>
+                  </td>
 
-                <td className="whitespace-nowrap px-4 py-3">
-                  <div className="space-y-1">
-                    <div className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                      {booking.bookingId || booking.id}
+                  {/* Booking Details */}
+                  <td className={`px-4 py-4 border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <div className="flex flex-col space-y-1">
+                      <span className={`text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                        #{booking.bookingId || booking.id?.slice(-8) || 'N/A'}
+                      </span>
+                      <div className="flex items-center text-xs">
+                        <Calendar className={`w-3 h-3 mr-1 ${
+                          isDark ? "text-indigo-400" : "text-indigo-600"
+                        }`} />
+                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>
+                          {formatDate(booking.createdAt)}
+                        </span>
+                      </div>
                     </div>
-                    <div className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>{formatDateTime(booking.createdAt)}</div>
-                  </div>
-                </td>
+                  </td>
 
-                <td className="px-4 py-3">
-                  <div className="space-y-1">
-                    <div className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}>{booking.userDetails?.name || "N/A"}</div>
-                    <div className={`flex items-center text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                      <Mail className="mr-1 h-3 w-3" />
-                      {booking.userDetails?.email || "N/A"}
+                  {/* Customer Information */}
+                  <td className={`px-4 py-4 border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <div className="flex flex-col space-y-2">
+                      <span className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {booking.userDetails?.name || 'N/A'}
+                      </span>
+                      <div className="flex items-center text-xs">
+                        <Phone className={`w-3 h-3 mr-1 flex-shrink-0 ${
+                          isDark ? "text-indigo-400" : "text-indigo-600"
+                        }`} />
+                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>
+                          {booking.userDetails?.phone || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-xs">
+                        <Mail className={`w-3 h-3 mr-1 flex-shrink-0 ${
+                          isDark ? "text-indigo-400" : "text-indigo-600"
+                        }`} />
+                        <span className={`truncate max-w-[180px] ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+                          {booking.userDetails?.email || 'N/A'}
+                        </span>
+                      </div>
                     </div>
-                    <div className={`flex items-center text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                      <Phone className="mr-1 h-3 w-3" />
-                      {booking.userDetails?.phone || "N/A"}
-                    </div>
-                  </div>
-                </td>
+                  </td>
 
-                <td className="px-4 py-3">
-                  <div className="space-y-2">
-                    <div className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                      {formatShowDate(booking.showDetails?.date, booking.showDetails?.time)}
+                  {/* Show Details */}
+                  <td className={`px-4 py-4 border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center">
+                        <Calendar className={`w-3 h-3 mr-1 ${
+                          isDark ? "text-indigo-400" : "text-indigo-600"
+                        }`} />
+                        <span className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
+                          {formatShowDate(booking.showDetails?.date)}
+                          {booking.showDetails?.time && ` (${booking.showDetails.time})`}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center">
+                        <Users className={`w-3 h-3 mr-1 ${
+                          isDark ? "text-indigo-400" : "text-indigo-600"
+                        }`} />
+                        <span className={`text-xs ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+                          {booking.showDetails?.selectedSeats?.length || 0} seats
+                        </span>
+                      </div>
+
+                      {booking.showDetails?.selectedSeats?.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {booking.showDetails.selectedSeats.slice(0, 4).map((seat, idx) => {
+                            const seatDisplay = typeof seat === "object" ? seat.id || seat.seatId || String(seat) : String(seat);
+                            return (
+                              <span 
+                                key={idx} 
+                                className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${getSeatCategoryColors(seatDisplay)}`}
+                              >
+                                {seatDisplay}
+                              </span>
+                            );
+                          })}
+                          {booking.showDetails.selectedSeats.length > 4 && (
+                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                              isDark 
+                                ? 'bg-gray-700 text-gray-300 border border-gray-600' 
+                                : 'bg-gray-200 text-gray-600 border border-gray-300'
+                            }`}>
+                              +{booking.showDetails.selectedSeats.length - 4}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {booking.showDetails?.selectedSeats?.slice(0, 3).map((seat, idx) => {
-                        const seatDisplay = typeof seat === "object" ? seat.id || seat.seatId || String(seat) : String(seat);
-                        const category = getSeatCategory(seatDisplay);
-                        return (
-                          <span key={idx} className={`inline-block rounded-md border px-2 py-1 text-xs font-medium ${getSeatStyle(category)}`}>
-                            {seatDisplay}
-                          </span>
-                        );
-                      })}
-                      {booking.showDetails?.selectedSeats?.length > 3 && (
-                        <span className={`inline-block rounded-md px-2 py-1 text-xs font-medium ${isDarkMode ? "bg-gray-600 text-gray-300" : "bg-gray-200 text-gray-600"}`}>
-                          +{booking.showDetails.selectedSeats.length - 3}
+                  </td>
+
+                  {/* Amount */}
+                  <td className={`px-4 py-4 border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <div className="flex flex-col items-start">
+                      <span className={`text-sm font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                        {formatCurrency(booking.showDetails?.totalAmount || booking.payment?.amount || 0)}
+                      </span>
+                      {booking.showDetails?.selectedSeats?.length > 0 && (
+                        <span className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                          ₹{Math.round((booking.showDetails?.totalAmount || 0) / booking.showDetails.selectedSeats.length)} per seat
                         </span>
                       )}
                     </div>
-                  </div>
-                </td>
+                  </td>
 
-                <td className="whitespace-nowrap px-4 py-3">
-                  <div className="space-y-1">
-                    <div className={`text-sm font-bold ${isDarkMode ? "text-green-400" : "text-green-600"}`}>
-                      {formatCurrency(booking.showDetails?.totalAmount || booking.showDetails?.totalPrice || booking.payment?.amount || 0)}
+                  {/* Status */}
+                  <td className={`px-4 py-4 border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <div className="flex flex-col items-start space-y-2">
+                      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-md ${getStatusColors(booking.status)}`}>
+                        {booking.status === 'cancellation-requested' ? 'Cancellation Requested' : 
+                         booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || 'Pending'}
+                      </span>
+                      {isParticipated && (
+                        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-md ${
+                          isDark 
+                            ? 'bg-green-900/60 text-green-200 border border-green-700' 
+                            : 'bg-green-100 text-green-700 border border-green-300'
+                        }`}>
+                          ✓ Participated
+                        </span>
+                      )}
+                      {booking.cancellationReason && (
+                        <div className={`text-xs max-w-32 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                          <span className="font-medium">Reason:</span> {booking.cancellationReason}
+                        </div>
+                      )}
                     </div>
-                    <div className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                      {booking.showDetails?.selectedSeats?.length || 0} seats
+                  </td>
+
+                  {/* Actions */}
+                  <td className={`px-4 py-4 ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <div className="flex items-center justify-center gap-2">
+                      {/* View Details - Always visible */}
+                      <button
+                        onClick={() => onViewDetails(booking)}
+                        className={`p-2 rounded-lg transition-all hover:scale-105 ${
+                          isDark 
+                            ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-600' 
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300'
+                        }`}
+                        title="View Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+
+                      {/* Status specific actions */}
+                      {booking.status === 'confirmed' && !isParticipated && (
+                        <>
+                          <button
+                            onClick={() => onParticipation(booking)}
+                            className={`p-2 rounded-lg transition-all hover:scale-105 ${
+                              isDark 
+                                ? 'bg-blue-900/60 hover:bg-blue-800/60 text-blue-300 border border-blue-700' 
+                                : 'bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300'
+                            }`}
+                            title="Mark Participation"
+                          >
+                            <UserCheck className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => onCancel(booking)}
+                            className={`p-2 rounded-lg transition-all hover:scale-105 ${
+                              isDark 
+                                ? 'bg-red-900/60 hover:bg-red-800/60 text-red-300 border border-red-700' 
+                                : 'bg-red-100 hover:bg-red-200 text-red-700 border border-red-300'
+                            }`}
+                            title="Cancel Booking"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+
+                      {booking.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => onConfirm(booking)}
+                            className={`p-2 rounded-lg transition-all hover:scale-105 ${
+                              isDark 
+                                ? 'bg-green-900/60 hover:bg-green-800/60 text-green-300 border border-green-700' 
+                                : 'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300'
+                            }`}
+                            title="Confirm Booking"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => onCancel(booking)}
+                            className={`p-2 rounded-lg transition-all hover:scale-105 ${
+                              isDark 
+                                ? 'bg-red-900/60 hover:bg-red-800/60 text-red-300 border border-red-700' 
+                                : 'bg-red-100 hover:bg-red-200 text-red-700 border border-red-300'
+                            }`}
+                            title="Cancel Booking"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+
+                      {booking.status === 'cancellation-requested' && (
+                        <>
+                          <button
+                            onClick={() => onApproveCancellation(booking)}
+                            className={`p-2 rounded-lg transition-all hover:scale-105 ${
+                              isDark 
+                                ? 'bg-green-900/60 hover:bg-green-800/60 text-green-300 border border-green-700' 
+                                : 'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300'
+                            }`}
+                            title="Approve Cancellation"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => onRejectCancellation(booking)}
+                            className={`p-2 rounded-lg transition-all hover:scale-105 ${
+                              isDark 
+                                ? 'bg-red-900/60 hover:bg-red-800/60 text-red-300 border border-red-700' 
+                                : 'bg-red-100 hover:bg-red-200 text-red-700 border border-red-300'
+                            }`}
+                            title="Reject Cancellation"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
-                  </div>
-                </td>
-
-                <td className="whitespace-nowrap px-4 py-3">
-                  <div className="space-y-2">
-                    {getStatusBadge(booking.status)}
-                    {booking.participated && <span className="block text-xs text-green-600 dark:text-green-400">Participated</span>}
-                    {booking.cancellationReason && (
-                      <div className={`max-w-32 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
-                        <span className="font-medium">Reason:</span> {booking.cancellationReason}
-                      </div>
-                    )}
-                  </div>
-                </td>
-
-                <td className="px-4 py-3">{renderActionButtons(booking)}</td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
+      {/* Pagination inside table */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalBookings}
+          itemsPerPage={bookingsPerPage}
+          onPageChange={onPageChange}
+        />
+      )}
+
+      {/* Loading Overlay */}
       {isUpdating && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
-          <div className={`flex items-center gap-3 rounded-xl border px-6 py-4 shadow-2xl ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
-            <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
+        <div className={`absolute inset-0 backdrop-blur-sm flex items-center justify-center ${
+          isDark ? "bg-gray-900/80" : "bg-white/80"
+        }`}>
+          <div className={`flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl border ${
+            isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}>
+            <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
             <span className="text-sm font-medium">Processing...</span>
           </div>
         </div>

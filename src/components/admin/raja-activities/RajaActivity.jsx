@@ -26,7 +26,7 @@ import SponsorModal from '@/components/sponsor-perfomer/SponsorModal';
 import PerformerModal from '@/components/sponsor-perfomer/PerformerModal';
 
 export default function RajaActivityPage() {
-  const { theme } = useThemeStore();
+  const { isDarkMode } = useThemeStore();
   const [activeTab, setActiveTab] = useState('sponsors');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPerformerModal, setShowPerformerModal] = useState(false);
@@ -97,10 +97,10 @@ export default function RajaActivityPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className={`text-2xl font-bold ${theme === "dark" ? 'text-white' : 'text-gray-900'}`}>
+            <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               Raja Activity
             </h1>
-            <p className={`text-sm mt-1 ${theme === "dark" ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               Manage sponsors, performers, and special categories
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function RajaActivityPage() {
             <button
               onClick={handleRefresh}
               className={`px-4 py-2 rounded-xl border text-sm font-medium flex items-center gap-2 transition-all ${
-                theme === "dark" 
+                isDarkMode 
                   ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' 
                   : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
@@ -130,24 +130,24 @@ export default function RajaActivityPage() {
         </div>
 
         {/* Tabs */}
-        <div className={`border-b ${theme === "dark" ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <nav className="flex overflow-x-auto space-x-4">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`
-                    flex items-center gap-2 px-4 py-3 text-base font-semibold border-b-2 transition-colors whitespace-nowrap
-                    ${isActive 
-                      ? activeTabStyles[tab.color]
-                      : `border-transparent ${theme === "dark" ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`
-                    }
-                  `}
-                >
+	                <button
+	                  key={tab.id}
+	                  onClick={() => setActiveTab(tab.id)}
+	                  className={`
+	                    flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border transition-colors whitespace-nowrap
+	                    ${isActive 
+	                      ? `${activeTabStyles[tab.color]} ${isDarkMode ? 'bg-gray-800/70' : 'bg-white'}`
+	                      : `${isDarkMode ? 'border-gray-700 text-gray-400 hover:text-gray-300 hover:border-gray-600 bg-gray-900/40' : 'border-gray-300 text-gray-600 hover:text-gray-800 hover:border-gray-400 bg-white'}`
+	                    }
+	                  `}
+	                >
                   <Icon className={`w-4 h-4 ${isActive ? activeTabIconStyles[tab.color] : ''}`} />
                   {tab.name}
                 </button>

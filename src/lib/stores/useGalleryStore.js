@@ -57,11 +57,18 @@ const useGalleryStore = create((set, get) => ({
   // Upload multiple images
   uploadImages: async (files) => {
     const uploadPromises = [];
-    const newQueue = [...get().uploadQueue, ...files];
+    const queuedFiles = files.map((file) => ({
+      id: `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+      file,
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }));
+    const newQueue = [...get().uploadQueue, ...queuedFiles];
     set({ uploadQueue: newQueue });
 
-    for (const file of files) {
-      const uploadId = Date.now() + Math.random();
+    for (const queueItem of queuedFiles) {
+      const { file, id: uploadId } = queueItem;
       set(state => ({
         uploadProgress: { ...state.uploadProgress, [uploadId]: 0 }
       }));
@@ -93,7 +100,7 @@ const useGalleryStore = create((set, get) => ({
             const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
             
             // Create Firestore document
-            const order = get().totalImages + get().uploadQueue.indexOf(file) + 1;
+            const order = get().totalImages + get().uploadQueue.findIndex((q) => q.id === uploadId) + 1;
             
             await addDoc(collection(db, 'gallery'), {
               filename: file.name,
@@ -110,7 +117,7 @@ const useGalleryStore = create((set, get) => ({
 
             // Remove from queue and progress
             set(state => {
-              const newQueue = state.uploadQueue.filter(f => f !== file);
+              const newQueue = state.uploadQueue.filter((q) => q.id !== uploadId);
               const newProgress = { ...state.uploadProgress };
               delete newProgress[uploadId];
               return {

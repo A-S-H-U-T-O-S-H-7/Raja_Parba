@@ -1,47 +1,53 @@
 // components/admin/users/UserStatusBadge.jsx
 "use client";
+
 import useThemeStore from "@/lib/stores/useThemeStore";
+import { CheckCircle2, Clock3, Ban, Trash2 } from "lucide-react";
 
 const statusConfig = {
   active: {
-    label: 'Active',
-    bgColor: 'bg-green-100 dark:bg-green-900/30',
-    textColor: 'text-green-800 dark:text-green-400',
-    dotColor: 'bg-green-500',
-    icon: '🟢'
+    label: "Active",
+    light: "bg-green-50 text-green-700 border-green-200",
+    dark: "bg-green-900/30 text-green-300 border-green-700/70",
+    dotColor: "bg-green-500",
+    icon: CheckCircle2,
   },
   suspended: {
-    label: 'Suspended',
-    bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-    textColor: 'text-yellow-800 dark:text-yellow-400',
-    dotColor: 'bg-yellow-500',
-    icon: '🟡'
+    label: "Suspended",
+    light: "bg-amber-50 text-amber-700 border-amber-200",
+    dark: "bg-amber-900/30 text-amber-300 border-amber-700/70",
+    dotColor: "bg-amber-500",
+    icon: Clock3,
   },
   banned: {
-    label: 'Banned',
-    bgColor: 'bg-red-100 dark:bg-red-900/30',
-    textColor: 'text-red-800 dark:text-red-400',
-    dotColor: 'bg-red-500',
-    icon: '🔴'
+    label: "Banned",
+    light: "bg-red-50 text-red-700 border-red-200",
+    dark: "bg-red-900/30 text-red-300 border-red-700/70",
+    dotColor: "bg-red-500",
+    icon: Ban,
   },
   deleted: {
-    label: 'Deleted',
-    bgColor: 'bg-gray-100 dark:bg-gray-800',
-    textColor: 'text-gray-800 dark:text-gray-400',
-    dotColor: 'bg-gray-500',
-    icon: '⚫'
-  }
+    label: "Deleted",
+    light: "bg-gray-100 text-gray-700 border-gray-300",
+    dark: "bg-gray-800 text-gray-300 border-gray-600",
+    dotColor: "bg-gray-500",
+    icon: Trash2,
+  },
 };
 
 export default function UserStatusBadge({ status, showDot = true, showIcon = false }) {
+  const { isDarkMode } = useThemeStore();
   const config = statusConfig[status] || statusConfig.active;
+  const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.textColor}`}>
-      {showIcon && <span className="mr-1">{config.icon}</span>}
-      {showDot && (
-        <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor} mr-1.5`}></span>
-      )}
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${
+        isDarkMode ? config.dark : config.light
+      }`}
+    >
+      {showIcon && <Icon className="w-3.5 h-3.5 mr-1" />}
+      {showDot && <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor} mr-1.5`}></span>}
       {config.label}
     </span>
   );

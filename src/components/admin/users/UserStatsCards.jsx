@@ -4,8 +4,6 @@ import { useEffect } from 'react';
 import { 
   Users, 
   UserCheck, 
-  UserX, 
-  Ban,
   MailCheck,
   Calendar,
   TrendingUp,
@@ -40,24 +38,6 @@ export default function UserStatsCards() {
       bgColor: isDarkMode ? 'bg-green-900/20' : 'bg-green-100',
       textColor: isDarkMode ? 'text-green-400' : 'text-green-600',
       borderColor: isDarkMode ? 'border-green-800' : 'border-green-200'
-    },
-    {
-      title: 'Suspended',
-      value: stats.suspended,
-      icon: UserX,
-      color: 'yellow',
-      bgColor: isDarkMode ? 'bg-yellow-900/20' : 'bg-yellow-100',
-      textColor: isDarkMode ? 'text-yellow-400' : 'text-yellow-600',
-      borderColor: isDarkMode ? 'border-yellow-800' : 'border-yellow-200'
-    },
-    {
-      title: 'Banned',
-      value: stats.banned,
-      icon: Ban,
-      color: 'red',
-      bgColor: isDarkMode ? 'bg-red-900/20' : 'bg-red-100',
-      textColor: isDarkMode ? 'text-red-400' : 'text-red-600',
-      borderColor: isDarkMode ? 'border-red-800' : 'border-red-200'
     },
     {
       title: 'Email Verified',
@@ -108,13 +88,13 @@ export default function UserStatsCards() {
   return (
     <div className="space-y-6">
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <div
               key={index}
-              className={`rounded-xl border p-4 transition-all hover:shadow-md ${
+              className={`rounded-2xl border-2 p-4 transition-all hover:shadow-md ${
                 isDarkMode 
                   ? `bg-gray-800 ${stat.borderColor}` 
                   : `bg-white ${stat.borderColor}`
@@ -164,8 +144,10 @@ export default function UserStatsCards() {
           return (
             <div
               key={index}
-              className={`rounded-lg p-3 ${
-                isDarkMode ? 'bg-gray-800/50' : 'bg-gray-50'
+              className={`rounded-xl border p-3 transition-colors ${
+                isDarkMode
+                  ? 'bg-gray-800/60 border-gray-700'
+                  : 'bg-white border-gray-200 shadow-sm'
               }`}
             >
               <div className="flex items-center gap-3">

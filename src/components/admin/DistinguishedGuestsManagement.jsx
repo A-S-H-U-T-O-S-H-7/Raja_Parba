@@ -275,10 +275,16 @@ const AdminGuests = () => {
         </div>
 
         {showForm && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <div className={`rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${
+          <div
+            className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+            onClick={resetForm}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className={`rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border ${
               isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
+            }`}
+            >
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>

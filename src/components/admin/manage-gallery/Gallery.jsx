@@ -22,7 +22,7 @@ import GalleryListView from './GalleryListView';
 import GalleryEditModal from './GalleryEditModal';
 
 export default function GalleryAdminPage() {
-  const { theme } = useThemeStore();
+  const { isDarkMode } = useThemeStore();
   const { 
     images, 
     loading, 
@@ -65,10 +65,10 @@ export default function GalleryAdminPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className={`text-2xl font-bold ${theme === "dark" ? 'text-white' : 'text-gray-900'}`}>
+            <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               Gallery Management
             </h1>
-            <p className={`text-sm mt-1 ${theme === "dark" ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Upload and manage festival images ({images.length} total)
             </p>
           </div>
@@ -80,7 +80,7 @@ export default function GalleryAdminPage() {
                 onClick={() => setViewMode('grid')}
                 className={`p-2 ${viewMode === 'grid' 
                   ? 'bg-purple-600 text-white' 
-                  : theme === "dark" ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600'
+                  : isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
                 }`}
               >
                 <Grid3x3 className="w-4 h-4" />
@@ -89,7 +89,7 @@ export default function GalleryAdminPage() {
                 onClick={() => setViewMode('list')}
                 className={`p-2 ${viewMode === 'list' 
                   ? 'bg-purple-600 text-white' 
-                  : theme === "dark" ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600'
+                  : isDarkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
                 }`}
               >
                 <List className="w-4 h-4" />
@@ -101,7 +101,7 @@ export default function GalleryAdminPage() {
               value={filterShowcase}
               onChange={(e) => setFilterShowcase(e.target.value)}
               className={`px-3 py-2 rounded-lg border text-sm ${
-                theme === "dark" 
+                isDarkMode 
                   ? 'bg-gray-800 border-gray-700 text-white' 
                   : 'bg-white border-gray-300 text-gray-900'
               }`}
@@ -114,7 +114,7 @@ export default function GalleryAdminPage() {
             <button
               onClick={() => fetchImages()}
               className={`p-2 rounded-lg border ${
-                theme === "dark" 
+                isDarkMode 
                   ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' 
                   : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
@@ -139,12 +139,12 @@ export default function GalleryAdminPage() {
         {/* Bulk Actions */}
         {selectedImages.length > 0 && (
           <div className={`p-4 rounded-lg border ${
-            theme === "dark" ? 'bg-purple-900/20 border-purple-700' : 'bg-purple-50 border-purple-200'
+            isDarkMode ? 'bg-purple-900/20 border-purple-700' : 'bg-purple-50 border-purple-200'
           }`}>
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <CheckSquare className="w-5 h-5 text-purple-600" />
-                <span className={`font-medium ${theme === "dark" ? 'text-white' : 'text-gray-900'}`}>
+                <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   {selectedImages.length} images selected
                 </span>
               </div>
@@ -172,11 +172,11 @@ export default function GalleryAdminPage() {
                 </button>
                 <button
                   onClick={clearSelection}
-                  className={`px-3 py-1.5 rounded-lg text-sm ${
-                    theme === "dark" 
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
+                    className={`px-3 py-1.5 rounded-lg text-sm ${
+                      isDarkMode 
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
                 >
                   Clear
                 </button>

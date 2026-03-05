@@ -8,8 +8,8 @@ import BulkBookingDiscounts from './BulkBookingDiscounts';
 
 export default function StallPriceSection() {
   const { isDarkMode } = useThemeStore();
-  const { 
-    stall, 
+  const {
+    stall,
     updateStallSeatPrice,
     addStallEarlyBird,
     removeStallEarlyBird,
@@ -21,7 +21,6 @@ export default function StallPriceSection() {
 
   return (
     <div className="space-y-6">
-      {/* Stall Pricing Section */}
       <div className={`p-4 sm:p-6 rounded-xl border ${
         isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'
       }`}>
@@ -31,12 +30,12 @@ export default function StallPriceSection() {
           <Store className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500" />
           Stall Pricing
         </h3>
-        
+
         <div>
           <label className={`block text-xs sm:text-sm font-medium mb-2 ${
             isDarkMode ? 'text-gray-300' : 'text-gray-700'
           }`}>
-            Base Price Per Stall (₹)
+            Base Price Per Stall (INR)
           </label>
           <input
             type="number"
@@ -44,8 +43,8 @@ export default function StallPriceSection() {
             onChange={(e) => updateStallSeatPrice(e.target.value)}
             placeholder="Enter price per stall"
             className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border focus:ring-2 focus:ring-green-500 ${
-              isDarkMode 
-                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+              isDarkMode
+                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                 : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
             }`}
           />
@@ -55,7 +54,6 @@ export default function StallPriceSection() {
         </div>
       </div>
 
-      {/* Early Bird Discounts */}
       <EarlyBirdDiscounts
         title="Early Bird Discounts"
         subtitle="Offer discounts for bookings made in advance"
@@ -65,7 +63,6 @@ export default function StallPriceSection() {
         onToggle={toggleStallEarlyBird}
       />
 
-      {/* Bulk Booking Discounts */}
       <BulkBookingDiscounts
         title="Bulk Booking Discounts"
         subtitle="Offer discounts for multiple stall bookings"

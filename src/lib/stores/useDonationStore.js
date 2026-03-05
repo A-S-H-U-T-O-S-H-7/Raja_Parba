@@ -248,7 +248,7 @@ const useDonationStore = create((set, get) => ({
   closeModal: (modalName) => {
     set({ 
       modals: { ...get().modals, [modalName]: false },
-      selectedModal: modalName === 'details' ? null : get().selectedDonation
+      selectedDonation: modalName === 'details' ? null : get().selectedDonation
     });
   },
 

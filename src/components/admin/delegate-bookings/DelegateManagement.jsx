@@ -14,7 +14,7 @@ import DelegateDetailsModal from './DelegateDetailsModal';
 import DelegateCancellationModal from './DelegateCancellationModal';
 import ParticipationModal from '../shared/ParticipationModal';
 import DocumentViewerModal from '../DocumentViewerModal';
-import Pagination from '../stall-bookings/Pagination';
+import Pagination from '../shared/Pagination';
 
 export default function DelegateManagement() {
   const { isDarkMode } = useTheme();

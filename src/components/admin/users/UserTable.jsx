@@ -64,20 +64,29 @@ export default function UserTable() {
   }
 
   return (
-    <div className={`overflow-hidden rounded-2xl border shadow-sm ${
-      isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'
+    <div className={`overflow-hidden rounded-2xl border-2 shadow-sm ${
+      isDarkMode ? 'border-indigo-700/50 bg-slate-900' : 'border-indigo-200 bg-white'
     }`}>
+      <div className={`px-4 py-3 border-b ${
+        isDarkMode
+          ? 'bg-gradient-to-r from-indigo-950 via-blue-900 to-cyan-900 border-indigo-700/60'
+          : 'bg-gradient-to-r from-indigo-100 via-blue-100 to-cyan-100 border-indigo-300'
+      }`}>
+        <p className={`text-sm font-semibold ${isDarkMode ? 'text-indigo-100' : 'text-indigo-900'}`}>
+          Registered Users
+        </p>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className={`text-xs font-medium ${
-            isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-50 text-slate-600'
+          <thead className={`text-xs font-semibold ${
+            isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-indigo-50 text-slate-700'
           }`}>
             <tr>
-              <th className="lg:hidden px-4 py-3 text-left">Expand</th>
-              <th className="px-4 py-3 text-left">User</th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left">Status</th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left">Sign-in Method</th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left">Joined</th>
+              <th className="lg:hidden px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Expand</th>
+              <th className="px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">User</th>
+              <th className="hidden lg:table-cell px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Status</th>
+              <th className="hidden lg:table-cell px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Sign-in Method</th>
+              <th className="hidden lg:table-cell px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Joined</th>
             </tr>
           </thead>
           <tbody className={`divide-y ${

@@ -1,8 +1,10 @@
+// app/admin/entry-pass-management/page.jsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { collection, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
-import { Ticket } from "lucide-react";
+import { ArrowLeft, RefreshCw, Ticket } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 import { db } from "@/lib/firebase/config";
@@ -29,11 +31,14 @@ const normalizeDate = (value) => {
 export default function EntryPassManagement() {
   const { isDarkMode } = useThemeStore();
   const { admin, hasPermission } = useAdminAuthStore();
+  const router = useRouter();
+  const isDark = isDarkMode;
 
   const [allBookings, setAllBookings] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -79,6 +84,7 @@ export default function EntryPassManagement() {
       toast.error("Failed to load entry pass records");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -231,7 +237,8 @@ export default function EntryPassManagement() {
       confirmButtonColor: "#dc2626",
       cancelButtonColor: "#6b7280",
       reverseButtons: true,
-      background: "#fffefc",
+      background: isDark ? "#1f2937" : "#ffffff",
+      color: isDark ? "#f9fafb" : "#111827",
     });
 
     if (result.isConfirmed) {
@@ -239,33 +246,70 @@ export default function EntryPassManagement() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchEntryPassBookings();
+  };
+
   return (
     <PermissionGate permission="view_entry_pass_management" showFallback>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>Entry Pass Management</h1>
-            <p className={`mt-1 text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-              Manage free entry pass registrations and participation.
-            </p>
+      <div className="min-h-screen transition-colors duration-300 p-0 md:p-4">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <button 
+                onClick={() => router.back()}
+                className={`p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-200 hover:scale-105 flex-shrink-0 ${
+                  isDark
+                    ? "bg-gray-800 hover:bg-gray-700 border border-gray-700"
+                    : "bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
+                }`}
+              >
+                <ArrowLeft className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                  isDark ? "text-indigo-400" : "text-indigo-600"
+                }`} />
+              </button>
+              <div>
+                <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r truncate ${
+                  isDark ? "from-indigo-400 to-blue-400" : "from-indigo-600 to-blue-600"
+                } bg-clip-text text-transparent`}>
+                  Entry Pass Management
+                </h1>
+                <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Manage free entry pass registrations and participation • Total: {filteredCount}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleRefresh}
+                disabled={loading || refreshing}
+                className={`px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 flex-1 sm:flex-initial ${
+                  isDark
+                    ? "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
+                    : "bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-300"
+                } ${(loading || refreshing) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${(loading || refreshing) ? 'animate-spin' : ''}`} />
+                <span className="text-xs sm:text-sm">Refresh</span>
+              </button>
+            </div>
           </div>
-          <div className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${isDarkMode ? "border-gray-700 text-gray-300" : "border-gray-200 text-gray-700"}`}>
-            <Ticket className="h-4 w-4" />
-            Total: {filteredCount}
-          </div>
-        </div>
 
-        <EntryPassFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          participationFilter={participationFilter}
-          onParticipationChange={setParticipationFilter}
-          dateFilter={dateFilter}
-          onDateChange={setDateFilter}
-          loading={loading}
-        />
+          <EntryPassFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            participationFilter={participationFilter}
+            onParticipationChange={setParticipationFilter}
+            dateFilter={dateFilter}
+            onDateChange={setDateFilter}
+            loading={loading}
+          />
+        </div>
 
         <EntryPassTable
           bookings={bookings}
@@ -297,7 +341,6 @@ export default function EntryPassManagement() {
             totalItems={filteredCount}
             itemsPerPage={BOOKINGS_PER_PAGE}
             onPageChange={setCurrentPage}
-            onPageSizeChange={() => {}}
           />
         )}
 

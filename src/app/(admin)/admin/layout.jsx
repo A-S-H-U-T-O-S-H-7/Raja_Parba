@@ -53,7 +53,7 @@ export default function AdminLayout({ children }) {
       <AdminSidebar />
       <div className="lg:pl-64">
         <AdminHeader />
-        <main className="py-8 px-4 sm:px-6 lg:px-8">
+        <main className="px-4 pb-8 pt-24 sm:px-6 sm:pt-28 lg:px-8">
           {children}
         </main>
       </div>

@@ -1,6 +1,5 @@
 // components/admin/gallery/GalleryListView.jsx
 "use client";
-import Image from 'next/image';
 import { 
   Eye, 
   EyeOff, 
@@ -80,12 +79,16 @@ export default function GalleryListView({ images, onEdit }) {
 
                 {/* Preview */}
                 <td className="px-4 py-3">
-                  <div className="relative w-12 h-12 rounded overflow-hidden">
-                    <Image
+                  <div className="relative w-12 h-12 rounded overflow-hidden bg-gray-100">
+                    <img
                       src={image.url}
                       alt={image.title}
-                      fill
-                      className="object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/api/placeholder/120/120';
+                      }}
                     />
                   </div>
                 </td>
@@ -95,25 +98,33 @@ export default function GalleryListView({ images, onEdit }) {
                   <div className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     {image.title}
                   </div>
-                  <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <div className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     {image.filename}
                   </div>
                 </td>
 
                 {/* Status */}
-                <td className="px-4 py-3">
-                  {image.showcase ? (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                      <Eye className="w-3 h-3 mr-1" />
-                      Showcase
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                      <EyeOff className="w-3 h-3 mr-1" />
-                      Normal
-                    </span>
-                  )}
-                </td>
+	                <td className="px-4 py-3">
+	                  {image.showcase ? (
+	                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+	                      isDarkMode
+	                        ? 'bg-green-900/30 text-green-300'
+	                        : 'bg-green-100 text-green-800'
+	                    }`}>
+	                      <Eye className="w-3 h-3 mr-1" />
+	                      Showcase
+	                    </span>
+	                  ) : (
+	                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+	                      isDarkMode
+	                        ? 'bg-gray-700 text-gray-300'
+	                        : 'bg-gray-100 text-gray-800'
+	                    }`}>
+	                      <EyeOff className="w-3 h-3 mr-1" />
+	                      Normal
+	                    </span>
+	                  )}
+	                </td>
 
                 {/* Size */}
                 <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -133,31 +144,41 @@ export default function GalleryListView({ images, onEdit }) {
                 {/* Actions */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => onEdit(image)}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-blue-600 dark:text-blue-400"
-                      title="Edit"
-                    >
+	                    <button
+	                      onClick={() => onEdit(image)}
+	                      className={`p-1.5 rounded-lg ${
+	                        isDarkMode
+	                          ? 'hover:bg-gray-700 text-blue-400'
+	                          : 'hover:bg-gray-100 text-blue-600'
+	                      }`}
+	                      title="Edit"
+	                    >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => toggleShowcase(image.id)}
-                      className={`p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        image.showcase
-                          ? 'text-yellow-600 dark:text-yellow-400'
-                          : 'text-green-600 dark:text-green-400'
-                      }`}
-                      title={image.showcase ? 'Remove from Showcase' : 'Add to Showcase'}
-                    >
+	                    <button
+	                      onClick={() => toggleShowcase(image.id)}
+	                      className={`p-1.5 rounded-lg ${
+	                        isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+	                      } ${
+	                        image.showcase
+	                          ? isDarkMode ? 'text-yellow-400' : 'text-yellow-600'
+	                          : isDarkMode ? 'text-green-400' : 'text-green-600'
+	                      }`}
+	                      title={image.showcase ? 'Remove from Showcase' : 'Add to Showcase'}
+	                    >
                       {image.showcase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
-                    <button
-                      onClick={() => {
-                        if (confirm('Delete this image?')) deleteImage(image.id);
-                      }}
-                      className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400"
-                      title="Delete"
-                    >
+	                    <button
+	                      onClick={() => {
+	                        if (confirm('Delete this image?')) deleteImage(image.id);
+	                      }}
+	                      className={`p-1.5 rounded-lg ${
+	                        isDarkMode
+	                          ? 'hover:bg-gray-700 text-red-400'
+	                          : 'hover:bg-gray-100 text-red-600'
+	                      }`}
+	                      title="Delete"
+	                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

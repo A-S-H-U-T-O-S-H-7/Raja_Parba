@@ -66,22 +66,31 @@ export default function AdminTable() {
   }
 
   return (
-    <div className={`rounded-xl border overflow-hidden ${
-      isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+    <div className={`rounded-2xl border-2 overflow-visible shadow-sm ${
+      isDarkMode ? 'bg-slate-900 border-indigo-700/50' : 'bg-white border-indigo-200'
     }`}>
+      <div className={`px-4 py-3 border-b ${
+        isDarkMode
+          ? 'bg-gradient-to-r from-indigo-950 via-violet-900 to-blue-900 border-indigo-700/60'
+          : 'bg-gradient-to-r from-indigo-100 via-violet-100 to-blue-100 border-indigo-300'
+      }`}>
+        <p className={`text-sm font-semibold ${isDarkMode ? 'text-indigo-100' : 'text-indigo-900'}`}>
+          Admin Accounts
+        </p>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className={`text-xs font-medium ${
-            isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-500'
+          <thead className={`text-xs font-semibold ${
+            isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-indigo-50 text-slate-700'
           }`}>
             <tr>
-              <th className="lg:hidden px-4 py-3 text-left">Expand</th>
-              <th className="px-4 py-3 text-left">Admin</th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left">Username</th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left">Role</th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left">Permissions</th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left">Last Login</th>
-              <th className="px-4 py-3 text-left">Actions</th>
+              <th className="lg:hidden px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Expand</th>
+              <th className="px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Admin</th>
+              <th className="hidden lg:table-cell px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Username</th>
+              <th className="hidden lg:table-cell px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Role</th>
+              <th className="hidden lg:table-cell px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Permissions</th>
+              <th className="hidden lg:table-cell px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Last Login</th>
+              <th className="px-4 py-3 text-left border-b border-indigo-100 dark:border-slate-700">Actions</th>
             </tr>
           </thead>
           <tbody className={`divide-y ${

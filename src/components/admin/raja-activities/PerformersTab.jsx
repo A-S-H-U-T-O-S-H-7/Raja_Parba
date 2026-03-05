@@ -1,6 +1,6 @@
 // components/admin/raja-activity/PerformersTab.jsx
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Mic,
   Users,
@@ -19,6 +19,7 @@ import Swal from 'sweetalert2';
 import useThemeStore from '@/lib/stores/useThemeStore';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import useRajaActivityStore from '@/lib/stores/useRajaActivityStore';
+import Pagination from '@/components/admin/shared/Pagination';
 
 const formatDate = (value) => {
   if (!value) return 'N/A';
@@ -34,26 +35,32 @@ const toDateInputValue = (value) => {
   return format(parsed, 'yyyy-MM-dd');
 };
 
-const statusBadge = (status) => {
+const statusBadge = (status, isDarkMode) => {
   const value = (status || 'pending').toLowerCase();
   if (value === 'confirmed' || value === 'approved') {
     return {
       label: 'Confirmed',
       icon: CheckCircle,
-      classes: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700'
+      classes: isDarkMode
+        ? 'bg-emerald-900/50 text-emerald-200 border-emerald-600'
+        : 'bg-emerald-100 text-emerald-800 border-emerald-300'
     };
   }
   if (value === 'rejected') {
     return {
       label: 'Rejected',
       icon: XCircle,
-      classes: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'
+      classes: isDarkMode
+        ? 'bg-rose-900/50 text-rose-200 border-rose-600'
+        : 'bg-rose-100 text-rose-800 border-rose-300'
     };
   }
   return {
     label: 'Pending',
     icon: Clock,
-    classes: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700'
+    classes: isDarkMode
+      ? 'bg-amber-900/50 text-amber-200 border-amber-600'
+      : 'bg-amber-100 text-amber-800 border-amber-300'
   };
 };
 
@@ -68,10 +75,25 @@ export default function PerformersTab() {
   const [performanceTime, setPerformanceTime] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [savingStatus, setSavingStatus] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const cellBorderClass = isDarkMode ? 'border-gray-700' : 'border-gray-300';
 
   useEffect(() => {
     fetchPerformers();
   }, [fetchPerformers]);
+
+  const totalPages = Math.max(1, Math.ceil((performers?.length || 0) / itemsPerPage));
+  const paginatedPerformers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return (performers || []).slice(startIndex, startIndex + itemsPerPage);
+  }, [performers, currentPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const openEditModal = (performer) => {
     setEditingPerformer(performer);
@@ -138,98 +160,115 @@ export default function PerformersTab() {
     <div className="space-y-4">
       <div
         className={`hidden overflow-hidden rounded-2xl border lg:block ${
-          isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-slate-200 bg-white'
+          isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'
         }`}
       >
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className={isDarkMode ? 'bg-gray-800 text-gray-200' : 'bg-slate-100 text-slate-700'}>
-              <tr className="text-left text-sm font-semibold">
-                <th className="px-5 py-3">Performer</th>
-                <th className="px-5 py-3">Contact</th>
-                <th className="px-5 py-3">Address</th>
-                <th className="px-5 py-3">Performance</th>
-                <th className="px-5 py-3">Participation</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Applied</th>
-                <th className="px-5 py-3">Actions</th>
+            <thead className={isDarkMode ? 'bg-gradient-to-r from-indigo-950 via-indigo-900 to-blue-900 text-blue-100' : 'bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-100 text-indigo-900'}>
+              <tr className="text-left text-xs font-bold uppercase tracking-wider">
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>S.No</th>
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>Performer</th>
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>Contact</th>
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>Address</th>
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>Performance</th>
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>Participation</th>
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>Status</th>
+                <th className={`px-4 py-3 border-r ${cellBorderClass}`}>Applied</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
-            <tbody className={isDarkMode ? 'divide-y divide-gray-800' : 'divide-y divide-slate-200'}>
-              {performers.map((performer) => {
-                const meta = statusBadge(performer.status);
+            <tbody className={isDarkMode ? 'divide-y divide-gray-800' : 'divide-y divide-gray-200'}>
+              {paginatedPerformers.map((performer, index) => {
+                const serialNo = (currentPage - 1) * itemsPerPage + index + 1;
+                const meta = statusBadge(performer.status, isDarkMode);
                 const Icon = meta.icon;
                 return (
-                  <tr key={performer.id} className={isDarkMode ? 'hover:bg-gray-800/80' : 'hover:bg-slate-50'}>
-                    <td className="px-5 py-4">
-                      <p className={`text-base font-semibold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{performer.name || 'N/A'}</p>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>{performer.gender || 'N/A'}</p>
-                      <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-slate-500'}`}>{performer.registrationId || performer.id}</p>
+                  <tr key={performer.id} className={`border-b ${isDarkMode ? 'border-gray-700 hover:bg-gray-800/80' : 'border-gray-300 hover:bg-gray-50'}`}>
+                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass}`}>
+                      <span className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{String(serialNo).padStart(2, '0')}</span>
                     </td>
-                    <td className={`px-5 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+                    <td className={`px-4 py-4 border-r ${cellBorderClass}`}>
+                      <p className={`text-base font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{performer.name || 'N/A'}</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{performer.gender || 'N/A'}</p>
+                      <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>{performer.registrationId || performer.id}</p>
+                    </td>
+                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-cyan-500" /> {performer.email || 'N/A'}</p>
                       <p className="mt-1 flex items-center gap-2"><Phone className="h-4 w-4 text-cyan-500" /> {performer.phone || 'N/A'}</p>
                     </td>
-                    <td className={`px-5 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       <p className="max-w-xs whitespace-pre-wrap break-words">{performer.address || 'N/A'}</p>
                     </td>
-                    <td className={`px-5 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       <p className="font-semibold">{performer.performanceType || 'N/A'}</p>
                       <p className="mt-1">{performer.trackMusicName || 'Track N/A'} ({performer.trackDuration || 'N/A'})</p>
                     </td>
-                    <td className={`px-5 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
-                      {performer.participationType === 'Group' ? (
-                        <div>
-                          <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                            <Users className="mr-1 h-3.5 w-3.5" />
-                            Group
-                          </span>
-                          <p className="mt-1 text-xs">
-                            {performer.groupName || 'Group'} ({performer.memberCount || 0})
-                          </p>
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-                          <UserCircle2 className="mr-1 h-3.5 w-3.5" />
-                          Solo
-                        </span>
-                      )}
-                      {performer.participationType === 'Group' && Array.isArray(performer.memberNames) && performer.memberNames.filter(Boolean).length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {performer.memberNames.filter(Boolean).map((memberName, index) => (
-                            <span
-                              key={`${performer.id}-member-${index}`}
-                              className="rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-medium text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200"
-                            >
-                              {memberName}
-                            </span>
+	                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+	                      {performer.participationType === 'Group' ? (
+	                        <div>
+	                          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border ${
+	                            isDarkMode
+	                              ? 'bg-purple-900/40 text-purple-200 border-purple-700'
+	                              : 'bg-purple-100 text-purple-800 border-purple-300'
+	                          }`}>
+	                            <Users className="mr-1 h-3.5 w-3.5" />
+	                            Group
+	                          </span>
+	                          <p className="mt-1 text-xs">
+	                            {performer.groupName || 'Group'} ({performer.memberCount || 0})
+	                          </p>
+	                        </div>
+	                      ) : (
+	                        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border ${
+	                          isDarkMode
+	                            ? 'bg-emerald-900/40 text-emerald-200 border-emerald-700'
+	                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+	                        }`}>
+	                          <UserCircle2 className="mr-1 h-3.5 w-3.5" />
+	                          Solo
+	                        </span>
+	                      )}
+	                      {performer.participationType === 'Group' && Array.isArray(performer.memberNames) && performer.memberNames.filter(Boolean).length > 0 && (
+	                        <div className="mt-2 flex flex-wrap gap-1.5">
+	                          {performer.memberNames.filter(Boolean).map((memberName, index) => (
+	                            <span
+	                              key={`${performer.id}-member-${index}`}
+	                              className={`rounded-full px-2 py-0.5 text-xs font-medium border ${
+	                                isDarkMode
+	                                  ? 'bg-cyan-900/40 text-cyan-200 border-cyan-700'
+	                                  : 'bg-cyan-100 text-cyan-800 border-cyan-300'
+	                              }`}
+	                            >
+	                              {memberName}
+	                            </span>
                           ))}
                         </div>
                       )}
                     </td>
-                    <td className="px-5 py-4">
+                    <td className={`px-4 py-4 border-r ${cellBorderClass}`}>
                       <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-semibold ${meta.classes}`}>
                         <Icon className="h-4 w-4" />
                         {meta.label}
                       </span>
                       {performer.performanceDate && (
-                        <p className={`mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
+                        <p className={`mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                           Performance: {formatDate(performer.performanceDate)} {performer.performanceTime ? `at ${performer.performanceTime}` : ''}
                         </p>
                       )}
                     </td>
-                    <td className={`px-5 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       <span className="inline-flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-cyan-500" />
                         {formatDate(performer.createdAt)}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => openEditModal(performer)}
-                          className="rounded-lg bg-blue-50 p-2 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300"
+                          className={isDarkMode ? "rounded-lg bg-blue-900/40 p-2 text-blue-300 border border-blue-700 hover:bg-blue-900/60" : "rounded-lg bg-indigo-100 p-2 text-indigo-700 border border-indigo-300 hover:bg-indigo-200"}
                           title="Edit"
                         >
                           <Edit className="h-4 w-4" />
@@ -238,7 +277,7 @@ export default function PerformersTab() {
                           <button
                             type="button"
                             onClick={() => deleteItem('performer', performer.id)}
-                            className="rounded-lg bg-red-50 p-2 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300"
+                            className={isDarkMode ? "rounded-lg bg-red-900/40 p-2 text-red-300 border border-red-700 hover:bg-red-900/60" : "rounded-lg bg-rose-100 p-2 text-rose-700 border border-rose-300 hover:bg-rose-200"}
                             title="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -255,20 +294,20 @@ export default function PerformersTab() {
       </div>
 
       <div className="space-y-3 lg:hidden">
-        {performers.map((performer) => {
-          const meta = statusBadge(performer.status);
+        {paginatedPerformers.map((performer) => {
+          const meta = statusBadge(performer.status, isDarkMode);
           const Icon = meta.icon;
           return (
             <div
               key={performer.id}
               className={`rounded-2xl border p-4 ${
-                isDarkMode ? 'border-gray-700 bg-gray-900 text-gray-100' : 'border-slate-200 bg-white text-slate-800'
+                isDarkMode ? 'border-gray-700 bg-gray-900 text-gray-100' : 'border-gray-200 bg-white text-gray-800'
               }`}
             >
               <div className="mb-3 flex items-start justify-between gap-2">
                 <div>
                   <p className="text-base font-bold">{performer.name || 'N/A'}</p>
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>{performer.performanceType || 'N/A'}</p>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{performer.performanceType || 'N/A'}</p>
                 </div>
                 <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${meta.classes}`}>
                   <Icon className="h-3.5 w-3.5" />
@@ -326,10 +365,22 @@ export default function PerformersTab() {
         })}
       </div>
 
+      {performers.length > itemsPerPage && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={performers.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          showPageSize={false}
+          className={isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}
+        />
+      )}
+
       {performers.length === 0 && !loading && (
         <div
           className={`rounded-2xl border p-10 text-center ${
-            isDarkMode ? 'border-gray-700 bg-gray-900 text-gray-400' : 'border-slate-200 bg-white text-slate-500'
+            isDarkMode ? 'border-gray-700 bg-gray-900 text-gray-400' : 'border-gray-200 bg-white text-gray-500'
           }`}
         >
           <Mic className="mx-auto mb-3 h-12 w-12 opacity-50" />
@@ -339,20 +390,20 @@ export default function PerformersTab() {
 
       {editingPerformer && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4">
-          <div className={`w-full max-w-lg rounded-2xl border p-6 shadow-2xl ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-slate-200 bg-white'}`}>
-            <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Update Performer Status</h3>
-            <p className={`mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
+          <div className={`w-full max-w-lg rounded-2xl border p-6 shadow-2xl ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'}`}>
+            <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Update Performer Status</h3>
+            <p className={`mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               {editingPerformer.name || 'Performer'} ({editingPerformer.registrationId || editingPerformer.id})
             </p>
 
             <div className="mt-5 space-y-4">
               <div>
-                <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>New Status</label>
+                <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>New Status</label>
                 <select
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value)}
                   className={`w-full rounded-xl border px-3 py-2 text-sm ${
-                    isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-slate-300 bg-white text-slate-900'
+                    isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-300 bg-white text-gray-900'
                   }`}
                 >
                   <option value="confirmed">Confirmed</option>
@@ -363,24 +414,24 @@ export default function PerformersTab() {
               {editStatus === 'confirmed' && (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>Performance Date</label>
+                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Performance Date</label>
                     <input
                       type="date"
                       value={performanceDate}
                       onChange={(e) => setPerformanceDate(e.target.value)}
                       className={`w-full rounded-xl border px-3 py-2 text-sm ${
-                        isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-slate-300 bg-white text-slate-900'
+                        isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-300 bg-white text-gray-900'
                       }`}
                     />
                   </div>
                   <div>
-                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>Performance Time</label>
+                    <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Performance Time</label>
                     <input
                       type="time"
                       value={performanceTime}
                       onChange={(e) => setPerformanceTime(e.target.value)}
                       className={`w-full rounded-xl border px-3 py-2 text-sm ${
-                        isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-slate-300 bg-white text-slate-900'
+                        isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-300 bg-white text-gray-900'
                       }`}
                     />
                   </div>
@@ -388,13 +439,13 @@ export default function PerformersTab() {
               )}
 
               <div>
-                <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-slate-700'}`}>Admin Notes (Optional)</label>
+                <label className={`mb-2 block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Admin Notes (Optional)</label>
                 <textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   rows={3}
                   className={`w-full rounded-xl border px-3 py-2 text-sm ${
-                    isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-slate-300 bg-white text-slate-900'
+                    isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-300 bg-white text-gray-900'
                   }`}
                   placeholder="Add notes for this update..."
                 />
@@ -406,7 +457,7 @@ export default function PerformersTab() {
                 type="button"
                 onClick={closeEditModal}
                 className={`rounded-xl px-4 py-2 text-sm font-semibold ${
-                  isDarkMode ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  isDarkMode ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 Cancel

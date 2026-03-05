@@ -1,6 +1,5 @@
 // components/admin/gallery/GalleryGridView.jsx
 "use client";
-import Image from 'next/image';
 import { 
   Eye, 
   EyeOff, 
@@ -103,11 +102,15 @@ export default function GalleryGridView({ images, onEdit }) {
 
               {/* Image */}
               <div className="relative aspect-square">
-                <Image
+                <img
                   src={image.url}
                   alt={image.title}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-300"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  onError={(e) => {
+                    e.currentTarget.src = '/api/placeholder/400/400';
+                  }}
                 />
               </div>
 
