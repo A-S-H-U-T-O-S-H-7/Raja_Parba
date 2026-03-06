@@ -241,6 +241,12 @@ export default function RajaQueenPage() {
             </div>
           </div>
 
+          <div className="flex mx-5 mt-1 justify-center items-center border border-pink-400 bg-linear-to-br from-pink-200 via-white to-pink-300 py-1 px-2 rounded-lg">
+          <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
+    For talented young women aged  <span className="text-red-600 font-bold text-base">15 to 30 years</span>
+  </p>
+  </div>
+
           {/* Competition Steps */}
           <div className="px-5 pt-5">
             <div className="bg-gradient-to-r from-purple-50 to-fuchsia-50 p-4 rounded-xl border border-purple-200">

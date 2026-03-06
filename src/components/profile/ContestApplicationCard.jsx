@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle, Clock } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, FileText } from 'lucide-react';
 
 const formatDate = (date) => {
   if (!date) return 'N/A';
@@ -148,6 +148,19 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
               </div>
             </div>
           )}
+          {item.profileUrl && (
+            <div className="mt-3">
+              <a
+                href={item.profileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                {item.profileFileName ? `Profile: ${item.profileFileName}` : 'View Uploaded Profile'}
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Details grid */}
@@ -168,6 +181,7 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
               <p className="text-xs leading-relaxed text-slate-700">{item.aboutSelf}</p>
             </div>
           )}
+
         </div>
       </div>
 

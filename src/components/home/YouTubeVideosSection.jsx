@@ -17,7 +17,7 @@ const cinzel = Cinzel({
 });
 
 const VIDEO_LINKS = [
-  "https://youtu.be/SmADJifjDJ0?si=pYBrkbXdLU82EArx",
+  "https://youtu.be/wNZVx-0CC4A?si=q1CU2_i3C3EPjyCZ",
   "https://youtu.be/HWF7iuU9BU8?si=IUcEgUxJz3bmzHy_",
   "https://youtu.be/SqfiB0mDkXQ?si=Cj-ytO4f7aw-Matd",
   "https://youtu.be/2FrVkhvrfDA?si=2y05eRT08mZADJtk",
@@ -26,7 +26,7 @@ const VIDEO_LINKS = [
   "https://www.youtube.com/live/nJWZExWUb-c?si=y-V4Irf61ZstyytL",
   "https://youtube.com/shorts/tChXS16hhP8?si=A_1guIwxKv1MorWv",
   "https://youtube.com/shorts/Uk0EN8akTec?si=NIrZj6J5f99OHh0n",
-  "https://youtu.be/wNZVx-0CC4A?si=q1CU2_i3C3EPjyCZ",
+  "https://youtu.be/SmADJifjDJ0?si=pYBrkbXdLU82EArx",
 ];
 
 const extractYouTubeId = (rawUrl) => {

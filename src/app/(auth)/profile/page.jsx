@@ -30,6 +30,24 @@ const PROFILE_TABS = [
   'drawing',
 ];
 
+const VALID_SHOW_COUNT_STATUSES = new Set([
+  'confirmed',
+  'pending',
+  'requested',
+  'cancellation-requested',
+]);
+const VALID_DONATION_COUNT_STATUSES = new Set(['confirmed', 'completed']);
+
+const EXCLUDED_COUNT_STATUSES = new Set(['failed', 'cancelled', 'rejected']);
+
+const getActiveCount = (items = [], allowedStatuses = null) =>
+  items.filter((item) => {
+    const status = String(item?.status || '').toLowerCase();
+    if (!status) return true;
+    if (allowedStatuses) return allowedStatuses.has(status);
+    return !EXCLUDED_COUNT_STATUSES.has(status);
+  }).length;
+
 const ProfilePage = () => {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('show');
@@ -64,20 +82,32 @@ const ProfilePage = () => {
     }
   }, []);
 
+  const showCount = useMemo(
+    () => getActiveCount(showBookings, VALID_SHOW_COUNT_STATUSES),
+    [showBookings]
+  );
+
+  const stallCount = useMemo(() => getActiveCount(stallBookings), [stallBookings]);
+  const donationCount = useMemo(
+    () => getActiveCount(donations, VALID_DONATION_COUNT_STATUSES),
+    [donations]
+  );
+  const performerCount = useMemo(() => getActiveCount(performers), [performers]);
+
   const counts = useMemo(
     () => ({
-      show: showBookings.length,
-      stall: stallBookings.length,
+      show: showCount,
+      stall: stallCount,
       entryPass: entryPassBookings.length,
-      donations: donations.length,
+      donations: donationCount,
       sponsor: sponsors.length,
-      performer: performers.length,
+      performer: performerCount,
       award: awards.length,
       rajaKumari: rajaKumari.length,
       rajaQueen: rajaQueen.length,
       drawing: drawings.length,
     }),
-    [showBookings, stallBookings, entryPassBookings, donations, sponsors, performers, awards, rajaKumari, rajaQueen, drawings]
+    [showCount, stallCount, entryPassBookings, donationCount, sponsors, performerCount, awards, rajaKumari, rajaQueen, drawings]
   );
 
   const emptyStates = {

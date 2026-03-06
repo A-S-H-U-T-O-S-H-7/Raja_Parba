@@ -30,7 +30,7 @@ const generateAwardRegistrationId = async () => {
   return `orp-award-${yearShort}-${padded}`;
 };
 
-export const createAwardApplication = async (applicationData, photoFile) => {
+export const createAwardApplication = async (applicationData, photoFile, profileFile = null) => {
   try {
     if (!photoFile) {
       throw new Error('Candidate photo is required');
@@ -55,11 +55,29 @@ export const createAwardApplication = async (applicationData, photoFile) => {
     const photoUrl = await getDownloadURL(uploadResult.ref);
     const registrationId = await generateAwardRegistrationId();
 
+    let profileUrl = null;
+    let profilePath = null;
+    let profileFileName = null;
+
+    if (profileFile) {
+      const profileTimestamp = Date.now();
+      const profileExtension = (profileFile.name || 'file').split('.').pop().toLowerCase();
+      const safeProfileName = `award_profile_${profileTimestamp}.${profileExtension}`;
+      const profileRef = ref(storage, `awards/profiles/${safeProfileName}`);
+      const profileUploadResult = await uploadBytes(profileRef, profileFile);
+      profileUrl = await getDownloadURL(profileUploadResult.ref);
+      profilePath = profileUploadResult.ref.fullPath;
+      profileFileName = profileFile.name || safeProfileName;
+    }
+
     const docRef = await addDoc(collection(db, AWARD_COLLECTION), {
       ...applicationData,
       registrationId,
       photoUrl,
       photoPath: uploadResult.ref.fullPath,
+      profileUrl,
+      profilePath,
+      profileFileName,
       status: 'pending',
       reviewStatus: 'pending',
       adminNotes: '',

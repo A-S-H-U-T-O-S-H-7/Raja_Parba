@@ -1,7 +1,7 @@
 // components/admin/raja-activity/AwardNomineesTab.jsx
 "use client";
 import { useEffect, useMemo, useState } from 'react';
-import { Award, Calendar, CheckCircle, Clock, Edit, Eye, Mail, Phone, Trash2, XCircle } from 'lucide-react';
+import { Award, Calendar, CheckCircle, Clock, Edit, Eye, FileText, Mail, Phone, Trash2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import Swal from 'sweetalert2';
 import useThemeStore from '@/lib/stores/useThemeStore';
@@ -197,6 +197,21 @@ export default function AwardNomineesTab() {
                       <p>Pin: {item.pin || item.pincode || 'N/A'}</p>
                       <p className="max-w-xs truncate">Address: {item.address || 'N/A'}</p>
                       <p className="max-w-xs truncate">About: {item.aboutSelf || 'N/A'}</p>
+                      {item.profileUrl && (
+                        <a
+                          href={item.profileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`mt-1 inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold ${
+                            isDarkMode
+                              ? 'border-indigo-700 bg-indigo-900/40 text-indigo-200 hover:bg-indigo-900/60'
+                              : 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                          }`}
+                        >
+                          <FileText className="h-3 w-3" />
+                          {item.profileFileName ? 'Profile File' : 'View Profile'}
+                        </a>
+                      )}
                     </td>
                     <td className={`px-4 py-4 border-r ${cellBorderClass}`}>
                       <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-semibold ${meta.classes}`}>
@@ -286,6 +301,21 @@ export default function AwardNomineesTab() {
                 <p>Address: {item.address || 'N/A'}</p>
                 <p>Age: {item.age || 'N/A'} | Gender: {item.gender || 'N/A'}</p>
                 <p>About: {item.aboutSelf || 'N/A'}</p>
+                {item.profileUrl && (
+                  <a
+                    href={item.profileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`mt-1 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold ${
+                      isDarkMode
+                        ? 'border-indigo-700 bg-indigo-900/40 text-indigo-200 hover:bg-indigo-900/60'
+                        : 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                    }`}
+                  >
+                    <FileText className="h-3 w-3" />
+                    {item.profileFileName || 'View Profile File'}
+                  </a>
+                )}
                 {item.awardDate && <p>Award Date: {formatDate(item.awardDate)} {item.awardTime ? `at ${item.awardTime}` : ''}</p>}
               </div>
 
@@ -351,6 +381,19 @@ export default function AwardNomineesTab() {
             <div className="mt-4 text-sm leading-7">
               <p><span className="font-semibold">Address:</span> {viewingItem.address || 'N/A'}</p>
               <p className="mt-2"><span className="font-semibold">About:</span> {viewingItem.aboutSelf || 'N/A'}</p>
+              {viewingItem.profileUrl && (
+                <p className="mt-2">
+                  <span className="font-semibold">Profile File:</span>{' '}
+                  <a
+                    href={viewingItem.profileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={isDarkMode ? 'text-indigo-300 underline hover:text-indigo-200' : 'text-indigo-700 underline hover:text-indigo-900'}
+                  >
+                    {viewingItem.profileFileName || 'View uploaded file'}
+                  </a>
+                </p>
+              )}
             </div>
             <div className="mt-6 flex justify-end">
               <button

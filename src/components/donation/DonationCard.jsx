@@ -143,7 +143,6 @@ const DonationCard = ({ donation }) => {
         isOpen={isReceiptModalOpen}
         onClose={() => setIsReceiptModalOpen(false)}
         booking={donation}
-        receiptOnly
       />
     </>
   );

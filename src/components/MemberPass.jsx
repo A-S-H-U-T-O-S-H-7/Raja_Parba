@@ -21,7 +21,7 @@ const MemberPass = ({ booking, participantName, purpose }) => {
     if (booking?.showDetails) return "SHOW RESERVATION";
     if (booking?.stallIds || booking?.type === "stall") return "STALL RESERVATION";
     if (booking?.delegateDetails) return "DELEGATE PASS";
-    return purpose?.toUpperCase() || "VISITOR";
+    return purpose?.toUpperCase() || "ENTRY PASS";
   };
 
   const passType = getPassType();
@@ -56,6 +56,7 @@ const MemberPass = ({ booking, participantName, purpose }) => {
   };
 
   const showDate = getShowDate();
+  const EVENT_DATE_TEXT = "13 June to 15 June, 2026";
   const freePassMembersCountRaw = Number(booking?.eventDetails?.numberOfPersons || 0);
   const freePassMembersLength = Array.isArray(booking?.eventDetails?.members) ? booking.eventDetails.members.length : 0;
   const freePassMembersCount = freePassMembersCountRaw
@@ -172,8 +173,14 @@ const MemberPass = ({ booking, participantName, purpose }) => {
               <div className="mb-4 rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 p-3 text-center">
                 <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Free Pass Details</p>
                 <p className="mt-1 text-sm font-bold text-emerald-900">Members: {freePassMembersCount}</p>
-                <p className="mt-0.5 text-sm font-semibold text-teal-800">Date: 13 June - 15 June, 2026</p>
+                <p className="mt-0.5 text-sm font-semibold text-teal-800">Date: {EVENT_DATE_TEXT}</p>
               </div>
+            )}
+
+            {!showDate && (
+              <p className="mb-4 text-center text-sm font-bold text-indigo-700">
+                Event Date: {EVENT_DATE_TEXT}
+              </p>
             )}
 
             {/* QR Code Section */}

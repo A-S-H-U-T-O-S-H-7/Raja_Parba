@@ -208,19 +208,19 @@ export default function RajaKumariPage() {
       
       <div className="max-w-4xl mx-auto">
         {/* Header with Festival Theme */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-rose-200 mb-3">
-            <Flower2 className="w-3.5 h-3.5 text-rose-500" />
-            <span className="text-xs font-medium text-rose-600">Raja Parba 2026</span>
-            <Flower2 className="w-3.5 h-3.5 text-rose-500" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">
-            Raja Kumari Registration
-          </h1>
-          <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
-            For talented young girls aged 6 to 15 years
-          </p>
-        </div>
+<div className="text-center mb-6">
+  <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-rose-200 mb-3">
+    <Flower2 className="w-3.5 h-3.5 text-rose-500" />
+    <span className="text-xs font-medium text-rose-600">Raja Parba 2026</span>
+    <Flower2 className="w-3.5 h-3.5 text-rose-500" />
+  </div>
+  <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">
+    Raja Kumari Registration
+  </h1>
+  <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
+    For talented young girls aged <span className="text-red-600 font-bold text-base">6 to 15 years</span>
+  </p>
+</div>
 
         {/* Main Form Card */}
         <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-200 overflow-hidden">
@@ -239,9 +239,14 @@ export default function RajaKumariPage() {
               </div>
             </div>
           </div>
+          <div className="flex mx-5 mt-1 justify-center items-center border border-green-400 bg-linear-to-br from-emerald-200 via-white to-emerald-300 py-1 px-2 rounded-lg">
+          <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
+    For talented young girls aged <span className="text-red-600 font-bold text-base">6 to 15 years</span>
+  </p>
+  </div>
 
           {/* Competition Steps */}
-          <div className="px-5 pt-5">
+          <div className="px-5 pt-4">
             <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-4 rounded-xl border border-rose-200">
               <p className="text-xs font-medium text-rose-600 mb-3 flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5" />

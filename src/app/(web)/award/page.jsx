@@ -70,8 +70,11 @@ export default function AwardPage() {
   const { user } = useAuthStore();
   const [form, setForm] = useState(initialForm);
   const [candidatePhoto, setCandidatePhoto] = useState(null);
+  const [profileFile, setProfileFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState("");
+  const [photoError, setPhotoError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const primaryFocusClass = "focus:border-amber-400 focus:ring-1 focus:ring-amber-100";
 
   const aboutWordCount = useMemo(() => getWordCount(form.aboutSelf), [form.aboutSelf]);
 
@@ -89,6 +92,7 @@ export default function AwardPage() {
     if (!file) {
       setCandidatePhoto(null);
       setPhotoPreview("");
+      setPhotoError("Candidate photo is required.");
       return;
     }
 
@@ -105,11 +109,52 @@ export default function AwardPage() {
 
     setCandidatePhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
+    setPhotoError("");
   };
 
   const removePhoto = () => {
     setCandidatePhoto(null);
     setPhotoPreview("");
+    setPhotoError("Candidate photo is required.");
+  };
+
+  const handleProfileFileChange = (file) => {
+    if (!file) {
+      setProfileFile(null);
+      return;
+    }
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes((file.type || "").toLowerCase())) {
+      Swal.fire({
+        icon: "warning",
+        title: "Unsupported File",
+        text: "Upload PDF, DOC, DOCX, JPG, PNG or WEBP only.",
+        confirmButtonColor: "#f59e0b",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      Swal.fire({
+        icon: "warning",
+        title: "File Too Large",
+        text: "Profile file must be under 10MB.",
+        confirmButtonColor: "#f59e0b",
+      });
+      return;
+    }
+
+    setProfileFile(file);
   };
 
   const onSubmit = async (e) => {
@@ -143,6 +188,9 @@ export default function AwardPage() {
       candidatePhoto;
 
     if (!hasAllRequired) {
+      if (!candidatePhoto) {
+        setPhotoError("Candidate photo is required.");
+      }
       await Swal.fire({
         icon: "warning",
         title: "Missing Details",
@@ -165,7 +213,7 @@ export default function AwardPage() {
     try {
       setSubmitting(true);
 
-      const result = await createAwardApplication(payload, candidatePhoto);
+      const result = await createAwardApplication(payload, candidatePhoto, profileFile);
 
       try {
         const { sendAwardConfirmationEmail } = await import("@/services/emailService");
@@ -265,7 +313,7 @@ export default function AwardPage() {
                   <select
                     value={form.awardField}
                     onChange={(e) => updateField("awardField", e.target.value)}
-                    className="h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100"
+                    className={`h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none ${primaryFocusClass}`}
                     required
                   >
                     <option value="" disabled>Select Award Field *</option>
@@ -280,12 +328,17 @@ export default function AwardPage() {
               </div>
 
               {/* Photo Upload with Preview */}
-              <div className="relative">
+              <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-rose-700">Candidate Photo *</p>
+                  <span className="rounded-full bg-rose-100/70 px-2 py-0.5 text-[10px] font-semibold text-rose-700">Required</span>
+                </div>
+
                 {photoPreview ? (
-                  <div className="relative mx-auto h-24 w-24 rounded-xl overflow-hidden border border-amber-300 bg-amber-50">
-                    <img 
-                      src={photoPreview} 
-                      alt="Preview" 
+                  <div className="relative mx-auto h-24 w-24 rounded-xl overflow-hidden border border-rose-200 bg-white">
+                    <img
+                      src={photoPreview}
+                      alt="Preview"
                       className="w-full h-full object-cover"
                     />
                     <button
@@ -297,18 +350,40 @@ export default function AwardPage() {
                     </button>
                   </div>
                 ) : (
-                  <label className="relative mx-auto flex h-24 w-24 flex-col items-center justify-center border border-dashed border-amber-300 rounded-xl bg-amber-50 cursor-pointer hover:bg-amber-100 transition group">
-                    <Camera className="w-5 h-5 text-amber-500 group-hover:text-amber-700" />
-                    <span className="mt-1 text-[10px] text-center text-amber-700 font-medium px-1">Upload photo</span>
+                  <label className="relative flex h-32 w-full flex-col items-center justify-center border border-dashed border-rose-300 rounded-xl bg-white cursor-pointer hover:bg-rose-50/60 transition group">
+                    <Camera className="w-6 h-6 text-rose-500 group-hover:text-rose-600" />
+                    <span className="mt-1.5 text-xs text-center text-rose-700 font-semibold px-2">
+                      Upload candidate photo (Required)
+                    </span>
+                    <span className="mt-0.5 text-[11px] text-rose-500">JPG, PNG, WEBP (max 5MB)</span>
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/jpg"
                       className="hidden"
                       onChange={(e) => handlePhotoChange(e.target.files?.[0] || null)}
-                      required
                     />
                   </label>
                 )}
+
+                {photoError && (
+                  <p className="mt-2 text-center text-xs font-semibold text-red-600">{photoError}</p>
+                )}
+                
+
+                <div className="mt-3">
+                  <label className="mb-1.5 block text-[15px] font-semibold text-amber-700">
+                    Upload your profile (Optional)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,image/jpeg,image/jpg,image/png,image/webp"
+                    className={`block w-full cursor-pointer rounded-md border border-amber-300 bg-white px-2.5 py-2 text-xs text-gray-700 file:mr-2 file:rounded file:border-0 file:bg-amber-100 file:px-2 file:py-1 file:text-xs file:font-semibold file:text-amber-700 hover:file:bg-amber-200 outline-none ${primaryFocusClass}`}
+                    onChange={(e) => handleProfileFileChange(e.target.files?.[0] || null)}
+                  />
+                  {profileFile && (
+                    <p className="mt-1 text-[11px] text-gray-600 truncate">{profileFile.name}</p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -328,7 +403,7 @@ export default function AwardPage() {
                     placeholder="Full Name *"
                     value={form.name}
                     onChange={(e) => updateField("name", e.target.value)}
-                    className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-all"
+                    className={`w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none transition-all ${primaryFocusClass}`}
                     required
                   />
                 </div>
@@ -341,7 +416,7 @@ export default function AwardPage() {
                     placeholder="Phone Number *"
                     value={form.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
-                    className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-all"
+                    className={`w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none transition-all ${primaryFocusClass}`}
                     required
                   />
                 </div>
@@ -354,7 +429,7 @@ export default function AwardPage() {
                     placeholder="Email Address *"
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
-                    className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-all"
+                    className={`w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none transition-all ${primaryFocusClass}`}
                     required
                   />
                 </div>
@@ -365,7 +440,7 @@ export default function AwardPage() {
                   <select
                     value={form.gender}
                     onChange={(e) => updateField("gender", e.target.value)}
-                    className="h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100"
+                    className={`h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none ${primaryFocusClass}`}
                     required
                   >
                     <option value="" disabled>Select Gender *</option>
@@ -383,7 +458,7 @@ export default function AwardPage() {
                     placeholder="Address *"
                     value={form.address}
                     onChange={(e) => updateField("address", e.target.value)}
-                    className="w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-all resize-none"
+                    className={`w-full rounded-lg border border-amber-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none transition-all resize-none ${primaryFocusClass}`}
                     rows={2}
                     required
                   />
@@ -402,7 +477,7 @@ export default function AwardPage() {
                   placeholder="Pin Code *"
                   value={form.pin}
                   onChange={(e) => updateField("pin", e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-full rounded-lg border border-orange-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-100 transition-all"
+                  className={`w-full rounded-lg border border-orange-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none transition-all ${primaryFocusClass}`}
                   required
                 />
               </div>
@@ -413,7 +488,7 @@ export default function AwardPage() {
                 <select
                   value={form.educationQualification}
                   onChange={(e) => updateField("educationQualification", e.target.value)}
-                  className="h-11 w-full rounded-lg border border-orange-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none focus:border-orange-400 focus:ring-1 focus:ring-orange-100"
+                  className={`h-11 w-full rounded-lg border border-orange-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none ${primaryFocusClass}`}
                   required
                 >
                   <option value="" disabled>Select Education *</option>
@@ -435,7 +510,7 @@ export default function AwardPage() {
                   placeholder="Age *"
                   value={form.age}
                   onChange={(e) => updateField("age", e.target.value.replace(/\D/g, ""))}
-                  className="w-full rounded-lg border border-orange-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-100 transition-all"
+                  className={`w-full rounded-lg border border-orange-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none transition-all ${primaryFocusClass}`}
                   required
                 />
               </div>
@@ -453,7 +528,7 @@ export default function AwardPage() {
                   value={form.aboutSelf}
                   onChange={(e) => handleAboutChange(e.target.value)}
                   rows={4}
-                  className="w-full rounded-lg border border-yellow-200 bg-white py-2.5 px-3 text-sm text-gray-700 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-100 transition-all resize-none"
+                  className={`w-full rounded-lg border border-yellow-200 bg-white py-2.5 px-3 text-sm text-gray-700 outline-none transition-all resize-none ${primaryFocusClass}`}
                   placeholder="Tell us about yourself, your achievements, and why you deserve this award... *"
                   required
                 />
