@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { createDrawingApplication } from "@/services/drawingService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 
 const competitionItems = [
   "Self-introduction",
@@ -205,7 +206,11 @@ export default function DrawingPage() {
           popup: "rounded-2xl shadow-2xl",
         },
       });
-
+      await showEntryPassAlert({
+        registrationId: result?.registrationId || result?.id,
+        name: payload?.name,
+        theme: "emerald",
+      });
       router.push("/profile?tab=drawing");
     } catch (error) {
       console.error("Error submitting Drawing registration:", error);

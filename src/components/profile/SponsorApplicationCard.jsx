@@ -86,7 +86,9 @@ const SponsorApplicationCard = ({ item }) => {
             <Calendar className="h-3 w-3 shrink-0 text-amber-500" />
             Applied: {formatDate(item.createdAt)}
           </p>
-          <p className="mt-1 text-xs text-slate-400">ID: {item.id}</p>
+          <p className="mt-2 inline-flex items-center rounded-md border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-2.5 py-1 font-mono text-[11px] font-semibold text-amber-700">
+            ID: {item.id}
+          </p>
 
           {/* Highlighted review status */}
           <div className="mt-2 flex items-center gap-2">

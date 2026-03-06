@@ -20,6 +20,8 @@ const ALLOWED_PERMISSIONS = new Set([
 ]);
 
 const allowedStatuses = new Set(["confirmed", "success", "paid", "completed", "active", "approved"]);
+const blockedStatuses = new Set(["cancelled", "failed", "rejected", "blocked"]);
+const softAllowedStatuses = new Set(["pending", "requested"]);
 
 const normalizeDate = (value) => {
   if (!value) return null;
@@ -96,6 +98,7 @@ const findBookingByIdOrField = async (collectionName, candidateIds = []) => {
 
     const fieldQueries = [
       query(collection(db, collectionName), where("bookingId", "==", candidateId)),
+      query(collection(db, collectionName), where("registrationId", "==", candidateId)),
       query(collection(db, collectionName), where("id", "==", candidateId)),
       query(collection(db, collectionName), where("order_id", "==", candidateId)),
       query(collection(db, collectionName), where("orderId", "==", candidateId)),
@@ -114,6 +117,9 @@ const findBookingByIdOrField = async (collectionName, candidateIds = []) => {
 };
 
 const getDisplayName = (booking = {}) =>
+  booking?.vendorDetails?.ownerName ||
+  booking?.vendorDetails?.name ||
+  booking?.donorDetails?.name ||
   booking?.delegateDetails?.name ||
   booking?.userDetails?.name ||
   booking?.customerDetails?.name ||
@@ -130,7 +136,57 @@ const getBookingStatus = (booking = {}) => String(booking?.status || "pending").
 
 const isValidForEntry = (booking = {}) => {
   const status = getBookingStatus(booking);
-  return allowedStatuses.has(status);
+  if (!status) return true;
+  if (blockedStatuses.has(status)) return false;
+  return allowedStatuses.has(status) || softAllowedStatuses.has(status);
+};
+
+const SEARCH_SOURCES = [
+  { collection: "delegateBookings", typeLabel: "ENTRY/FREE PASS" },
+  { collection: "showBookings", typeLabel: "SHOW RESERVATION" },
+  { collection: "stallBookings", typeLabel: "STALL RESERVATION" },
+  { collection: "performers", typeLabel: "PERFORMER PASS" },
+  { collection: "award_applications", typeLabel: "AWARD PASS" },
+  { collection: "raja_kumari_applications", typeLabel: "RAJA KUMARI PASS" },
+  { collection: "raja_queen_applications", typeLabel: "RAJA QUEEN PASS" },
+  { collection: "drawing_applications", typeLabel: "DRAWING PASS" },
+  { collection: "sponsors", typeLabel: "SPONSOR PASS" },
+  { collection: "bookings", typeLabel: "LEGACY PASS" },
+];
+
+const findBookingAcrossSources = async (candidateIds = [], qrType = "UNKNOWN") => {
+  const normalizedType = String(qrType || "").toUpperCase();
+
+  // Prioritize obvious collections by QR type, then fallback to all.
+  const prioritized = [...SEARCH_SOURCES].sort((a, b) => {
+    const score = (entry) => {
+      const label = entry.typeLabel.toUpperCase();
+      if (normalizedType.includes("SHOW") && label.includes("SHOW")) return 2;
+      if (normalizedType.includes("STALL") && label.includes("STALL")) return 2;
+      if (normalizedType.includes("FREE") && entry.collection === "delegateBookings") return 2;
+      if (normalizedType.includes("ENTRY") && entry.collection === "delegateBookings") return 2;
+      if (normalizedType.includes("PERFORM") && label.includes("PERFORMER")) return 2;
+      if (normalizedType.includes("AWARD") && label.includes("AWARD")) return 2;
+      if (normalizedType.includes("KUMARI") && label.includes("KUMARI")) return 2;
+      if (normalizedType.includes("QUEEN") && label.includes("QUEEN")) return 2;
+      if (normalizedType.includes("DRAW") && label.includes("DRAWING")) return 2;
+      return 1;
+    };
+    return score(b) - score(a);
+  });
+
+  for (const source of prioritized) {
+    const hit = await findBookingByIdOrField(source.collection, candidateIds);
+    if (hit) {
+      return {
+        booking: hit,
+        sourceCollection: source.collection,
+        typeLabel: source.typeLabel,
+      };
+    }
+  }
+
+  return null;
 };
 
 const buildDetails = (booking, typeLabel) => ({
@@ -181,45 +237,12 @@ export async function POST(request) {
     if (!candidateIds.length) {
       return NextResponse.json({ success: false, error: "Invalid QR format" }, { status: 400 });
     }
-    const bookingId = candidateIds[0];
-
     const qrType = extractPassType(scanText);
-    let booking = null;
-    let typeLabel = "UNKNOWN";
-    let sourceCollection = "";
-
-    if (qrType === "FREE PASS") {
-      booking = await findBookingByIdOrField("delegateBookings", candidateIds);
-      typeLabel = "FREE PASS";
-      sourceCollection = "delegateBookings";
-    } else if (qrType === "SHOW RESERVATION") {
-      booking = await findBookingByIdOrField("showBookings", candidateIds);
-      typeLabel = "SHOW RESERVATION";
-      sourceCollection = "showBookings";
-    } else {
-      const freePassBooking = await findBookingByIdOrField("delegateBookings", candidateIds);
-      if (freePassBooking) {
-        booking = freePassBooking;
-        typeLabel = "FREE PASS";
-        sourceCollection = "delegateBookings";
-      } else {
-        const showBooking = await findBookingByIdOrField("showBookings", candidateIds);
-        if (showBooking) {
-          booking = showBooking;
-          typeLabel = "SHOW RESERVATION";
-          sourceCollection = "showBookings";
-        } else {
-          // Legacy fallback collection in older flow versions.
-          const legacyBooking = await findBookingByIdOrField("bookings", candidateIds);
-          if (legacyBooking) {
-            booking = legacyBooking;
-            sourceCollection = "bookings";
-            if (legacyBooking?.showDetails) typeLabel = "SHOW RESERVATION";
-            else if (legacyBooking?.category === "free_pass") typeLabel = "FREE PASS";
-          }
-        }
-      }
-    }
+    const lookup = await findBookingAcrossSources(candidateIds, qrType);
+    const booking = lookup?.booking || null;
+    const sourceCollection = lookup?.sourceCollection || "";
+    let typeLabel = lookup?.typeLabel || "UNKNOWN";
+    const bookingId = candidateIds[0];
 
     if (!booking) {
       await addDoc(collection(db, "admin_pass_scans"), {
@@ -232,6 +255,18 @@ export async function POST(request) {
         createdAt: serverTimestamp(),
       });
       return NextResponse.json({ success: false, error: "Pass not found" }, { status: 404 });
+    }
+
+    // Refine label when source stores mixed pass/application types.
+    if (sourceCollection === "delegateBookings") {
+      if (booking?.category === "free_pass" || booking?.eventDetails?.delegateType === "freePass") {
+        typeLabel = "FREE ENTRY PASS";
+      } else {
+        typeLabel = "ENTRY PASS";
+      }
+    } else if (sourceCollection === "bookings") {
+      if (booking?.showDetails) typeLabel = "SHOW RESERVATION";
+      else if (booking?.category === "free_pass") typeLabel = "FREE ENTRY PASS";
     }
 
     const valid = isValidForEntry(booking);

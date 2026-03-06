@@ -208,7 +208,7 @@ export default function PassScanner() {
               Pass Scanner
             </h1>
             <p className={`mt-1 text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-              Scan free pass and show booking QR at field entry point.
+              Scan all event passes: entry/free pass, show, stall, performer, award, Raja Kumari, Raja Queen, drawing, sponsor.
             </p>
           </div>
           <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${scannerBadge.className}`}>
@@ -293,7 +293,7 @@ export default function PassScanner() {
                   <textarea
                     value={manualInput}
                     onChange={(event) => setManualInput(event.target.value)}
-                    placeholder="Paste QR text here (example: RAJA PARBA 2026 | ID:... | Name:... | Type:...)"
+                    placeholder="Paste QR text or ID (bookingId / registrationId / document ID). Example: RAJA PARBA 2026 | ID:... | Name:... | Type:..."
                     rows={4}
                     className={`w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 ${
                       isDarkMode

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { createRajaKumariApplication } from "@/services/rajaKumariService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 
 const competitionItems = [
   "Self-introduction",
@@ -158,8 +159,8 @@ export default function RajaKumariPage() {
           id: result.id,
           registrationId: result.registrationId || result.id,
         });
-        if (!emailResult?.success) {
-          console.error("Raja Kumari email failed:", emailResult);
+        if (emailResult && emailResult.success === false) {
+          console.warn("Raja Kumari email response:", emailResult);
         }
       } catch (emailError) {
         console.error("Failed to send Raja Kumari email:", emailError);
@@ -185,7 +186,11 @@ export default function RajaKumariPage() {
           popup: "rounded-2xl shadow-2xl",
         },
       });
-
+      await showEntryPassAlert({
+        registrationId: result?.registrationId || result?.id,
+        name: payload?.name,
+        theme: "rose",
+      });
       router.push("/profile?tab=rajaKumari");
     } catch (error) {
       console.error("Error submitting Raja Kumari registration:", error);

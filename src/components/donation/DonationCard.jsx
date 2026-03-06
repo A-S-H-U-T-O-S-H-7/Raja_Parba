@@ -120,7 +120,9 @@ const DonationCard = ({ donation }) => {
               </div>
 
               <div className="border-t border-pink-100 pt-2">
-                <p className="font-mono text-xs text-gray-500">ID: {donation.id || donation.donationId}</p>
+                <p className="inline-flex items-center rounded-md border border-pink-200 bg-gradient-to-r from-pink-50 to-rose-50 px-2.5 py-1 font-mono text-[11px] font-semibold text-pink-700">
+                  ID: {donation.id || donation.donationId}
+                </p>
               </div>
             </div>
           </div>

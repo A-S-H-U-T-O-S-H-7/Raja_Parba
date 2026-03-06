@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { createRajaQueenApplication } from "@/services/rajaQueenService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 
 const competitionItems = [
   "Self-introduction",
@@ -186,7 +187,11 @@ export default function RajaQueenPage() {
           popup: "rounded-2xl shadow-2xl",
         },
       });
-
+      await showEntryPassAlert({
+        registrationId: result?.registrationId || result?.id,
+        name: payload?.name,
+        theme: "violet",
+      });
       router.push("/profile?tab=rajaQueen");
     } catch (error) {
       console.error("Error submitting Raja Queen registration:", error);

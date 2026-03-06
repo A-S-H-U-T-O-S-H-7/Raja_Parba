@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { createPerformerApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 
 const performanceOptions = ["Song", "Dance", "Others"];
 const participationOptions = ["Solo", "Group"];
@@ -186,7 +187,11 @@ export default function PerformerPage() {
           popup: "rounded-2xl shadow-2xl",
         },
       });
-
+      await showEntryPassAlert({
+        registrationId: submission?.registrationId,
+        name: performerPayload?.name,
+        theme: "blue",
+      });
       router.push("/profile?tab=performer");
     } catch (error) {
       console.error("Error submitting performer application:", error);

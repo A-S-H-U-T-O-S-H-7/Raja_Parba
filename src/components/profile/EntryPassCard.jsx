@@ -82,7 +82,9 @@ const EntryPassCard = ({ booking }) => {
               {isFreePass ? '13, 14, 15 June 2026' : `${eventDetails?.duration || '3'} Day Pass`}
             </p>
             <p className="mt-1 text-xs text-slate-500">Type: {isFreePass ? 'Free Entry Pass' : 'Entry Pass'}</p>
-            <p className="mt-0.5 text-xs text-slate-400">ID: {booking?.bookingId || booking?.id}</p>
+            <p className="mt-1 inline-flex items-center rounded-md border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-2.5 py-1 font-mono text-[11px] font-semibold text-orange-700">
+              ID: {booking?.bookingId || booking?.id}
+            </p>
           </div>
 
           {/* Attendance */}
@@ -135,9 +137,10 @@ const EntryPassCard = ({ booking }) => {
             <button
               type="button"
               onClick={() => setIsPassModalOpen(true)}
-              className="rounded-md bg-gradient-to-r from-purple-500 via-purple-400 to-purple-700 px-5 py-2 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-purple-500 via-purple-400 to-purple-700 px-5 py-2 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg active:scale-95"
             >
-              Pass & Receipt
+              <Ticket className="h-4 w-4" />
+              Pass
             </button>
           </div>
         )}

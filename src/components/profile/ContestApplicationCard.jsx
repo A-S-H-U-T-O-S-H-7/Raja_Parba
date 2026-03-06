@@ -1,4 +1,8 @@
-import { Calendar, CheckCircle, Clock, FileText } from 'lucide-react';
+"use client";
+
+import { useState } from 'react';
+import { Calendar, CheckCircle, Clock, FileText, Ticket } from 'lucide-react';
+import PassReceiptModal from '../PassReceiptModal';
 
 const formatDate = (date) => {
   if (!date) return 'N/A';
@@ -31,6 +35,7 @@ const ACCENTS = {
     noteBox: 'border-indigo-200 bg-indigo-50',
     noteLabel: 'text-indigo-500',
     iconAccent: 'text-indigo-400',
+    passButton: 'bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600 hover:from-indigo-600 hover:via-blue-600 hover:to-indigo-700',
   },
   emeraldTeal: {
     card: 'border-teal-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100',
@@ -48,6 +53,7 @@ const ACCENTS = {
     noteBox: 'border-teal-200 bg-teal-50',
     noteLabel: 'text-teal-600',
     iconAccent: 'text-teal-500',
+    passButton: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:via-teal-600 hover:to-emerald-700',
   },
   redPink: {
     card: 'border-rose-200 bg-gradient-to-br from-red-50 via-rose-50 to-pink-100',
@@ -65,6 +71,7 @@ const ACCENTS = {
     noteBox: 'border-rose-200 bg-rose-50',
     noteLabel: 'text-rose-600',
     iconAccent: 'text-rose-500',
+    passButton: 'bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:via-pink-600 hover:to-rose-700',
   },
   green: {
     card: 'border-green-200 bg-gradient-to-br from-green-50 via-emerald-50 to-lime-100',
@@ -82,10 +89,12 @@ const ACCENTS = {
     noteBox: 'border-green-200 bg-green-50',
     noteLabel: 'text-green-600',
     iconAccent: 'text-green-500',
+    passButton: 'bg-gradient-to-r from-lime-500 via-green-500 to-emerald-600 hover:from-lime-600 hover:via-green-600 hover:to-emerald-700',
   },
 };
 
 const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const status = (item.status || item.reviewStatus || 'pending').toLowerCase();
   const isConfirmed = status === 'confirmed' || status === 'approved';
   const eventDate = item.eventDate || item.awardDate || null;
@@ -136,7 +145,9 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
         <div className={`rounded-xl border p-3.5 shadow-sm ${theme.applicantBox}`}>
           <p className={`mb-2 text-[10px] font-bold uppercase tracking-widest ${theme.applicantTag}`}>Applicant</p>
           <p className="text-sm font-bold leading-snug text-slate-800">{item.name || 'N/A'}</p>
-          <p className="mt-1 text-xs text-slate-400">ID: {item.registrationId || item.id}</p>
+          <p className="mt-2 inline-flex items-center rounded-md border border-indigo-200 bg-gradient-to-r from-indigo-50 to-blue-50 px-2.5 py-1 font-mono text-[11px] font-semibold text-indigo-700">
+            ID: {item.registrationId || item.id}
+          </p>
           {item.photoUrl && (
             <div className="mt-3">
               <div className="h-24 w-24 overflow-hidden rounded-xl border border-indigo-100 bg-white shadow-sm">
@@ -203,14 +214,23 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
             </div>
           </div>
 
-          {/* Right: confirmed event date */}
-          {isConfirmed && (
-            <p className="flex items-center gap-1.5 text-xs font-semibold text-green-700">
-              <CheckCircle className="h-3.5 w-3.5 shrink-0" />
-              Event: {eventDate ? formatDate(eventDate) : 'Date pending'}
-              {eventTime ? ` at ${eventTime}` : ''}
-            </p>
-          )}
+          <div className="flex items-center gap-2">
+            {isConfirmed && (
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-green-700">
+                <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                Event: {eventDate ? formatDate(eventDate) : 'Date pending'}
+                {eventTime ? ` at ${eventTime}` : ''}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => setIsPassModalOpen(true)}
+              className={`inline-flex items-center gap-1.5 rounded-md px-5 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:shadow-lg active:scale-95 ${theme.passButton || 'bg-indigo-600 hover:bg-indigo-700'}`}
+            >
+              <Ticket className="h-3.5 w-3.5" />
+              Pass
+            </button>
+          </div>
         </div>
 
         {/* Admin notes */}
@@ -221,6 +241,12 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
           </div>
         )}
       </div>
+
+      <PassReceiptModal
+        isOpen={isPassModalOpen}
+        onClose={() => setIsPassModalOpen(false)}
+        booking={item}
+      />
     </div>
   );
 };

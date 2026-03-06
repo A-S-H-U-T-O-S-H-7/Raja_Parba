@@ -18,7 +18,17 @@ function layout({ children }) {
         console.error('Logout error:', error);
       }
     };
-    const shouldShowBackButton = pathname !== "/" && pathname !== "/show" && pathname !== "/stall";
+    const backButtonAllowedPaths = [
+      "/raja-kumari",
+      "/drawing",
+      "/raja-queen",
+      "/award",
+      "/performer",
+      "/sponsor",
+    ];
+    const shouldShowBackButton = backButtonAllowedPaths.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`)
+    );
 
     const handleBack = () => {
       if (typeof window !== "undefined" && window.history.length > 1) {

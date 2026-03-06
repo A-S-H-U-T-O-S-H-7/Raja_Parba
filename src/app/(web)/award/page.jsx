@@ -18,18 +18,76 @@ import {
   ChevronDown,
   Hash,
   BookOpen,
+  Info,
   X
 } from "lucide-react";
 import { createAwardApplication } from "@/services/awardService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 
 const awardFieldOptions = [
-  "Best Cultural Performer",
-  "Community Excellence",
-  "Art & Creativity",
-  "Young Talent",
-  "Social Impact",
+  { label: "Utkal Seva Samman", icon: "🏛️" },
+  { label: "Odisha Pratibha Samman", icon: "🌟" },
+  { label: "Odisha Gaurav Award", icon: "🏅" },
+  { label: "Odisha Ratna Award", icon: "👑" },
 ];
+
+const awardDetailsByLanguage = {
+  odia: [
+    {
+      title: "୧. ଉତ୍କଳ ସେବା ସମ୍ମାନ (Utkal Seva Samman)",
+      description: "ଉତ୍କଳ ସେବା ସମ୍ମାନ ସେହି ବ୍ୟକ୍ତିବିଶେଷଙ୍କୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ ନଏଡା, ଦିଲ୍ଲୀ NCR ରେ ଶ୍ରୀ ଜଗନ୍ନାଥ ମନ୍ଦିର ସ୍ଥାପନାରେ ନିଜର ନିଷ୍ଠା, ଭକ୍ତି ଓ ନିଷ୍କାମ ସେବା ମାଧ୍ୟମରେ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଅବଦାନ ରଖିଛନ୍ତି। ଏହି ସମ୍ମାନ ମନ୍ଦିରର ଉନ୍ନତି ଓ ଧାର୍ମିକ କାର୍ଯ୍ୟକଳାପରେ ତାଙ୍କର ଅବିରତ ସମର୍ଥନକୁ ସମ୍ମାନିତ କରେ।",
+    },
+    {
+      title: "୨. ଓଡିଶା ପ୍ରତିଭା ସମ୍ମାନ (Odisha Pratibha Samman)",
+      description: "ଓଡିଶା ପ୍ରତିଭା ସମ୍ମାନ ସେହି ଗରିମାମୟ ଓଡ଼ିଆ ବ୍ୟକ୍ତିବିଶେଷଙ୍କୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ କେନ୍ଦ୍ର ସରକାରୀ ସେବା ମାଧ୍ୟମରେ ଦେଶକୁ ନିଷ୍ଠା ଓ ସତ୍ୟନିଷ୍ଠା ସହିତ ସେବା କରିଛନ୍ତି। ସମାଜ ଓ ଜନସେବାରେ ତାଙ୍କର ମୂଲ୍ୟବାନ ଅବଦାନକୁ ଏହି ସମ୍ମାନ ସ୍ୱୀକାର କରେ।",
+    },
+    {
+      title: "୩. ଓଡିଶା ଗୌରବ ପୁରସ୍କାର (Odisha Gaurav Award)",
+      description: "ଓଡିଶା ଗୌରବ ପୁରସ୍କାର ଦିଲ୍ଲୀ NCR ଅଞ୍ଚଳରେ କାର୍ଯ୍ୟରତ ସେହି ଓଡ଼ିଆ ସଂଗଠନଗୁଡ଼ିକୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ ଓଡ଼ିଆ ସମୁଦାୟର ସମର୍ଥନ, ସମାଜସେବା ଓ ସାମ୍ପ୍ରଦାୟିକ ଉନ୍ନତି ପାଇଁ ଉଲ୍ଲେଖନୀୟ କାମ କରୁଛନ୍ତି। ତାଙ୍କର ନିରନ୍ତର ପ୍ରୟାସ ଓଡ଼ିଆ ସମୁଦାୟ ପାଇଁ ଗର୍ବର କାରଣ।",
+    },
+    {
+      title: "୪. ଓଡିଶା ରତ୍ନ ପୁରସ୍କାର (Odisha Ratna Award)",
+      description: "ଓଡିଶା ରତ୍ନ ପୁରସ୍କାର ସେହି ବ୍ୟକ୍ତିବିଶେଷଙ୍କୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ ଦିଲ୍ଲୀ NCR ରେ ଓଡ଼ିଶାର ସମୃଦ୍ଧ ସଂସ୍କୃତି, ପାରମ୍ପରିକତା ଓ ପବିତ୍ର ଜଗନ୍ନାଥ ସଂସ୍କୃତିର ପ୍ରଚାର ଓ ପ୍ରସାର ପାଇଁ ଅସାଧାରଣ ଅବଦାନ ରଖିଛନ୍ତି। ତାଙ୍କର ନିଷ୍ଠା, ସମର୍ପଣ ଓ ସଂସ୍କୃତି ପ୍ରତି ଅଟୁଟ ଭଲପାଇବା ଓଡ଼ିଆ ପରମ୍ପରାକୁ ଦେଶର ବିଭିନ୍ନ ସ୍ଥାନରେ ଉଜ୍ଜ୍ୱଳ କରିଛି। ଏହି ସମ୍ମାନ ତାଙ୍କର ଉଲ୍ଲେଖନୀୟ ଅବଦାନକୁ ସ୍ୱୀକାର କରି ଓଡ଼ିଶାର ଗୌରବ ଓ ଆତ୍ମପରିଚୟକୁ ଅଧିକ ସୁଦୃଢ଼ କରିବା ପାଇଁ ପ୍ରଦାନ କରାଯାଏ।",
+    },
+  ],
+  english: [
+    {
+      title: "1. Utkal Seva Samman",
+      description: "Utkal Seva Samman is presented to individuals whose dedication, devotion, and selfless support played a significant role in the establishment of the Jagannath Temple in Noida, Delhi NCR. This award honors those who stood with unwavering commitment during the temple's journey and continue to support its spiritual and community activities.",
+    },
+    {
+      title: "2. Odisha Pratibha Samman",
+      description: "Odisha Pratibha Samman honors distinguished Odia individuals who have served the nation with integrity and dedication through Central Government service. This award recognizes their valuable contributions to public service and their commitment to the welfare and development of society.",
+    },
+    {
+      title: "3. Odisha Gaurav Award",
+      description: "Odisha Gaurav Award recognizes Odia organizations in Delhi NCR that have made remarkable contributions in supporting and uplifting the Odia community. Their continuous efforts in social service, cultural activities, and community welfare bring pride and strength to the Odia diaspora.",
+    },
+    {
+      title: "4. Odisha Ratna Award",
+      description: "Odisha Ratna Award is presented to individuals who have made exceptional efforts in promoting Odisha's culture, heritage, and the sacred Jagannath Sanskriti in Delhi NCR. This honor celebrates their dedication in spreading the spiritual and cultural identity of Odisha beyond its borders.",
+    },
+  ],
+  hindi: [
+    {
+      title: "1. उत्कल सेवा सम्मान (Utkal Seva Samman)",
+      description: "उत्कल सेवा सम्मान उन व्यक्तियों को प्रदान किया जाता है जिन्होंने नोएडा, दिल्ली NCR में श्री जगन्नाथ मंदिर की स्थापना और विकास में अपनी निष्ठा, भक्ति और निःस्वार्थ सेवा के माध्यम से महत्वपूर्ण योगदान दिया है। यह सम्मान उन महान व्यक्तियों को समर्पित है जिन्होंने मंदिर के निर्माण की यात्रा में अटूट समर्पण के साथ सहयोग किया और आज भी इसके आध्यात्मिक एवं सामाजिक कार्यों में अपना समर्थन प्रदान कर रहे हैं।",
+    },
+    {
+      title: "2. ओडिशा प्रतिभा सम्मान (Odisha Pratibha Samman)",
+      description: "ओडिशा प्रतिभा सम्मान उन विशिष्ट ओड़िया व्यक्तियों को प्रदान किया जाता है जिन्होंने केंद्रीय सरकारी सेवाओं में रहकर राष्ट्र की सेवा निष्ठा, ईमानदारी और समर्पण के साथ की है। यह सम्मान उनके उत्कृष्ट सार्वजनिक सेवा और समाज के विकास में उनके महत्वपूर्ण योगदान को मान्यता देता है।",
+    },
+    {
+      title: "3. ओडिशा गौरव पुरस्कार (Odisha Gaurav Award)",
+      description: "ओडिशा गौरव पुरस्कार दिल्ली NCR में कार्यरत उन ओड़िया संगठनों को प्रदान किया जाता है जिन्होंने ओड़िया समुदाय के सहयोग, सामाजिक सेवा, सांस्कृतिक संरक्षण और सामुदायिक विकास के लिए उल्लेखनीय कार्य किए हैं। उनके निरंतर प्रयास ओड़िया समाज की एकता, गौरव और प्रगति को सुदृढ़ करते हैं।",
+    },
+    {
+      title: "4. ओडिशा रत्न पुरस्कार (Odisha Ratna Award)",
+      description: "ओडिशा रत्न पुरस्कार उन विशिष्ट व्यक्तियों को प्रदान किया जाता है जिन्होंने दिल्ली NCR में ओडिशा की समृद्ध संस्कृति, परंपरा और पवित्र जगन्नाथ संस्कृति के प्रचार-प्रसार में असाधारण योगदान दिया है। उनके समर्पण और प्रयासों ने ओडिशा की आध्यात्मिक और सांस्कृतिक पहचान को व्यापक स्तर पर प्रतिष्ठित किया है और ओड़िया समाज के गौरव को और अधिक सशक्त बनाया है।",
+    },
+  ],
+};
 
 const educationOptions = [
   "10th Pass",
@@ -74,6 +132,8 @@ export default function AwardPage() {
   const [photoPreview, setPhotoPreview] = useState("");
   const [photoError, setPhotoError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showAwardDetails, setShowAwardDetails] = useState(false);
+  const [awardDetailLang, setAwardDetailLang] = useState("odia");
   const primaryFocusClass = "focus:border-amber-400 focus:ring-1 focus:ring-amber-100";
 
   const aboutWordCount = useMemo(() => getWordCount(form.aboutSelf), [form.aboutSelf]);
@@ -247,7 +307,11 @@ export default function AwardPage() {
           popup: "rounded-2xl shadow-2xl",
         },
       });
-
+      await showEntryPassAlert({
+        registrationId: result?.registrationId || result?.id,
+        name: payload?.name,
+        theme: "amber",
+      });
       router.push("/profile?tab=award");
     } catch (error) {
       console.error("Error submitting Award application:", error);
@@ -313,18 +377,26 @@ export default function AwardPage() {
                   <select
                     value={form.awardField}
                     onChange={(e) => updateField("awardField", e.target.value)}
-                    className={`h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-700 outline-none transition-all appearance-none ${primaryFocusClass}`}
+                    className={`h-11 w-full rounded-lg border border-amber-200 bg-white pl-9 pr-8 text-sm leading-none text-gray-900 outline-none transition-all appearance-none ${primaryFocusClass}`}
                     required
                   >
-                    <option value="" disabled>Select Award Field *</option>
+                    <option value="" disabled className="text-gray-700">Select Award Field *</option>
                     {awardFieldOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
+                      <option key={option.label} value={option.label} className="text-gray-900">
+                        {option.icon} {option.label}
                       </option>
                     ))}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-400" />
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAwardDetails(true)}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                  Awards Details
+                </button>
               </div>
 
               {/* Photo Upload with Preview */}
@@ -563,6 +635,57 @@ export default function AwardPage() {
             </div>
           </form>
         </div>
+
+        {showAwardDetails && (
+          <div
+            className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-3"
+            onClick={() => setShowAwardDetails(false)}
+          >
+            <div
+              className="w-full max-w-3xl rounded-2xl border border-amber-200 bg-white shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-amber-200 px-4 py-3">
+                <h3 className="text-base font-bold text-gray-900">Awards Details</h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 p-1">
+                    {["odia", "english", "hindi"].map((lang) => (
+                      <button
+                        key={lang}
+                        type="button"
+                        onClick={() => setAwardDetailLang(lang)}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+                          awardDetailLang === lang
+                            ? "bg-amber-500 text-white"
+                            : "text-gray-700 hover:bg-amber-100"
+                        }`}
+                      >
+                        {lang}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAwardDetails(false)}
+                    className="rounded-full border border-gray-200 p-1.5 text-gray-600 hover:bg-gray-100"
+                    aria-label="Close award details"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="max-h-[70vh] space-y-4 overflow-y-auto px-4 py-4">
+                {awardDetailsByLanguage[awardDetailLang].map((item) => (
+                  <div key={item.title} className="rounded-xl border border-amber-100 bg-amber-50/40 p-3">
+                    <h4 className="text-sm font-bold text-gray-900">{item.title}</h4>
+                    <p className="mt-1 text-sm leading-6 text-gray-700">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer Note */}
         <p className="text-center text-xs text-gray-500 mt-4">

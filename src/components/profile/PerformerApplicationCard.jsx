@@ -1,4 +1,8 @@
-import { Calendar, CheckCircle, Clock, Mail, Mic, Music2, Phone, Users, MapPin, User } from 'lucide-react';
+"use client";
+
+import { useState } from 'react';
+import { Calendar, CheckCircle, Clock, Mail, Mic, Music2, Phone, Users, MapPin, User, Ticket } from 'lucide-react';
+import PassReceiptModal from '../PassReceiptModal';
 
 const formatDate = (date) => {
   if (!date) return 'N/A';
@@ -15,6 +19,7 @@ const getReviewStatusStyle = (status) => {
 };
 
 const PerformerApplicationCard = ({ item }) => {
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const status = (item.status || item.reviewStatus || 'pending').toLowerCase();
   const isConfirmed = status === 'confirmed' || status === 'approved';
   const isPending = status === 'pending' || status === 'requested';
@@ -103,7 +108,9 @@ const PerformerApplicationCard = ({ item }) => {
             <Calendar className="h-3 w-3 shrink-0 text-blue-400" />
             Applied: {formatDate(item.createdAt)}
           </p>
-          <p className="mt-1 text-xs font-semibold text-slate-800">ID: {item.registrationId || item.id}</p>
+          <p className="mt-2 inline-flex items-center rounded-md border border-cyan-200 bg-gradient-to-r from-cyan-50 to-sky-50 px-2.5 py-1 font-mono text-[11px] font-semibold text-cyan-700">
+            ID: {item.registrationId || item.id}
+          </p>
 
           {/* Highlighted review status */}
           <div className="mt-2 flex items-center gap-2">
@@ -147,6 +154,25 @@ const PerformerApplicationCard = ({ item }) => {
           </p>
         </div>
       )}
+
+      <div className="border-t border-cyan-200 bg-white/70 px-5 py-3">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setIsPassModalOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:from-cyan-600 hover:via-sky-600 hover:to-blue-700 hover:shadow-lg active:scale-95"
+          >
+            <Ticket className="h-3.5 w-3.5" />
+            Pass
+          </button>
+        </div>
+      </div>
+
+      <PassReceiptModal
+        isOpen={isPassModalOpen}
+        onClose={() => setIsPassModalOpen(false)}
+        booking={item}
+      />
     </div>
   );
 };

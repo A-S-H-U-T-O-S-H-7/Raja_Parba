@@ -72,7 +72,7 @@ const ShowBookingCard = ({ booking, onCancel }) => {
               🎭 Show Booking
             </span>
           </div>
-          <span className="text-xs sm:text-sm text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded">
+          <span className="inline-flex items-center rounded-md border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 px-2.5 py-1 font-mono text-xs sm:text-sm font-semibold text-purple-700">
             ID: {booking.id || booking.bookingId || 'N/A'}
           </span>
         </div> 
