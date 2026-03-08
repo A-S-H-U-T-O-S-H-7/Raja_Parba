@@ -157,11 +157,35 @@ const ProfilePage = () => {
       case 'award':
         return awards.map((item) => <ContestApplicationCard key={item.id} item={item} title="Award Application" accent="blueIndigo" />);
       case 'rajaKumari':
-        return rajaKumari.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Kumari Application" accent="emeraldTeal" />);
+        return rajaKumari.map((item) => (
+          <ContestApplicationCard
+            key={item.id}
+            item={item}
+            title="Raja Kumari Application"
+            accent="emeraldTeal"
+            assessmentType="rajaKumari"
+          />
+        ));
       case 'rajaQueen':
-        return rajaQueen.map((item) => <ContestApplicationCard key={item.id} item={item} title="Raja Queen Application" accent="redPink" />);
+        return rajaQueen.map((item) => (
+          <ContestApplicationCard
+            key={item.id}
+            item={item}
+            title="Raja Queen Application"
+            accent="redPink"
+            assessmentType="rajaQueen"
+          />
+        ));
       case 'drawing':
-        return drawings.map((item) => <ContestApplicationCard key={item.id} item={item} title="Drawing Application" accent="green" />);
+        return drawings.map((item) => (
+          <ContestApplicationCard
+            key={item.id}
+            item={item}
+            title="Drawing Application"
+            accent="green"
+            assessmentType={(String(item?.category || "").toLowerCase() === "senior" ? "drawingSenior" : "drawingJunior")}
+          />
+        ));
       default:
         return null;
     }

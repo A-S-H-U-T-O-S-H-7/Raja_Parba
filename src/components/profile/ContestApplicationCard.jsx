@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, CheckCircle, Clock, FileText, Ticket } from 'lucide-react';
 import PassReceiptModal from '../PassReceiptModal';
+import { useRouter } from 'next/navigation';
+import { getAssessmentSession } from '@/services/assessmentService';
 
 const formatDate = (date) => {
   if (!date) return 'N/A';
@@ -93,14 +95,49 @@ const ACCENTS = {
   },
 };
 
-const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
+const ContestApplicationCard = ({ item, title, accent = 'blueIndigo', assessmentType = null }) => {
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+  const [assessmentEnabled, setAssessmentEnabled] = useState(false);
+  const [checkingAssessment, setCheckingAssessment] = useState(Boolean(assessmentType));
+  const router = useRouter();
   const status = (item.status || item.reviewStatus || 'pending').toLowerCase();
   const isConfirmed = status === 'confirmed' || status === 'approved';
   const eventDate = item.eventDate || item.awardDate || null;
   const eventTime = item.eventTime || item.awardTime || null;
   const reviewLabel = item.reviewStatus || item.status || 'pending';
   const theme = ACCENTS[accent] || ACCENTS.blueIndigo;
+  const assessmentRouteId = item.id || item.registrationId;
+  const isAssessmentEligible = Boolean(
+    assessmentType &&
+    assessmentRouteId &&
+    (status === 'confirmed' || status === 'approved')
+  );
+
+  useEffect(() => {
+    let active = true;
+    if (!isAssessmentEligible) {
+      setAssessmentEnabled(false);
+      setCheckingAssessment(false);
+      return () => {
+        active = false;
+      };
+    }
+    (async () => {
+      try {
+        const session = await getAssessmentSession(assessmentType, assessmentRouteId);
+        if (!active) return;
+        setAssessmentEnabled(Boolean(session?.enabled));
+      } catch {
+        if (!active) return;
+        setAssessmentEnabled(false);
+      } finally {
+        if (active) setCheckingAssessment(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [assessmentType, assessmentRouteId, isAssessmentEligible]);
 
   const detailPairs = [
     ['Gender',        item.gender],
@@ -230,6 +267,20 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo' }) => {
               <Ticket className="h-3.5 w-3.5" />
               Pass
             </button>
+            {isAssessmentEligible && (
+              <button
+                type="button"
+                disabled={!assessmentEnabled || checkingAssessment}
+                onClick={() => router.push(`/assessment/${assessmentType}/${assessmentRouteId}`)}
+                className={`inline-flex items-center gap-1 rounded-md px-4 py-2 text-xs font-semibold shadow-sm transition ${
+                  assessmentEnabled
+                    ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700"
+                    : "cursor-not-allowed bg-gray-200 text-gray-500"
+                }`}
+              >
+                Start Assessment
+              </button>
+            )}
           </div>
         </div>
 

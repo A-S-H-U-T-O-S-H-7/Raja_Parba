@@ -160,8 +160,8 @@ export default function RajaQueenPage() {
           id: result.id,
           registrationId: result.registrationId || result.id,
         });
-        if (!emailResult?.success) {
-          console.error("Raja Queen email failed:", emailResult);
+        if (emailResult && emailResult.success === false) {
+          console.warn("Raja Queen email response:", emailResult);
         }
       } catch (emailError) {
         console.error("Failed to send Raja Queen email:", emailError);

@@ -7,7 +7,8 @@ import {
   UserPlusIcon,
   DocumentTextIcon,
   HeartIcon,
-  StarIcon
+  StarIcon,
+  ClipboardDocumentCheckIcon
 } from '@heroicons/react/24/outline';
 
 export const navigationItems = [
@@ -63,6 +64,18 @@ export const navigationItems = [
     id: 'sponsor-performer',
     name: 'Sponsors & Performers',
     icon: UserPlusIcon,
+    permission: 'view_sponsor_performer'
+  },
+  {
+    id: 'assessment',
+    name: 'Assessment',
+    icon: ClipboardDocumentCheckIcon,
+    permission: 'view_sponsor_performer'
+  },
+  {
+    id: 'assessment-quiz',
+    name: 'Assessment Quiz',
+    icon: ClipboardDocumentCheckIcon,
     permission: 'view_sponsor_performer'
   },
   {

@@ -19,6 +19,7 @@ import {
   User,
   Sparkles,
   ScanLine,
+  ClipboardCheck,
   Menu,
   X
 } from 'lucide-react';
@@ -61,6 +62,18 @@ const navigation = [
     name: 'Raja Activity',
     href: '/admin/raja-activities',
     icon: Sparkles,
+    permission: 'view_sponsor_performer'
+  },
+  {
+    name: 'Assessment',
+    href: '/admin/assessment',
+    icon: ClipboardCheck,
+    permission: 'view_sponsor_performer'
+  },
+  {
+    name: 'Assessment Quiz',
+    href: '/admin/assessment-quiz',
+    icon: ClipboardCheck,
     permission: 'view_sponsor_performer'
   },
   {
