@@ -45,9 +45,21 @@ export async function POST(request) {
       order_status: mapUiStatusToOrderStatus(status)
     };
 
+    console.log('[SYNC_STATUS] Incoming payment sync request:', {
+      order_id,
+      status,
+      mapped_order_status: paymentData.order_status,
+      amount,
+      tracking_id,
+      payment_method,
+      purpose: body?.purpose || null
+    });
+
     const bookingType = await getBookingTypeFromOrderId(order_id, body?.purpose);
+    console.log('[SYNC_STATUS] Detected booking type:', { order_id, bookingType });
     const updated = await updateBookingAfterPayment(order_id, paymentData, bookingType);
 
+    console.log('[SYNC_STATUS] Update result:', { order_id, bookingType, updated });
     return NextResponse.json({ status: updated, bookingType });
   } catch (error) {
     console.error('Error syncing payment status:', error);

@@ -141,6 +141,15 @@ export const sendDonationConfirmationEmail = async (donationData) => {
       donationData.order_id ||
       donationId;
 
+    console.log('[DONATION_EMAIL] Payload prepared:', {
+      name: donorName || null,
+      email: donorEmail || null,
+      donation_amount: donationAmount,
+      payment_id: paymentId,
+      donation_id: donationId || paymentId,
+      transaction_date: new Date().toLocaleDateString('en-GB').replace(/\//g, '-')
+    });
+
     const formData = new FormData();
     formData.append('name', donorName);
     formData.append('email', donorEmail);
@@ -369,6 +378,10 @@ export const sendSponsorConfirmationEmail = async (sponsorData) => {
     });
 
     const responseText = await response.text();
+    console.log('[DONATION_EMAIL] donation.php raw response:', {
+      httpStatus: response.status,
+      responseText
+    });
     let result;
     try {
       result = JSON.parse(responseText);

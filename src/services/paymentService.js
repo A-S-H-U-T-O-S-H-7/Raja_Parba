@@ -134,11 +134,27 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
           order_id: orderId,
           payment_id: paymentData.tracking_id || paymentData.order_id || bookingData?.payment?.transactionId || orderId
         };
+
+        console.log('[PAYMENT_EMAIL] Preparing email trigger:', {
+          orderId,
+          bookingType,
+          amount: enrichedBookingData.amount,
+          payment_id: enrichedBookingData.payment_id,
+          order_id: enrichedBookingData.order_id,
+          donorName: enrichedBookingData?.donorDetails?.name || enrichedBookingData?.name || null,
+          donorEmail: enrichedBookingData?.donorDetails?.email || enrichedBookingData?.email || null
+        });
         
         if (bookingType === 'donation') {
           const { sendDonationConfirmationEmail } = await import('@/services/emailService');
           const emailResult = await sendDonationConfirmationEmail(enrichedBookingData);
-          console.log('📧 Donation email sent:', emailResult.success ? 'Success' : emailResult.error);
+          console.log('[PAYMENT_EMAIL] Donation email result:', {
+            orderId,
+            success: Boolean(emailResult?.success),
+            message: emailResult?.message || null,
+            error: emailResult?.error || null,
+            rawResponse: emailResult?.data || emailResult?.rawResponse || null
+          });
         } else if (bookingType === 'delegate') {
           // Ensure numberOfPersons is properly set in enrichedBookingData
           console.log('📋 Delegate booking data before email:', {
@@ -165,7 +181,11 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
           console.log('📧 Confirmation email sent:', emailResult.success ? 'Success' : emailResult.error);
         }
       } catch (emailError) {
-        console.error('❌ Failed to send confirmation email:', emailError);
+        console.error('[PAYMENT_EMAIL] Failed to send confirmation email:', {
+          orderId,
+          bookingType,
+          error: emailError?.message || emailError
+        });
       }
     }
     
