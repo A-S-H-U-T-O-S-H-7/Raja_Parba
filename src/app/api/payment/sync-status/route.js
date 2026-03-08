@@ -18,15 +18,19 @@ const mapUiStatusToOrderStatus = (status = '') => {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const {
-      order_id,
-      status,
-      amount,
-      tracking_id,
-      status_message,
-      failure_message,
-      payment_method
-    } = body || {};
+    const order_id = body?.order_id || body?.orderId || body?.merchantOrderNo || '';
+    const status =
+      body?.status ||
+      body?.order_status ||
+      body?.orderStatus ||
+      body?.transStatus ||
+      body?.paymentStatus ||
+      '';
+    const amount = body?.amount || body?.grossAmt || body?.netAmt || '';
+    const tracking_id = body?.tracking_id || body?.trackingId || '';
+    const status_message = body?.status_message || body?.statusMessage || '';
+    const failure_message = body?.failure_message || body?.errorMessage || body?.errorDesc || '';
+    const payment_method = body?.payment_method || body?.paymentMode || body?.cardType || '';
 
     if (!order_id || !status) {
       return NextResponse.json(
@@ -52,10 +56,10 @@ export async function POST(request) {
       amount,
       tracking_id,
       payment_method,
-      purpose: body?.purpose || null
+      purpose: body?.purpose || body?.merchantParam1 || null
     });
 
-    const bookingType = await getBookingTypeFromOrderId(order_id, body?.purpose);
+    const bookingType = await getBookingTypeFromOrderId(order_id, body?.purpose || body?.merchantParam1);
     console.log('[SYNC_STATUS] Detected booking type:', { order_id, bookingType });
     const updated = await updateBookingAfterPayment(order_id, paymentData, bookingType);
 
