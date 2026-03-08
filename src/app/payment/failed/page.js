@@ -152,11 +152,7 @@ function PaymentFailedContent() {
   }, [paymentInfo]);
 
   const handleTryAgain = () => {
-    if (paymentInfo?.order_id?.startsWith("DN")) {
-      router.push("/donate");
-      return;
-    }
-    router.push("/booking");
+    router.push("/profile");
   };
   const handleGoHome = () => router.push("/");
   const handleContactSupport = () => {

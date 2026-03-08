@@ -13,6 +13,38 @@ const getUiStatusFromOrderStatus = (orderStatus = '') => {
   return 'failed';
 };
 
+const normalizeOrderStatus = (orderStatus = '') => {
+  const normalized = String(orderStatus || '').toLowerCase().trim();
+  if (!normalized) return '';
+  if (normalized === 'success' || normalized === 'successful') return 'Success';
+  if (normalized === 'aborted' || normalized === 'cancelled' || normalized === 'canceled') return 'Aborted';
+  if (normalized === 'failure' || normalized === 'failed' || normalized === 'error') return 'Failure';
+  return orderStatus;
+};
+
+const normalizePaymentInfo = (rawPaymentInfo = {}) => {
+  const normalized = {
+    ...rawPaymentInfo,
+    order_id: rawPaymentInfo.order_id || rawPaymentInfo.orderId || rawPaymentInfo.merchantOrderNo || '',
+    order_status:
+      normalizeOrderStatus(
+        rawPaymentInfo.order_status ||
+        rawPaymentInfo.orderStatus ||
+        rawPaymentInfo.transStatus ||
+        rawPaymentInfo.paymentStatus
+      ) || '',
+    tracking_id: rawPaymentInfo.tracking_id || rawPaymentInfo.trackingId || '',
+    bank_ref_no: rawPaymentInfo.bank_ref_no || rawPaymentInfo.bankRefNo || '',
+    amount: rawPaymentInfo.amount || rawPaymentInfo.netAmt || rawPaymentInfo.grossAmt || '',
+    status_message: rawPaymentInfo.status_message || rawPaymentInfo.statusMessage || '',
+    failure_message: rawPaymentInfo.failure_message || rawPaymentInfo.errorMessage || rawPaymentInfo.errorDesc || '',
+    payment_mode: rawPaymentInfo.payment_mode || rawPaymentInfo.paymentMode || rawPaymentInfo.cardType || '',
+    mer_param1: rawPaymentInfo.mer_param1 || rawPaymentInfo.merchant_param1 || rawPaymentInfo.merchantParam1 || rawPaymentInfo.purpose || ''
+  };
+
+  return normalized;
+};
+
 const buildPaymentRedirectUrl = (paymentInfo = {}, baseUrl, fallbackMessage = '') => {
   const redirectUrl = new URL('/payment/success', baseUrl);
   const uiStatus = getUiStatusFromOrderStatus(paymentInfo.order_status);
@@ -37,7 +69,7 @@ async function updateBookingState(paymentInfo) {
     const { updateBookingAfterPayment, getBookingTypeFromOrderId } = await import('@/services/paymentService');
     const bookingType = await getBookingTypeFromOrderId(
       paymentInfo.order_id,
-      paymentInfo.mer_param1 || paymentInfo.merchant_param1 || paymentInfo.purpose
+      paymentInfo.mer_param1 || paymentInfo.merchant_param1 || paymentInfo.merchantParam1 || paymentInfo.purpose
     );
 
     await updateBookingAfterPayment(paymentInfo.order_id, paymentInfo, bookingType);
@@ -96,12 +128,19 @@ async function processPaymentResponse(encResp, options = {}) {
   }
 
   if (parsed?.status && parsed?.data) {
-    await updateBookingState(parsed.data);
+    const normalizedPaymentInfo = normalizePaymentInfo(parsed.data);
+
+    await updateBookingState(normalizedPaymentInfo);
 
     if (wantsRedirect) {
-      const redirectUrl = buildPaymentRedirectUrl(parsed.data, baseUrl);
+      const redirectUrl = buildPaymentRedirectUrl(normalizedPaymentInfo, baseUrl);
       return NextResponse.redirect(redirectUrl.toString(), redirectStatus);
     }
+
+    return NextResponse.json({
+      ...parsed,
+      data: normalizedPaymentInfo
+    });
   }
 
   if (wantsRedirect && (!parsed?.status || !parsed?.data)) {
