@@ -45,6 +45,16 @@ const normalizePaymentInfo = (rawPaymentInfo = {}) => {
   return normalized;
 };
 
+const extractPaymentPayload = (parsed = {}) => {
+  if (!parsed || typeof parsed !== 'object') return null;
+  if (parsed?.status && parsed?.data && typeof parsed.data === 'object') return parsed.data;
+  if (parsed?.data && typeof parsed.data === 'object' && (parsed.data.order_id || parsed.data.orderId || parsed.data.merchantOrderNo)) {
+    return parsed.data;
+  }
+  if (parsed.order_id || parsed.orderId || parsed.merchantOrderNo) return parsed;
+  return null;
+};
+
 const buildPaymentRedirectUrl = (paymentInfo = {}, baseUrl, fallbackMessage = '') => {
   const redirectUrl = new URL('/payment/success', baseUrl);
   const uiStatus = getUiStatusFromOrderStatus(paymentInfo.order_status);
@@ -98,12 +108,15 @@ async function processPaymentResponse(encResp, options = {}) {
     return NextResponse.json({ status: false, message }, { status: 400 });
   }
 
-  const formData = new FormData();
-  formData.append('encResp', encResp);
-
   const upstreamResponse = await fetch('https://svsamiti.com/rajaparba/ccavResponseHandler.php', {
     method: 'POST',
-    body: formData
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'Havan-Booking-System/1.0'
+    },
+    body: new URLSearchParams({
+      encResp: String(encResp)
+    })
   });
 
   const text = await upstreamResponse.text();
@@ -127,10 +140,13 @@ async function processPaymentResponse(encResp, options = {}) {
     );
   }
 
-  if (parsed?.status && parsed?.data) {
-    const normalizedPaymentInfo = normalizePaymentInfo(parsed.data);
+  const rawPaymentInfo = extractPaymentPayload(parsed);
+  if (rawPaymentInfo) {
+    const normalizedPaymentInfo = normalizePaymentInfo(rawPaymentInfo);
 
-    await updateBookingState(normalizedPaymentInfo);
+    if (normalizedPaymentInfo.order_id && normalizedPaymentInfo.order_status) {
+      await updateBookingState(normalizedPaymentInfo);
+    }
 
     if (wantsRedirect) {
       const redirectUrl = buildPaymentRedirectUrl(normalizedPaymentInfo, baseUrl);

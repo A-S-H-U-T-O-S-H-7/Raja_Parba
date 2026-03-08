@@ -237,11 +237,7 @@ function PaymentSuccessContent() {
 
   const handleGoHome = () => router.push("/");
   const handleTryAgain = () => {
-    if (paymentInfo?.order_id?.startsWith("DN")) {
-      router.push("/donate");
-      return;
-    }
-    router.push("/booking");
+    router.push("/profile");
   };
   const handleViewBookings = () => router.push("/profile");
 
