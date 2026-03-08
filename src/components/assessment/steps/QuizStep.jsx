@@ -19,6 +19,7 @@ export default function QuizStep({
   isLocked = false,
   onStart,
   onSubmit,
+  onBackToProfile,
 }) {
   const alreadySubmitted = existingStatus === "submitted";
   const [started, setStarted] = useState(existingStatus === "in_progress");
@@ -32,6 +33,7 @@ export default function QuizStep({
   const streamRef = useRef(null);
   const videoRef = useRef(null);
   const dragRef = useRef({ active: false, offsetX: 0, offsetY: 0 });
+  const autoSubmittedRef = useRef(false);
 
   useEffect(() => {
     if (!started) return undefined;
@@ -48,8 +50,9 @@ export default function QuizStep({
   }, [started]);
 
   useEffect(() => {
-    if (!started || remainingSec > 0 || submitting) return;
+    if (!started || remainingSec > 0 || submitting || autoSubmittedRef.current) return;
     (async () => {
+      autoSubmittedRef.current = true;
       setSubmitting(true);
       try {
         await onSubmit?.(answers, "timer");
@@ -142,6 +145,7 @@ export default function QuizStep({
     try {
       await onSubmit?.(answers, "manual");
     } finally {
+      autoSubmittedRef.current = true;
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -181,14 +185,17 @@ export default function QuizStep({
 
   return (
     <div className="relative rounded-3xl border border-indigo-200 bg-white p-4 shadow-lg md:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-lg font-bold text-gray-900">Quiz Competition</h3>
+      <div className="flex flex-col items-center gap-2">
+        <h3 className="text-center text-lg font-bold text-gray-900">Quiz Competition</h3>
         <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
           Time Left: {formatTime(remainingSec)}
         </span>
       </div>
-      <p className="mt-1 text-sm text-gray-600">
-        15 questions. Timer is 5 minutes. Leaving in between will block re-entry.
+      <p className="mt-2 text-center text-sm font-medium text-gray-700">
+        15 questions, 5 minutes. Once you start, do not leave the quiz page.
+      </p>
+      <p className="mt-1 text-center text-xs text-gray-600">
+        If you leave after starting, you cannot re-enter or retry this quiz.
       </p>
 
       {!started && (
@@ -196,9 +203,12 @@ export default function QuizStep({
           <div className="flex items-start gap-2 text-amber-800">
             <ShieldCheck className="mt-0.5 h-4 w-4" />
             <p className="text-xs font-semibold">
-              Camera and mic permission is required before quiz start.
+              Camera and microphone stay live during quiz for fair assessment.
             </p>
           </div>
+          <p className="mt-2 text-xs text-amber-700">
+            If you are not ready, you can start this quiz later from your profile.
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-white px-2 py-1 text-[11px] font-medium text-amber-700">
               <Camera className="h-3 w-3" />
@@ -221,6 +231,13 @@ export default function QuizStep({
             className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-indigo-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm"
           >
             Start Quiz
+          </button>
+          <button
+            type="button"
+            onClick={onBackToProfile}
+            className="mt-3 ml-2 inline-flex items-center gap-1.5 rounded-md border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm"
+          >
+            Back to Profile
           </button>
         </div>
       )}
@@ -276,7 +293,7 @@ export default function QuizStep({
 
           <div
             style={{ right: `${cameraPosition.x}px`, top: `${cameraPosition.y}px` }}
-            className={`fixed z-[60] w-56 overflow-hidden rounded-xl border border-indigo-300 bg-black shadow-xl ${
+            className={`fixed z-[60] w-36 overflow-hidden rounded-xl border border-indigo-300 bg-black shadow-xl md:w-56 ${
               dragging ? "cursor-grabbing" : ""
             }`}
           >
@@ -290,7 +307,7 @@ export default function QuizStep({
                 Live Camera
               </span>
             </button>
-            <video ref={videoRef} autoPlay muted playsInline className="h-36 w-full object-cover" />
+            <video ref={videoRef} autoPlay muted playsInline className="h-24 w-full object-cover md:h-36" />
           </div>
         </>
       )}

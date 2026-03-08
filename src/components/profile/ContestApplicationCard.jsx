@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Calendar, CheckCircle, Clock, FileText, Ticket } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, FileText, Play, Ticket } from 'lucide-react';
 import PassReceiptModal from '../PassReceiptModal';
 import { useRouter } from 'next/navigation';
 import { getAssessmentSession } from '@/services/assessmentService';
+import { assessmentTrackConfig } from '@/lib/assessment/templates';
+import Swal from 'sweetalert2';
 
 const formatDate = (date) => {
   if (!date) return 'N/A';
@@ -98,6 +100,7 @@ const ACCENTS = {
 const ContestApplicationCard = ({ item, title, accent = 'blueIndigo', assessmentType = null }) => {
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [assessmentEnabled, setAssessmentEnabled] = useState(false);
+  const [assessmentSession, setAssessmentSession] = useState(null);
   const [checkingAssessment, setCheckingAssessment] = useState(Boolean(assessmentType));
   const router = useRouter();
   const status = (item.status || item.reviewStatus || 'pending').toLowerCase();
@@ -117,6 +120,7 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo', assessment
     let active = true;
     if (!isAssessmentEligible) {
       setAssessmentEnabled(false);
+      setAssessmentSession(null);
       setCheckingAssessment(false);
       return () => {
         active = false;
@@ -127,9 +131,11 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo', assessment
         const session = await getAssessmentSession(assessmentType, assessmentRouteId);
         if (!active) return;
         setAssessmentEnabled(Boolean(session?.enabled));
+        setAssessmentSession(session || null);
       } catch {
         if (!active) return;
         setAssessmentEnabled(false);
+        setAssessmentSession(null);
       } finally {
         if (active) setCheckingAssessment(false);
       }
@@ -138,6 +144,54 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo', assessment
       active = false;
     };
   }, [assessmentType, assessmentRouteId, isAssessmentEligible]);
+
+  const getResumeStepNo = () => {
+    if (!assessmentSession) return 1;
+    const track = assessmentTrackConfig?.[assessmentType];
+    const steps = track?.steps || [];
+    const stepIndex = steps.findIndex((step) => step.id === assessmentSession?.currentStepId);
+    if (stepIndex >= 0) return stepIndex + 1;
+    const firstPendingIndex = steps.findIndex((step) => (assessmentSession?.stepStates?.[step.id]?.status || '') !== 'completed');
+    return firstPendingIndex >= 0 ? firstPendingIndex + 1 : steps.length;
+  };
+
+  const isAssessmentCompleted = assessmentSession?.assessmentStatus === 'completed';
+  const resumeStepNo = getResumeStepNo();
+  const isStepOneCompleted = resumeStepNo > 1;
+
+  const handleAssessmentClick = async () => {
+    if (!assessmentEnabled || checkingAssessment) {
+      await Swal.fire({
+        icon: 'info',
+        title: 'Please wait',
+        text: 'Dont worry , Assesment will be Enable for you Soon..',
+        timer: 2200,
+        showConfirmButton: false,
+        background: '#eff6ff',
+        color: '#1e3a8a',
+      });
+      return;
+    }
+
+    if (isAssessmentCompleted) {
+      const contestName = title || assessmentType;
+      await Swal.fire({
+        icon: 'success',
+        title: `You completed the assessment for ${contestName} successfully 🎉`,
+        html: `
+          <p style="margin-top:8px;color:#334155;">We will announce the result very soon. Stay tuned.</p>
+          <p style="margin-top:10px;color:#0f766e;font-weight:600;">Join us on 13, 14, 15 June 2026</p>
+          <p style="margin-top:4px;color:#475569;">📍 Ramleela Ground, Noida</p>
+        `,
+        background: '#f0fdf4',
+        color: '#14532d',
+        timer: 3800,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    router.push(`/assessment/${assessmentType}/${assessmentRouteId}`);
+  };
 
   const detailPairs = [
     ['Gender',        item.gender],
@@ -270,15 +324,16 @@ const ContestApplicationCard = ({ item, title, accent = 'blueIndigo', assessment
             {isAssessmentEligible && (
               <button
                 type="button"
-                disabled={!assessmentEnabled || checkingAssessment}
-                onClick={() => router.push(`/assessment/${assessmentType}/${assessmentRouteId}`)}
+                onClick={handleAssessmentClick}
+                title={!assessmentEnabled || checkingAssessment ? 'Dont worry , Assesment will be Enable for you Soon..' : ''}
                 className={`inline-flex items-center gap-1 rounded-md px-4 py-2 text-xs font-semibold shadow-sm transition ${
                   assessmentEnabled
                     ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700"
-                    : "cursor-not-allowed bg-gray-200 text-gray-500"
+                    : "cursor-not-allowed bg-gray-200 text-gray-500 hover:bg-gray-200"
                 }`}
               >
-                Start Assessment
+                {isAssessmentCompleted ? <CheckCircle className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                {isAssessmentCompleted ? 'Completed' : isStepOneCompleted ? `Resume from Step ${resumeStepNo}` : 'Start Assessment'}
               </button>
             )}
           </div>

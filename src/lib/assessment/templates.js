@@ -45,7 +45,7 @@ export const assessmentTrackConfig = {
             label: "Dress Walk Video",
             accept: "video/mp4,video/quicktime,video/webm",
             inputType: "video",
-            maxDurationSec: 180,
+            maxDurationSec: 60,
           },
           {
             key: "attireImage",
@@ -110,7 +110,7 @@ export const assessmentTrackConfig = {
             label: "Dress Walk Video",
             accept: "video/mp4,video/quicktime,video/webm",
             inputType: "video",
-            maxDurationSec: 180,
+            maxDurationSec: 60,
           },
           {
             key: "attireImage",
@@ -142,7 +142,27 @@ export const assessmentTrackConfig = {
     collection: "drawing_applications",
     requiresDrawingCategory: "senior",
     steps: [
-      { id: "drawingThemeVideo", type: "video_upload", title: "Drawing Theme Video", description: "Upload your drawing process video based on the given theme." },
+      {
+        id: "drawingThemeVideo",
+        type: "media_bundle",
+        title: "Drawing Theme Submission",
+        description: "Upload drawing process video (max 5 min) and final drawing image.",
+        fields: [
+          {
+            key: "processVideo",
+            label: "Drawing Process Video",
+            accept: "video/mp4,video/quicktime,video/webm",
+            inputType: "video",
+            maxDurationSec: 300,
+          },
+          {
+            key: "finalImage",
+            label: "Final Drawing Image",
+            accept: "image/jpeg,image/png,image/webp,image/jpg",
+            inputType: "image",
+          },
+        ],
+      },
       { id: "quiz", type: "quiz", title: "Quiz Competition", description: "15 questions, 5 minutes. Auto-submit after timeout." },
       {
         id: "selfIntroduction",
@@ -159,7 +179,27 @@ export const assessmentTrackConfig = {
     collection: "drawing_applications",
     requiresDrawingCategory: "junior",
     steps: [
-      { id: "drawingThemeVideo", type: "video_upload", title: "Drawing Theme Video", description: "Upload your drawing process video based on the given theme." },
+      {
+        id: "drawingThemeVideo",
+        type: "media_bundle",
+        title: "Drawing Theme Submission",
+        description: "Upload drawing process video (max 5 min) and final drawing image.",
+        fields: [
+          {
+            key: "processVideo",
+            label: "Drawing Process Video",
+            accept: "video/mp4,video/quicktime,video/webm",
+            inputType: "video",
+            maxDurationSec: 300,
+          },
+          {
+            key: "finalImage",
+            label: "Final Drawing Image",
+            accept: "image/jpeg,image/png,image/webp,image/jpg",
+            inputType: "image",
+          },
+        ],
+      },
       { id: "quiz", type: "quiz", title: "Quiz Competition", description: "15 questions, 5 minutes. Auto-submit after timeout." },
       {
         id: "selfIntroduction",

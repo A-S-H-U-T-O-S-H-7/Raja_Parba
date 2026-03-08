@@ -16,7 +16,7 @@ export default function ZoomMeetingStep({
       <p className="mt-1 text-sm text-violet-700/90">{description}</p>
 
       {hasSchedule ? (
-        <div className="mt-4 space-y-3 rounded-2xl border border-violet-200 bg-violet-50/70 p-4">
+        <div className="mt-4 space-y-3 space-x-4 rounded-2xl border border-violet-200 bg-violet-50/70 p-4">
           <p className="inline-flex items-center gap-1 text-sm font-semibold text-violet-800">
             <CalendarClock className="h-4 w-4" />
             {existingData.slot}
@@ -25,7 +25,7 @@ export default function ZoomMeetingStep({
             href={existingData.zoomLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-violet-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm"
           >
             <Video className="h-4 w-4" />
             Join Zoom Meeting

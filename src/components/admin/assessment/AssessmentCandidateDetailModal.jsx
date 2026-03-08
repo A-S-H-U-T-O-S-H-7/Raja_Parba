@@ -169,11 +169,12 @@ export default function AssessmentCandidateDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm md:p-10" onClick={onClose}>
       <div
         className={`w-full max-w-5xl overflow-hidden rounded-2xl border shadow-2xl ${
           isDarkMode ? "border-gray-700/50 bg-gray-900 text-gray-100" : "border-gray-200 bg-white text-gray-800"
         }`}
+        style={{ maxHeight: "calc(100vh - 3rem)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={`flex items-center justify-between border-b px-6 py-4 ${isDarkMode ? "border-gray-800" : "border-gray-100"}`}>
@@ -201,7 +202,7 @@ export default function AssessmentCandidateDetailModal({
           </button>
         </div>
 
-        <div className="max-h-[75vh] space-y-6 overflow-y-auto p-6">
+        <div className="space-y-6 overflow-y-auto p-6" style={{ maxHeight: "calc(100vh - 11rem)" }}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <InfoCard label="Application Status" value={candidate.status || candidate.reviewStatus || "pending"} isDarkMode={isDarkMode} type="status" />
             <InfoCard label="Assessment Status" value={session.assessmentStatus || "not_enabled"} isDarkMode={isDarkMode} type="status" />
@@ -395,42 +396,41 @@ export default function AssessmentCandidateDetailModal({
           </div>
         </div>
 
-        {showZoomForm ? (
-          <div className="border-t border-violet-200 bg-violet-50 p-4">
-            <p className="text-sm font-semibold text-violet-800">Set Zoom Details</p>
-            <div className="mt-2 grid gap-2 md:grid-cols-2">
+      </div>
+
+      {showZoomForm ? (
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/45 p-4" onClick={() => setShowZoomForm(false)}>
+          <div
+            className={`w-full max-w-xl rounded-2xl border p-5 shadow-2xl ${
+              isDarkMode ? "border-violet-700 bg-gray-900 text-white" : "border-violet-200 bg-white text-gray-900"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-base font-semibold text-violet-700">Set Zoom Details</p>
+            <div className="mt-3 grid gap-2">
               <input
                 type="url"
                 value={zoomForm.zoomLink}
                 onChange={(e) => setZoomForm((prev) => ({ ...prev, zoomLink: e.target.value }))}
-                placeholder="https://..."
-                className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none"
+                placeholder="Zoom Link"
+                className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none"
               />
               <input
                 type="text"
                 value={zoomForm.slot}
                 onChange={(e) => setZoomForm((prev) => ({ ...prev, slot: e.target.value }))}
-                placeholder="Meeting timing"
-                className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none"
+                placeholder="Timing (example: 13 Jun 2026, 6:30 PM)"
+                className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none"
               />
               <textarea
                 value={zoomForm.note}
                 onChange={(e) => setZoomForm((prev) => ({ ...prev, note: e.target.value }))}
                 placeholder="Notes"
                 rows={3}
-                className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none md:col-span-2"
+                className="rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none"
               />
             </div>
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={handleSaveZoom}
-                disabled={savingZoom}
-                className="inline-flex items-center gap-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
-              >
-                {savingZoom ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                Save
-              </button>
+            <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowZoomForm(false)}
@@ -438,10 +438,19 @@ export default function AssessmentCandidateDetailModal({
               >
                 Cancel
               </button>
+              <button
+                type="button"
+                onClick={handleSaveZoom}
+                disabled={savingZoom}
+                className="inline-flex items-center gap-1 rounded-md bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+              >
+                {savingZoom ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                Save Zoom
+              </button>
             </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }

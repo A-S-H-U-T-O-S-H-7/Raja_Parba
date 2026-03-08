@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Loader2, UploadCloud, Video } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, UploadCloud, Video } from "lucide-react";
 
 export default function VideoUploadStep({
   title,
@@ -67,19 +67,28 @@ export default function VideoUploadStep({
 
   return (
     <div className="rounded-3xl border border-rose-200 bg-white/95 p-4 shadow-lg md:p-5">
-      <h3 className="text-xl font-semibold text-rose-900">{title}</h3>
-      <p className="mt-1 text-sm text-rose-700/90">{description}</p>
+      <h3 className="text-center text-xl font-semibold text-rose-900">{title}</h3>
+      <p className="mt-1 text-center text-sm text-rose-700/90">{description}</p>
+      <p className="mt-1 text-center text-[11px] text-slate-500">
+        Upload can take some time for larger files depending on internet speed.
+      </p>
 
       {existingData?.url && (
-        <a
-          href={existingData.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"
-        >
-          <Video className="h-3.5 w-3.5" />
-          Previously uploaded video
-        </a>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          <a
+            href={existingData.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"
+          >
+            <Video className="h-3.5 w-3.5" />
+            View uploaded video
+          </a>
+          <p className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Video uploaded successfully 🎉
+          </p>
+        </div>
       )}
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-3">
@@ -101,8 +110,11 @@ export default function VideoUploadStep({
         </label>
 
         {file && (
-          <p className="rounded-md border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-medium text-rose-700">
-            Selected: {file.name}
+          <p className="rounded-md border border-emerald-200 bg-emerald-100 px-2.5 py-1.5 text-xs font-semibold text-emerald-700">
+            <span className="inline-flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Video uploaded successfully 🎉
+            </span>
           </p>
         )}
         {error && (
@@ -112,14 +124,16 @@ export default function VideoUploadStep({
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={!file || submitting || disabled}
-          className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-rose-500 to-pink-600 px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
-          Submit Video
-        </button>
+        <div className="flex justify-center">
+          <button
+            type="submit"
+            disabled={!file || submitting || disabled}
+            className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-rose-500 to-pink-600 px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
+            Submit Video
+          </button>
+        </div>
       </form>
     </div>
   );

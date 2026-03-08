@@ -38,10 +38,7 @@ export default function MediaBundleStep({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const completedFiles = useMemo(
-    () => Object.keys(existingData?.files || {}).length,
-    [existingData]
-  );
+  const completedFiles = useMemo(() => Object.keys(existingData?.files || {}).length, [existingData]);
 
   const handleFileChange = async (field, nextFile) => {
     if (!nextFile) {
@@ -51,9 +48,7 @@ export default function MediaBundleStep({
     if (field.inputType === "video" && field.maxDurationSec) {
       const check = await validateVideoDuration(nextFile, field.maxDurationSec);
       if (!check.valid) {
-        setError(
-          `${field.label} exceeds allowed duration (${Math.floor(field.maxDurationSec / 60)} minute max).`
-        );
+        setError(`${field.label} exceeds allowed duration (${Math.floor(field.maxDurationSec / 60)} minute max).`);
         return;
       }
     }
@@ -80,14 +75,21 @@ export default function MediaBundleStep({
 
   return (
     <div className="rounded-3xl border border-emerald-200 bg-white/95 p-4 shadow-lg backdrop-blur md:p-6">
-      <h3 className="text-xl font-semibold text-emerald-900">{title}</h3>
-      <p className="mt-1 text-sm text-emerald-700/90">{description}</p>
+      <h3 className="text-center text-xl font-semibold text-emerald-900">{title}</h3>
+      <p className="mt-1 text-center text-sm text-emerald-700/90">{description}</p>
+      <p className="mt-1 text-center text-[11px] text-slate-500">
+        Upload time depends on file size and internet speed, so video/image may take a little longer.
+      </p>
 
       {completedFiles > 0 && (
-        <p className="mt-3 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-          <CheckCircle2 className="h-3.5 w-3.5" />
-          Existing submission found
-        </p>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {Object.keys(existingData?.files || {}).map((key) => (
+            <p key={key} className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {key.toLowerCase().includes("video") ? "Video uploaded successfully" : "Image uploaded successfully"} {"\u{1F389}"}
+            </p>
+          ))}
+        </div>
       )}
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -102,11 +104,10 @@ export default function MediaBundleStep({
                   {field.label}
                 </p>
                 {field.maxDurationSec ? (
-                  <span className="text-[11px] font-semibold text-teal-700">
-                    Max {Math.floor(field.maxDurationSec / 60)} min
-                  </span>
+                  <span className="text-[11px] font-semibold text-teal-700">Max {Math.floor(field.maxDurationSec / 60)} min</span>
                 ) : null}
               </div>
+
               {existingFile?.url && (
                 <a
                   href={existingFile.url}
@@ -117,6 +118,7 @@ export default function MediaBundleStep({
                   View existing file
                 </a>
               )}
+
               <label className="mt-2 flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-teal-300 bg-white p-4 text-center">
                 <div>
                   <UploadCloud className="mx-auto h-5 w-5 text-teal-600" />
@@ -130,9 +132,13 @@ export default function MediaBundleStep({
                   disabled={disabled || submitting}
                 />
               </label>
+
               {files?.[field.key] && (
-                <p className="mt-2 rounded-md border border-teal-200 bg-white px-2.5 py-1.5 text-xs font-medium text-teal-800">
-                  Selected: {files[field.key].name}
+                <p className="mt-2 rounded-md border border-emerald-200 bg-emerald-100 px-2.5 py-1.5 text-xs font-semibold text-emerald-800">
+                  <span className="inline-flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {field.inputType === "video" ? "Video uploaded successfully" : "Image uploaded successfully"} {"\u{1F389}"}
+                  </span>
                 </p>
               )}
             </div>

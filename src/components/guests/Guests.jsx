@@ -88,39 +88,7 @@ export default function GuestsPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#f8fbff] via-[#eef7ff] to-[#e6f2ff] relative">
       <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_1px_1px,rgba(30,64,175,0.09)_1px,transparent_1px)] [background-size:18px_18px]" />
       <GuestBanner />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-5">
-          <button
-            onClick={() => {
-              if (typeof window !== "undefined" && window.history.length > 1) {
-                router.back();
-                return;
-              }
-              router.push("/");
-            }}
-            className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:bg-indigo-50 hover:border-indigo-300"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-7">
-          {[
-            { label: "Total Guests", value: totalGuests, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
-            { label: "Spiritual", value: spiritual.length, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
-            { label: "Artists", value: artist.length, color: "text-rose-700 bg-rose-50 border-rose-200" },
-            { label: "Special", value: special.length, color: "text-blue-700 bg-blue-50 border-blue-200" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className={`rounded-2xl border px-4 py-3 shadow-sm ${item.color}`}
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide opacity-80">{item.label}</p>
-              <p className="text-2xl font-bold mt-1">{item.value}</p>
-            </div>
-          ))}
-        </div>
+      <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <div className="flex flex-wrap justify-center gap-2 mb-8 rounded-2xl border border-blue-100 bg-white/80 backdrop-blur-sm p-3 shadow-sm">
           {pills.map(({ id, label, Icon, count }) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import {
@@ -42,6 +42,7 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
   const [application, setApplication] = useState(null);
   const [activeStepId, setActiveStepId] = useState(null);
   const [submittingStep, setSubmittingStep] = useState(false);
+  const completionAlertShownRef = useRef(false);
 
   const config = assessmentTrackConfig[assessmentType];
   const steps = config?.steps || [];
@@ -68,6 +69,13 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
 
   const canAccessStep = (stepId, indexFromNav = null) => {
     return canAccessStepFromStateMap(stepId, stepStates, indexFromNav);
+  };
+
+  const getLockedStepId = () => session?.currentStepId || getFirstIncompleteStepId();
+
+  const canNavigateToStep = (stepId) => {
+    if (isCompleted) return false;
+    return stepId === getLockedStepId();
   };
 
   const loadSession = async () => {
@@ -165,9 +173,12 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
       if (stepId !== "quiz") {
         await Swal.fire({
           icon: "success",
-          title: "Step Completed",
-          timer: 1200,
+          title: "Step Completed Successfully",
+          text: "Great work. Moving to the next step.",
+          timer: 2400,
           showConfirmButton: false,
+          background: "#f0fdf4",
+          color: "#166534",
         });
       }
     } finally {
@@ -224,6 +235,7 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
       answers,
       questions,
       score,
+      nextStepId: getNextStepId("quiz"),
       reason,
     });
     await refreshSession();
@@ -231,20 +243,26 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
       icon: "success",
       title: "Quiz Submitted",
       text: `Your score: ${score}/${questions.length}`,
-      timer: 1500,
+      timer: 2800,
       showConfirmButton: false,
+      background: "#ecfeff",
+      color: "#0f766e",
     });
   };
 
   useEffect(() => {
-    if (!allStepsCompleted || isCompleted) return;
+    if (!allStepsCompleted || isCompleted || completionAlertShownRef.current) return;
     (async () => {
+      completionAlertShownRef.current = true;
       await completeAssessmentSession({ assessmentType, applicationId });
       await refreshSession();
       await Swal.fire({
         icon: "success",
         title: "Assessment Completed",
         text: "All required steps are completed successfully.",
+        timer: 3400,
+        background: "#eff6ff",
+        color: "#1e3a8a",
       });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -252,16 +270,12 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
 
   useEffect(() => {
     if (!steps.length) return;
-    const firstIncomplete = getFirstIncompleteStepId();
-    if (!activeStepId) {
-      setActiveStepId(firstIncomplete);
-      return;
-    }
-    if (!canAccessStep(activeStepId)) {
-      setActiveStepId(firstIncomplete);
+    const lockedStepId = getLockedStepId();
+    if (!activeStepId || activeStepId !== lockedStepId) {
+      setActiveStepId(lockedStepId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [steps.length, stepStates, activeStepId]);
+  }, [steps.length, stepStates, activeStepId, session?.currentStepId]);
 
   const activeStep = steps.find((s) => s.id === activeStepId) || steps[0];
 
@@ -319,6 +333,7 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
             isLocked={isLocked || isCompleted}
             onStart={handleQuizStart}
             onSubmit={handleQuizSubmit}
+            onBackToProfile={() => router.push("/profile")}
           />
         );
       default:
@@ -372,13 +387,14 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
       title={`${config.label} Assessment`}
       subtitle={`Candidate: ${application?.name || session?.candidateName || "Participant"}`}
     >
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px,1fr]">
+      <div className="space-y-4">
         <AssessmentStepNav
           steps={steps}
           stepStates={stepStates}
           activeStepId={activeStep?.id}
           onSelectStep={setActiveStepId}
           canAccessStep={canAccessStep}
+          canNavigateToStep={canNavigateToStep}
           quizScore={Number.isFinite(session?.quiz?.score) ? session?.quiz?.score : null}
           quizTotal={session?.quiz?.questions?.length || 15}
           isLocked={isLocked}
@@ -386,11 +402,17 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
 
         <div className="space-y-3">
           {isCompleted && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">
-              <span className="inline-flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4" />
-                Assessment completed successfully.
-              </span>
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-rose-50 p-6 text-center shadow-lg">
+              <div className="pointer-events-none absolute -right-6 -top-6 text-5xl opacity-20">🎉</div>
+              <div className="pointer-events-none absolute -left-5 -bottom-6 text-5xl opacity-20">💖</div>
+              <p className="text-4xl">😊 🎊 ❤️</p>
+              <p className="mt-3 text-lg font-bold text-emerald-700">
+                Congratulations! You have successfully completed your assessment.
+              </p>
+              <p className="mt-2 text-sm font-semibold text-rose-700">
+                We will announce the results very soon. Stay tuned, take care, and keep smiling.
+              </p>
+              <p className="mt-2 text-base font-bold text-amber-700">Happy Raja Parba ✨</p>
             </div>
           )}
 
@@ -411,7 +433,7 @@ export default function AssessmentPageClient({ assessmentType, applicationId }) 
             {steps.filter((step) => stepStates?.[step.id]?.status === "completed").length}/{steps.length} steps completed
           </div>
 
-          {renderStep()}
+          {!isCompleted ? renderStep() : null}
         </div>
       </div>
     </AssessmentShell>

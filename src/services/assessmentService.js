@@ -289,6 +289,7 @@ export const submitQuizAttempt = async ({
   answers,
   questions,
   score,
+  nextStepId = null,
   reason = "manual",
 }) => {
   const sessionId = getAssessmentSessionId(assessmentType, applicationId);
@@ -312,6 +313,7 @@ export const submitQuizAttempt = async ({
         reason,
       },
     },
+    ...(nextStepId ? { currentStepId: nextStepId } : {}),
     assessmentStatus: "in_progress",
     updatedAt: serverTimestamp(),
   });
