@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { createSponsorApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
-import { toast } from "react-hot-toast";
 
 const initialForm = {
   name: "",
@@ -39,7 +38,7 @@ export default function SponsorPage() {
     await Swal.fire({
       html: `
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;">
-          <div style="width:56px;height:56px;border-radius:9999px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:700;">OK</div>
+          <div style="width:56px;height:56px;border-radius:9999px;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;color:white;font-size:30px;font-weight:700;">&#10003;</div>
           <h2 style="margin:0;font-size:1.25rem;color:#111827;">Application Submitted</h2>
           <p style="margin:0;font-size:0.95rem;color:#4b5563;text-align:center;line-height:1.45;">
             Thank you for supporting Raja Parba 2026.<br/>Track status from your profile dashboard.
@@ -56,7 +55,7 @@ export default function SponsorPage() {
       }
     });
 
-    router.push("/profile?tab=performer");
+    router.push("/profile?tab=sponsor");
   };
 
   const showWarningAlert = async () => {
@@ -109,13 +108,9 @@ export default function SponsorPage() {
         const emailResult = await sendSponsorConfirmationEmail(payload);
         if (!emailResult?.success) {
           console.error("Sponsor email failed:", emailResult);
-          toast.error(`Email not sent: ${emailResult?.error || "Backend issue"}`);
-        } else {
-          toast.success(`Email sent (${emailResult.method || "ok"})`);
         }
       } catch (emailError) {
         console.error("Failed to send sponsor email:", emailError);
-        toast.error("Email service failed");
       }
 
       await showSuccessAlert();

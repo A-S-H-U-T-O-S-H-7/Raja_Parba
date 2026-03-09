@@ -4,6 +4,7 @@ import { db } from '@/lib/firebase/config';
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   addDoc,
   updateDoc,
@@ -219,7 +220,11 @@ const useRajaActivityStore = create((set, get) => ({
         return { success: false };
       }
 
-      await updateDoc(doc(db, collectionName, id), {
+      const itemRef = doc(db, collectionName, id);
+      const existingSnap = await getDoc(itemRef);
+      const existingData = existingSnap.exists() ? existingSnap.data() : null;
+
+      await updateDoc(itemRef, {
         status,
         reviewStatus: status,
         adminNotes: notes,
@@ -228,6 +233,209 @@ const useRajaActivityStore = create((set, get) => ({
         updatedAt: serverTimestamp(),
         updatedBy: admin?.id
       });
+
+      if (category === 'sponsor' && status === 'confirmed') {
+        const sponsorName = existingData?.name || existingData?.organization || '';
+        const sponsorEmail = existingData?.email || '';
+
+        if (sponsorName && sponsorEmail) {
+          try {
+            const response = await fetch('/api/emails/sponsor-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: sponsorName,
+                email: sponsorEmail
+              })
+            });
+            const emailResult = await response.json();
+
+            if (!response.ok || !emailResult?.status) {
+              console.error('Sponsor approval confirmation email failed:', emailResult);
+              toast.error('Sponsor approved, but confirmation email failed.');
+            } else {
+              toast.success('Sponsor approval confirmation email sent.');
+            }
+          } catch (emailError) {
+            console.error('Sponsor approval email request failed:', emailError);
+            toast.error('Sponsor approved, but confirmation email failed.');
+          }
+        }
+      }
+
+      if (category === 'award' && status === 'confirmed') {
+        const nomineeName = existingData?.name || '';
+        const nomineeEmail = existingData?.email || '';
+        const awardName = existingData?.awardField || existingData?.award_name || 'Award Nomination';
+        const eventDate = extraData?.awardDate || existingData?.awardDate || '';
+        const eventTime = extraData?.awardTime || existingData?.awardTime || '';
+
+        if (nomineeName && nomineeEmail && eventDate && eventTime) {
+          try {
+            const response = await fetch('/api/emails/award-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: nomineeName,
+                email: nomineeEmail,
+                award_name: awardName,
+                event_date: eventDate,
+                event_time: eventTime
+              })
+            });
+            const emailResult = await response.json();
+
+            if (!response.ok || !emailResult?.status) {
+              console.error('Award confirmation email failed:', emailResult);
+              toast.error('Award confirmed, but confirmation email failed.');
+            } else {
+              toast.success('Award confirmation email sent.');
+            }
+          } catch (emailError) {
+            console.error('Award confirmation email request failed:', emailError);
+            toast.error('Award confirmed, but confirmation email failed.');
+          }
+        }
+      }
+
+      if (category === 'performer' && status === 'confirmed') {
+        const performerName = existingData?.name || '';
+        const performerEmail = existingData?.email || '';
+        const performanceDate = extraData?.performanceDate || existingData?.performanceDate || '';
+        const performanceTime = extraData?.performanceTime || existingData?.performanceTime || '';
+
+        if (performerName && performerEmail && performanceDate && performanceTime) {
+          try {
+            const response = await fetch('/api/emails/performer-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: performerName,
+                email: performerEmail,
+                performance_date: performanceDate,
+                performance_time: performanceTime
+              })
+            });
+            const emailResult = await response.json();
+
+            if (!response.ok || !emailResult?.status) {
+              console.error('Performer confirmation email failed:', emailResult);
+              toast.error('Performer confirmed, but confirmation email failed.');
+            } else {
+              toast.success('Performer confirmation email sent.');
+            }
+          } catch (emailError) {
+            console.error('Performer confirmation email request failed:', emailError);
+            toast.error('Performer confirmed, but confirmation email failed.');
+          }
+        }
+      }
+
+      if (category === 'kumari' && status === 'confirmed') {
+        const candidateName = existingData?.name || '';
+        const candidateEmail = existingData?.email || '';
+        const eventDate = extraData?.eventDate || existingData?.eventDate || '';
+        const eventTime = extraData?.eventTime || existingData?.eventTime || '';
+
+        if (candidateName && candidateEmail && eventDate && eventTime) {
+          try {
+            const response = await fetch('/api/emails/competition-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: candidateName,
+                email: candidateEmail,
+                competition_name: 'Raja Kumari',
+                category: '6-15 yr age',
+                event_date: eventDate,
+                event_time: eventTime
+              })
+            });
+            const emailResult = await response.json();
+
+            if (!response.ok || !emailResult?.status) {
+              console.error('Raja Kumari confirmation email failed:', emailResult);
+              toast.error('Raja Kumari confirmed, but confirmation email failed.');
+            } else {
+              toast.success('Raja Kumari confirmation email sent.');
+            }
+          } catch (emailError) {
+            console.error('Raja Kumari confirmation email request failed:', emailError);
+            toast.error('Raja Kumari confirmed, but confirmation email failed.');
+          }
+        }
+      }
+
+      if (category === 'queen' && status === 'confirmed') {
+        const candidateName = existingData?.name || '';
+        const candidateEmail = existingData?.email || '';
+        const eventDate = extraData?.eventDate || existingData?.eventDate || '';
+        const eventTime = extraData?.eventTime || existingData?.eventTime || '';
+
+        if (candidateName && candidateEmail && eventDate && eventTime) {
+          try {
+            const response = await fetch('/api/emails/competition-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: candidateName,
+                email: candidateEmail,
+                competition_name: 'Raja Queen',
+                category: '16-30 yr age',
+                event_date: eventDate,
+                event_time: eventTime
+              })
+            });
+            const emailResult = await response.json();
+
+            if (!response.ok || !emailResult?.status) {
+              console.error('Raja Queen confirmation email failed:', emailResult);
+              toast.error('Raja Queen confirmed, but confirmation email failed.');
+            } else {
+              toast.success('Raja Queen confirmation email sent.');
+            }
+          } catch (emailError) {
+            console.error('Raja Queen confirmation email request failed:', emailError);
+            toast.error('Raja Queen confirmed, but confirmation email failed.');
+          }
+        }
+      }
+
+      if (category === 'drawing' && status === 'confirmed') {
+        const candidateName = existingData?.name || '';
+        const candidateEmail = existingData?.email || '';
+        const eventDate = extraData?.eventDate || existingData?.eventDate || '';
+        const eventTime = extraData?.eventTime || existingData?.eventTime || '';
+        const drawingCategory = (existingData?.category || '').toString().toLowerCase() === 'junior' ? 'Junior' : 'Senior';
+
+        if (candidateName && candidateEmail && eventDate && eventTime) {
+          try {
+            const response = await fetch('/api/emails/competition-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: candidateName,
+                email: candidateEmail,
+                competition_name: 'Drawing Competition',
+                category: drawingCategory,
+                event_date: eventDate,
+                event_time: eventTime
+              })
+            });
+            const emailResult = await response.json();
+
+            if (!response.ok || !emailResult?.status) {
+              console.error('Drawing confirmation email failed:', emailResult);
+              toast.error('Drawing confirmed, but confirmation email failed.');
+            } else {
+              toast.success('Drawing confirmation email sent.');
+            }
+          } catch (emailError) {
+            console.error('Drawing confirmation email request failed:', emailError);
+            toast.error('Drawing confirmed, but confirmation email failed.');
+          }
+        }
+      }
 
       await get().logActivity({
         action: 'UPDATE',

@@ -119,13 +119,6 @@ export default function SponsorsTab() {
     setSavingStatus(false);
 
     if (result?.success) {
-      await Swal.fire({
-        title: 'Status Updated',
-        text: `Sponsor status changed to ${editStatus}.`,
-        icon: 'success',
-        timer: 1400,
-        showConfirmButton: false
-      });
       closeEditModal();
     }
   };

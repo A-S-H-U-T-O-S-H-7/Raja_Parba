@@ -125,13 +125,6 @@ export default function RajaQueenTab() {
     setSaving(false);
 
     if (result?.success) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'Raja Queen updated',
-        text: `Status changed to ${editStatus}.`,
-        timer: 1400,
-        showConfirmButton: false
-      });
       closeEditModal();
     }
   };

@@ -127,13 +127,6 @@ export default function AwardNomineesTab() {
     setSaving(false);
 
     if (result?.success) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'Award updated',
-        text: `Status changed to ${editStatus}.`,
-        timer: 1400,
-        showConfirmButton: false
-      });
       closeEditModal();
     }
   };

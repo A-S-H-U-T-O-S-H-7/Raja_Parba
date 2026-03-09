@@ -137,13 +137,6 @@ export default function PerformersTab() {
     setSavingStatus(false);
 
     if (result?.success) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'Performer Updated',
-        text: `Status changed to ${editStatus}.`,
-        timer: 1400,
-        showConfirmButton: false
-      });
       closeEditModal();
     }
   };
