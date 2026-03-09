@@ -116,8 +116,13 @@ const DonationReceipt = ({ booking }) => {
             </div>
           </div>
 
-          <div className="border-b border-gray-300 px-3 py-2 md:px-4 md:py-2.5">
-            <span className="font-bold">Name:</span> {name}
+          <div className="grid grid-cols-2">
+            <div className="border-b border-r border-gray-300 px-3 py-2 md:px-4 md:py-2.5">
+              <span className="font-bold">Name:</span> {name}
+            </div>
+            <div className="border-b border-gray-300 px-3 py-2 md:px-4 md:py-2.5">
+              <span className="font-bold">On Account Of:</span> Donation
+            </div>
           </div>
 
           <div className="border-b border-gray-300 px-3 py-2 md:px-4 md:py-2.5">
