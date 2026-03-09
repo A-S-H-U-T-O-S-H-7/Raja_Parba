@@ -193,6 +193,7 @@ const MemberPass = ({ booking, participantName, purpose }) => {
                 <img
                   src={qrSrc}
                   alt="QR Code"
+                  crossOrigin="anonymous"
                   className="h-44 w-44 object-contain"
                   onError={() => {
                     if (!usedFallbackQr) {

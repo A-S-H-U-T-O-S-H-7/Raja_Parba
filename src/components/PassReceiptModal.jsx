@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Printer, X } from "lucide-react";
+import { ArrowDownToLine, X } from "lucide-react";
+import jsPDF from "jspdf";
+import { toPng } from "html-to-image";
 import MemberPass from "./MemberPass";
 import DonationReceipt from "./Receipt";
 import DonationPart from "./DonatePart";
@@ -9,6 +11,7 @@ import DonationPart from "./DonatePart";
 const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => {
   const [activeTab, setActiveTab] = useState("pass");
   const [mounted, setMounted] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [passScale, setPassScale] = useState(1);
   const [passScaledHeight, setPassScaledHeight] = useState(null);
   const passViewportRef = useRef(null);
@@ -72,7 +75,7 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
   const modalMaxWidthClass = isReceiptView ? "max-w-4xl" : "max-w-lg";
   const modalHeightClass = isReceiptView
     ? "max-h-[72vh] md:max-h-[92vh]"
-    : "max-h-[calc(85vh-60px)] md:max-h-[calc(98vh-100px)]";
+    : "max-h-[calc(85vh-60px)] md:max-h-[calc(98vh-90px)]";
 
   const fitPassToViewport = useCallback(() => {
     if (!isOpen || !showPass || !passViewportRef.current || !passContentRef.current) return;
@@ -109,14 +112,69 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
     };
   }, [isOpen, showPass, booking, fitPassToViewport]);
 
-  const handlePrintPass = () => {
-    document.body.classList.add("print-pass-mode");
-    const clearPrintMode = () => document.body.classList.remove("print-pass-mode");
-    window.addEventListener("afterprint", clearPrintMode, { once: true });
-    setTimeout(() => {
-      window.print();
-      setTimeout(clearPrintMode, 1200);
-    }, 120);
+  const handleDownloadPass = async () => {
+    if (downloading) return;
+    const source = passContentRef.current?.firstElementChild;
+    if (!source) return;
+
+    setDownloading(true);
+    let offscreenWrapper = null;
+
+    try {
+      offscreenWrapper = document.createElement("div");
+      offscreenWrapper.style.position = "fixed";
+      offscreenWrapper.style.left = "-100000px";
+      offscreenWrapper.style.top = "0";
+      offscreenWrapper.style.width = `${source.scrollWidth || 420}px`;
+      offscreenWrapper.style.background = "transparent";
+      offscreenWrapper.style.zIndex = "-1";
+
+      const clone = source.cloneNode(true);
+      offscreenWrapper.appendChild(clone);
+      document.body.appendChild(offscreenWrapper);
+
+      const dataUrl = await toPng(clone, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+      });
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 8;
+      const usableWidth = pageWidth - margin * 2;
+      const usableHeight = pageHeight - margin * 2;
+      const visualScaleFactor = 0.58;
+
+      let renderWidth = usableWidth * visualScaleFactor;
+      let renderHeight = (img.height * renderWidth) / img.width;
+
+      if (renderHeight > usableHeight) {
+        renderHeight = usableHeight;
+        renderWidth = (img.width * renderHeight) / img.height;
+      }
+
+      const x = (pageWidth - renderWidth) / 2;
+      const y = (pageHeight - renderHeight) / 2;
+      pdf.addImage(dataUrl, "PNG", x, y, renderWidth, renderHeight, undefined, "FAST");
+
+      const passId =
+        booking?.id || booking?.bookingId || booking?.registrationId || "raja-parba-pass";
+      pdf.save(`${String(passId)}-pass.pdf`);
+    } catch (error) {
+      console.error("Pass download failed:", error);
+    } finally {
+      if (offscreenWrapper && offscreenWrapper.parentNode) {
+        offscreenWrapper.parentNode.removeChild(offscreenWrapper);
+      }
+      setDownloading(false);
+    }
   };
 
   if (!isOpen || !mounted) return null;
@@ -136,11 +194,12 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
 
         {showPass && (
           <button
-            onClick={handlePrintPass}
-            className="absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition hover:bg-indigo-700"
+            onClick={handleDownloadPass}
+            disabled={downloading}
+            className="absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition hover:from-amber-500 hover:via-yellow-600 hover:to-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            <Printer size={14} />
-            Print / Save PDF
+            <ArrowDownToLine size={14} />
+            {downloading ? "Downloading..." : "Download"}
           </button>
         )}
 
@@ -219,39 +278,6 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
           </>
         )}
       </div>
-      <style jsx global>{`
-        @media print {
-          @page {
-            size: auto;
-            margin: 6mm;
-          }
-          body.print-pass-mode * {
-            visibility: hidden !important;
-          }
-          body.print-pass-mode .print-pass-target,
-          body.print-pass-mode .print-pass-target * {
-            visibility: visible !important;
-          }
-          body.print-pass-mode .print-pass-target {
-            position: static !important;
-            margin: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            overflow: visible !important;
-            background: white !important;
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
-          }
-          body.print-pass-mode .print-pass-target [style*="transform: scale"] {
-            transform: none !important;
-            height: auto !important;
-          }
-          body.print-pass-mode .print-pass-target > div {
-            height: auto !important;
-          }
-        }
-      `}</style>
     </div>
   );
 
