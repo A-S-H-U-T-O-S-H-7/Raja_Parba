@@ -408,6 +408,29 @@ export async function getBookingTypeFromOrderId(orderId, purpose) {
   console.log('🔍 Detecting booking type for:', { orderId, purpose });
   const normalizedOrderId = String(orderId || '').toLowerCase().trim();
   const normalizedPurpose = String(purpose || '').toLowerCase().trim();
+
+  // Prefer explicit order-id prefixes over gateway purpose.
+  // Some gateways can return stale/incorrect purpose values.
+  if (normalizedOrderId.startsWith('dn')) {
+    console.log('✅ Detected donation from ID prefix');
+    return 'donation';
+  }
+  if (normalizedOrderId.startsWith('bk')) {
+    console.log('✅ Detected havan from ID prefix');
+    return 'havan';
+  }
+  if (normalizedOrderId.startsWith('show-') || normalizedOrderId.includes('show')) {
+    console.log('✅ Detected show from ID pattern');
+    return 'show';
+  }
+  if (normalizedOrderId.startsWith('stall-') || normalizedOrderId.includes('stall')) {
+    console.log('✅ Detected stall from ID pattern');
+    return 'stall';
+  }
+  if (normalizedOrderId.startsWith('delegate-') || normalizedOrderId.includes('delegate')) {
+    console.log('✅ Detected delegate from ID pattern');
+    return 'delegate';
+  }
   
   if (normalizedPurpose) {
     if (normalizedPurpose.includes('donation')) {
@@ -430,28 +453,6 @@ export async function getBookingTypeFromOrderId(orderId, purpose) {
       console.log('✅ Detected delegate from purpose');
       return 'delegate';
     }
-  }
-  
-  // Fallback to order ID pattern  
-  if (normalizedOrderId.startsWith('dn')) {
-    console.log('✅ Detected donation from ID prefix');
-    return 'donation';
-  }
-  if (normalizedOrderId.startsWith('bk')) {
-    console.log('✅ Detected havan from ID prefix');
-    return 'havan';
-  }
-  if (normalizedOrderId.startsWith('show-') || normalizedOrderId.includes('show')) {
-    console.log('✅ Detected show from ID pattern');
-    return 'show';
-  }
-  if (normalizedOrderId.startsWith('stall-') || normalizedOrderId.includes('stall')) {
-    console.log('✅ Detected stall from ID pattern');
-    return 'stall';
-  }
-  if (normalizedOrderId.startsWith('delegate-') || normalizedOrderId.includes('delegate')) {
-    console.log('✅ Detected delegate from ID pattern');
-    return 'delegate';
   }
   
   // For Firebase auto-generated IDs, try to check the actual collections
