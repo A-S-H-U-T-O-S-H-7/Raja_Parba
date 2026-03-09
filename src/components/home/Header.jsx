@@ -105,7 +105,7 @@ export default function Header() {
               {/* Left: Raja Logo + Divider + Parent Org Logo */}
               <div className="flex items-center gap-3">
                 {/* Raja Mahotsav Logo */}
-                <div className="flex-shrink-0 relative group">
+                <Link href="/" aria-label="Go to home page" className="flex-shrink-0 relative group">
                   <div className="w-20 h-20 md:w-24 md:h-24 relative bg-gradient-to-br from-rose-400 to-red-500 rounded-full p-0.5 border border-rose-300 shadow-md transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
                     <div className="relative w-full h-full rounded-full bg-white overflow-hidden">
                       <Image
@@ -117,7 +117,7 @@ export default function Header() {
                     </div>
                   </div>
                   <div className="absolute -inset-2 bg-amber-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                </div>
+                </Link>
 
                 {/* Divider — only on desktop */}
                 <div className="flex flex-col items-center self-stretch py-3">

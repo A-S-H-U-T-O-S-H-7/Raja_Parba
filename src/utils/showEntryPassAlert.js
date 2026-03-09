@@ -6,7 +6,7 @@ const colorThemes = {
   blue: { from: "#2563eb", to: "#0891b2", soft: "#dbeafe" },
   emerald: { from: "#10b981", to: "#0f766e", soft: "#d1fae5" },
   rose: { from: "#e11d48", to: "#be185d", soft: "#ffe4e6" },
-  violet: { from: "#8b5cf6", to: "#a21caf", soft: "#ede9fe" },
+  violet: { from: "#7c3aed", to: "#9333ea", soft: "#f3e8ff" },
 };
 
 export const showEntryPassAlert = async ({
@@ -21,23 +21,39 @@ export const showEntryPassAlert = async ({
   await Swal.fire({
     html: `
       <style>
-        .entry-pass-wrap { position: relative; padding: 10px 6px 14px; overflow: hidden; }
+        .entry-pass-popup {
+          background: transparent !important;
+          box-shadow: none !important;
+          border: 0 !important;
+          padding: 0 !important;
+          width: auto !important;
+        }
+        .entry-pass-wrap {
+          position: relative;
+          padding: 4px;
+          overflow: hidden;
+        }
         .entry-pass-glow {
           position: absolute;
-          inset: 8px;
-          border-radius: 18px;
-          background: radial-gradient(circle at 20% 10%, ${palette.soft}, transparent 60%), radial-gradient(circle at 80% 20%, ${palette.soft}, transparent 65%);
-          filter: blur(8px);
-          opacity: 0.85;
+          inset: 12px;
+          border-radius: 22px;
+          background:
+            radial-gradient(circle at 20% 12%, ${palette.soft}, transparent 58%),
+            radial-gradient(circle at 80% 18%, ${palette.soft}, transparent 62%),
+            radial-gradient(circle at 50% 100%, #ffffff, transparent 70%);
+          filter: blur(14px);
+          opacity: 0.9;
         }
         .entry-pass-card {
           position: relative;
-          border: 1px dashed ${palette.from};
-          border-radius: 16px;
-          background: linear-gradient(135deg, ${palette.soft} 0%, ${palette.to}22 100%);
-          padding: 14px 14px 16px;
+          border: 1px solid ${palette.from}33;
+          border-radius: 18px;
+          background: linear-gradient(165deg, #ffffff 0%, ${palette.soft} 50%, #ffffff 100%);
+          padding: 16px 16px 18px;
           text-align: center;
-          box-shadow: 0 16px 36px rgba(15, 23, 42, 0.2);
+          box-shadow:
+            0 18px 32px rgba(15, 23, 42, 0.18),
+            0 2px 8px rgba(124, 58, 237, 0.2);
           animation: passBounceIn 1s cubic-bezier(.12,1.35,.28,1) both;
           transform-origin: center;
         }
@@ -47,7 +63,7 @@ export const showEntryPassAlert = async ({
           max-width: 260px;
           border-radius: 14px;
           overflow: hidden;
-          box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
           animation: passImageZoom 1.05s cubic-bezier(.18,1.22,.25,1) both;
         }
         .entry-pass-image {
@@ -66,9 +82,26 @@ export const showEntryPassAlert = async ({
           background: linear-gradient(135deg, ${palette.from}, ${palette.to});
           margin-bottom: 8px;
         }
-        .entry-pass-title { margin: 2px 0 0; font-size: 1.25rem; font-weight: 900; color: #0f172a; }
-        .entry-pass-sub { margin: 7px 0 0; font-size: 0.95rem; color: #334155; font-weight: 700; }
-        .entry-pass-id { margin: 10px 0 0; font-size: 0.84rem; font-weight: 700; color: ${palette.to}; word-break: break-word; }
+        .entry-pass-title {
+          margin: 2px 0 0;
+          font-size: 1.35rem;
+          font-weight: 900;
+          color: #0f172a;
+          letter-spacing: .2px;
+        }
+        .entry-pass-sub {
+          margin: 8px 0 0;
+          font-size: 1rem;
+          color: #334155;
+          font-weight: 700;
+        }
+        .entry-pass-id {
+          margin: 10px 0 0;
+          font-size: 0.84rem;
+          font-weight: 700;
+          color: ${palette.to};
+          word-break: break-word;
+        }
         @keyframes passBounceIn {
           0% { opacity: 0; transform: scale(0.65) translateY(44px); }
           62% { opacity: 1; transform: scale(1.08) translateY(-8px); }
@@ -137,7 +170,7 @@ export const showEntryPassAlert = async ({
       }
     },
     customClass: {
-      popup: "rounded-2xl shadow-2xl",
+      popup: "entry-pass-popup",
     },
   });
 };

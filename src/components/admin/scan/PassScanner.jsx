@@ -16,6 +16,7 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
+import jsQR from "jsqr";
 import { toast } from "react-hot-toast";
 import useThemeStore from "@/lib/stores/useThemeStore";
 import PermissionGate from "@/components/admin/PermissionGate";
@@ -49,6 +50,10 @@ export default function PassScanner() {
 
   const supportsBarcodeDetector =
     typeof window !== "undefined" && "BarcodeDetector" in window;
+  const supportsCameraApi =
+    typeof navigator !== "undefined" &&
+    !!navigator.mediaDevices &&
+    typeof navigator.mediaDevices.getUserMedia === "function";
 
   const scannerBadge = useMemo(() => {
     if (verifying) return { text: "Verifying...", className: "text-indigo-700 bg-indigo-100 border-indigo-200" };
@@ -121,7 +126,7 @@ export default function PassScanner() {
   };
 
   const scanFrame = async () => {
-    if (!detectorRef.current || !videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current) return;
     if (verifying || scanLockRef.current) return;
     const video = videoRef.current;
     if (video.readyState < 2) return;
@@ -132,11 +137,18 @@ export default function PassScanner() {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      let raw = "";
 
-      const barcodes = await detectorRef.current.detect(canvas);
-      if (!barcodes?.length) return;
-
-      const raw = barcodes[0]?.rawValue;
+      if (supportsBarcodeDetector && detectorRef.current) {
+        const barcodes = await detectorRef.current.detect(canvas);
+        raw = barcodes?.[0]?.rawValue || "";
+      } else {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "attemptBoth",
+        });
+        raw = qrCode?.data || "";
+      }
       if (!raw) return;
 
       scanLockRef.current = true;
@@ -151,13 +163,15 @@ export default function PassScanner() {
     setCameraError("");
     setStartingCamera(true);
     try {
-      if (!supportsBarcodeDetector) {
-        setCameraError("Camera QR scanning is not supported in this browser. Use manual input below.");
+      if (!supportsCameraApi) {
+        setCameraError("Camera is not supported in this browser. Use manual input below.");
         setStartingCamera(false);
         return;
       }
 
-      detectorRef.current = new window.BarcodeDetector({ formats: ["qr_code"] });
+      detectorRef.current = supportsBarcodeDetector
+        ? new window.BarcodeDetector({ formats: ["qr_code"] })
+        : null;
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" } },
         audio: false,
@@ -270,7 +284,7 @@ export default function PassScanner() {
 
             {!supportsBarcodeDetector && (
               <p className={`mt-3 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                Browser does not support native QR detection. Use manual input section.
+                Using Safari-compatible QR fallback scanner.
               </p>
             )}
           </section>

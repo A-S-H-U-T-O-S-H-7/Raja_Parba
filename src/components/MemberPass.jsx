@@ -79,7 +79,7 @@ const MemberPass = ({ booking, participantName, purpose }) => {
   const shortCode = String(bookingId).replace(/[^a-zA-Z0-9]/g, "").slice(-8).toUpperCase() || "RAJA2026";
 
   return (
-    <div className="relative min-h-[70vh] bg-gradient-to-b from-[#1e3a8a] via-[#4f46e5] to-[#c2410c] p-2 md:p-4 flex items-center justify-center">
+    <div className="relative w-full min-h-[74vh] md:min-h-[70vh] bg-gradient-to-b from-[#1e3a8a] via-[#4f46e5] to-[#c2410c] p-2 md:p-4 flex items-center justify-center">
       {/* White Dots Pattern - Cross lines effect */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Diagonal cross lines */}
@@ -119,7 +119,7 @@ const MemberPass = ({ booking, participantName, purpose }) => {
         </div>
       </div>
 
-      <div className="relative mx-auto w-full max-w-lg">
+      <div className="relative mx-auto w-full max-w-[24rem] md:max-w-md">
         {/* White Card with Side Cuts */}
         <div className="relative bg-white rounded-3xl shadow-2xl overflow-visible">
           {/* Half-circle cuts on white card - matching gradient colors */}

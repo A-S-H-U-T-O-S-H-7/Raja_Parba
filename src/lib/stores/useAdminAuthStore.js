@@ -32,7 +32,8 @@ const useAdminAuthStore = create(
             Cookies.set('admin_session', result.sessionToken, { 
               expires: 1,
               secure: process.env.NODE_ENV === 'production',
-              sameSite: 'strict'
+              sameSite: 'lax',
+              path: '/'
             });
             
             set({ 
@@ -70,7 +71,8 @@ const useAdminAuthStore = create(
 
       // Verify session
       verifySession: async () => {
-        const sessionToken = Cookies.get('admin_session');
+        const tokenFromCookie = Cookies.get('admin_session');
+        const sessionToken = tokenFromCookie || get().sessionToken;
         
         if (!sessionToken) {
           set({ isAuthenticated: false, admin: null });
@@ -87,6 +89,16 @@ const useAdminAuthStore = create(
               ...result.admin,
               uid: result.admin?.uid || result.admin?.id
             };
+
+            // Keep cookie in sync for browsers with strict cookie behavior.
+            if (!tokenFromCookie) {
+              Cookies.set('admin_session', sessionToken, {
+                expires: 1,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/'
+              });
+            }
             set({ 
               admin: normalizedAdmin,
               sessionToken,
@@ -187,6 +199,7 @@ const useAdminAuthStore = create(
           role: state.admin.role,
           permissions: state.admin.permissions
         } : null,
+        sessionToken: state.sessionToken,
         isAuthenticated: state.isAuthenticated
       }),
     }
