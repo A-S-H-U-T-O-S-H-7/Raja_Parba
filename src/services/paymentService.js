@@ -146,7 +146,7 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
         });
         
         if (bookingType === 'donation') {
-          const { sendDonationConfirmationEmail } = await import('@/services/emailService');
+          const { sendDonationConfirmationEmail } = await import('@/services/donationEmailService');
           const emailResult = await sendDonationConfirmationEmail(enrichedBookingData);
           console.log('[PAYMENT_EMAIL] Donation email result:', {
             orderId,
@@ -155,6 +155,27 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
             error: emailResult?.error || null,
             rawResponse: emailResult?.data || emailResult?.rawResponse || null
           });
+
+          // Save donation-only email debug status on the booking document.
+          try {
+            await updateDoc(bookingRef, {
+              emailNotification: {
+                type: 'donation',
+                attemptedAt: serverTimestamp(),
+                success: Boolean(emailResult?.success),
+                endpoint: emailResult?.endpoint || null,
+                httpStatus: emailResult?.httpStatus || null,
+                message: emailResult?.message || null,
+                error: emailResult?.error || null
+              },
+              updatedAt: serverTimestamp()
+            });
+          } catch (emailStatusError) {
+            console.error('[PAYMENT_EMAIL] Failed to save donation email debug status:', {
+              orderId,
+              error: emailStatusError?.message || emailStatusError
+            });
+          }
         } else if (bookingType === 'delegate') {
           // Ensure numberOfPersons is properly set in enrichedBookingData
           console.log('📋 Delegate booking data before email:', {

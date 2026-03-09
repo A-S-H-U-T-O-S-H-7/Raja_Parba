@@ -97,7 +97,7 @@ const PerformerApplicationCard = ({ item }) => {
           </p>
           <p className="mt-0.5 text-xs text-slate-500">
             <span className="font-semibold text-slate-600">Track:</span> {item.trackMusicName || 'N/A'}
-            {item.trackDuration ? ` (${item.trackDuration})` : ''}
+            {item.trackDuration ? ` (${item.trackDuration} min)` : ''}
           </p>
         </div>
 

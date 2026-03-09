@@ -21,6 +21,7 @@ import {
 import { createDrawingApplication } from "@/services/drawingService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
+import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
 
 const competitionItems = [
   "Self-introduction",
@@ -60,7 +61,8 @@ const calculateAgeFromDob = (dobString) => {
 const detectCategoryByAge = (ageNum) => {
   if (!Number.isFinite(ageNum) || ageNum <= 0) return "";
   if (ageNum < 16) return "Junior";
-  return "Senior";
+  if (ageNum <= 30) return "Senior";
+  return "";
 };
 
 export default function DrawingPage() {
@@ -125,6 +127,36 @@ export default function DrawingPage() {
       userId: user?.uid || null,
     };
 
+    if (!payload.age || payload.age <= 0) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Invalid Age",
+        text: "Please enter a valid date of birth.",
+        confirmButtonColor: "#10b981",
+      });
+      return;
+    }
+
+    if (payload.age > 30) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Age Not Eligible",
+        text: "Drawing competition categories are only: Junior (below 16) and Senior (16 to 30).",
+        confirmButtonColor: "#10b981",
+      });
+      return;
+    }
+
+    if (!payload.category) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Category Required",
+        text: "Please select a valid category based on age: Junior (below 16) or Senior (16 to 30).",
+        confirmButtonColor: "#10b981",
+      });
+      return;
+    }
+
     const hasAllRequired =
       payload.name &&
       payload.email &&
@@ -161,9 +193,55 @@ export default function DrawingPage() {
       await Swal.fire({
         icon: "warning",
         title: "Category Mismatch",
-        text: "Senior category is only for candidates aged 16 and above.",
+        text: "Senior category is only for candidates aged 16 to 30.",
         confirmButtonColor: "#10b981",
       });
+      return;
+    }
+
+    if (payload.category === "Senior" && payload.age > 30) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Category Mismatch",
+        text: "Senior category is only for candidates aged 16 to 30.",
+        confirmButtonColor: "#10b981",
+      });
+      return;
+    }
+
+    const alreadyRegistered = await hasExistingSingleRegistration({
+      collectionName: "drawing_applications",
+      userId: payload.userId,
+      email: payload.email,
+      phone: payload.phone,
+    });
+
+    if (alreadyRegistered) {
+      const result = await Swal.fire({
+        html: `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;">
+            <div style="width:56px;height:56px;border-radius:9999px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;">!</div>
+            <h2 style="margin:0;font-size:1.2rem;color:#111827;">Already Registered</h2>
+            <p style="margin:0;font-size:0.95rem;color:#4b5563;text-align:center;line-height:1.45;">
+              You have already registered for Drawing competition.<br/>
+              Please go to your profile to view details.
+            </p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Go to Profile",
+        cancelButtonText: "Close",
+        confirmButtonColor: "#059669",
+        cancelButtonColor: "#6b7280",
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl shadow-2xl",
+        },
+      });
+
+      if (result.isConfirmed) {
+        router.push("/profile?tab=drawing");
+      }
       return;
     }
 
@@ -289,7 +367,7 @@ export default function DrawingPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={onSubmit} className="p-5 md:p-6">
+          <form onSubmit={onSubmit} noValidate className="p-5 md:p-6">
             {/* Photo Upload with Preview */}
             <div className="mb-6">
               <p className="text-xs font-medium text-gray-700 mb-2">Candidate Photo *</p>
@@ -348,7 +426,7 @@ export default function DrawingPage() {
                   />
                   <div className="flex items-center justify-center gap-1.5">
                     <Palette className="w-4 h-4" />
-                    <span className="text-sm font-medium">Junior (till 16)</span>
+                    <span className="text-sm font-medium">Junior (below 16)</span>
                   </div>
                 </label>
                 
@@ -368,7 +446,7 @@ export default function DrawingPage() {
                   />
                   <div className="flex items-center justify-center gap-1.5">
                     <Palette className="w-4 h-4" />
-                    <span className="text-sm font-medium">Senior (16+)</span>
+                    <span className="text-sm font-medium">Senior (16-30)</span>
                   </div>
                 </label>
               </div>

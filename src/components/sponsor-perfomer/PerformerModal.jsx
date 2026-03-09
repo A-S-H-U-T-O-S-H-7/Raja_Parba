@@ -1,9 +1,15 @@
 import React from 'react';
-import { X, Mic, User, Mail, Phone, MapPin, Music2, Users, UserCircle2 } from 'lucide-react';
+import { X, Mic, User, Mail, Phone, MapPin, Music2, Users, UserCircle2, Clock3 } from 'lucide-react';
 import PortalModal from '../home/PortalModal';
 
 const performanceOptions = ['Song', 'Dance', 'Others'];
 const participationOptions = ['Solo', 'Group'];
+
+const normalizeDurationInput = (raw = '') => {
+  const digits = String(raw).replace(/\D/g, '').slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+};
 
 const PerformerModal = ({
   showPerformerModal,
@@ -293,6 +299,20 @@ const PerformerModal = ({
                 placeholder="Track / Music Name"
                 value={performerForm?.trackMusicName || ''}
                 onChange={(e) => updateField('trackMusicName', e.target.value)}
+                className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
+                required
+              />
+            </div>
+
+            <div className="relative">
+              <Clock3 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-600" />
+              <input
+                type="tel"
+                inputMode="numeric"
+                placeholder="--:--"
+                value={performerForm?.trackDuration || ''}
+                onChange={(e) => updateField('trackDuration', normalizeDurationInput(e.target.value))}
+                maxLength={5}
                 className="w-full rounded-xl border border-cyan-200 bg-white/90 py-3 pl-11 pr-4 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
                 required
               />

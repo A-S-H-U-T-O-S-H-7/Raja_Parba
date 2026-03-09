@@ -20,6 +20,7 @@ import {
 import { createRajaKumariApplication } from "@/services/rajaKumariService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
+import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
 
 const competitionItems = [
   "Self-introduction",
@@ -144,6 +145,42 @@ export default function RajaKumariPage() {
         text: "Raja Kumari age group is 6 to 15 years only.",
         confirmButtonColor: "#e11d48",
       });
+      return;
+    }
+
+    const alreadyRegistered = await hasExistingSingleRegistration({
+      collectionName: "raja_kumari_applications",
+      userId: payload.userId,
+      email: payload.email,
+      phone: payload.phone,
+    });
+
+    if (alreadyRegistered) {
+      const result = await Swal.fire({
+        html: `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;">
+            <div style="width:56px;height:56px;border-radius:9999px;background:linear-gradient(135deg,#f43f5e,#e11d48);display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;">!</div>
+            <h2 style="margin:0;font-size:1.2rem;color:#111827;">Already Registered</h2>
+            <p style="margin:0;font-size:0.95rem;color:#4b5563;text-align:center;line-height:1.45;">
+              You have already registered for Raja Kumari.<br/>
+              Please go to your profile to view details.
+            </p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Go to Profile",
+        cancelButtonText: "Close",
+        confirmButtonColor: "#e11d48",
+        cancelButtonColor: "#6b7280",
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl shadow-2xl",
+        },
+      });
+
+      if (result.isConfirmed) {
+        router.push("/profile?tab=rajaKumari");
+      }
       return;
     }
 

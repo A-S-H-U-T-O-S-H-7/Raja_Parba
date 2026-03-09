@@ -42,6 +42,12 @@ const initialForm = {
   trackDuration: "",
 };
 
+const normalizeDurationInput = (raw = "") => {
+  const digits = String(raw).replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+};
+
 export default function PerformerPage() {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -122,6 +128,18 @@ export default function PerformerPage() {
 
     const isGroup = form.participationType === "Group";
     const memberCount = Number(form.memberCount || 0);
+    const trackDuration = (form.trackDuration || "").trim();
+    const durationMatch = trackDuration.match(/^(\d{1,2}):([0-5]\d)$/);
+
+    if (!durationMatch) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Invalid Duration",
+        text: "Please enter duration in MM:SS format (example: 03:25).",
+        confirmButtonColor: "#2563eb",
+      });
+      return;
+    }
 
     const isFormValid =
       (form.name || "").trim() &&
@@ -131,7 +149,6 @@ export default function PerformerPage() {
       (form.gender || "").trim() &&
       (form.participationType || "").trim() &&
       (form.trackMusicName || "").trim() &&
-      (form.trackDuration || "").trim() &&
       resolvedPerformanceType &&
       (!isGroup || ((form.groupName || "").trim() && memberCount > 0));
 
@@ -152,7 +169,9 @@ export default function PerformerPage() {
       memberCount: isGroup ? String(memberCount) : "",
       memberNames: isGroup ? (form.memberNames || []) : [],
       trackMusicName: form.trackMusicName.trim(),
-      trackDuration: form.trackDuration.trim(),
+      trackDuration: durationMatch
+        ? `${durationMatch[1].padStart(2, "0")}:${durationMatch[2]}`
+        : trackDuration,
       userId: user?.uid || null,
     };
 
@@ -469,10 +488,14 @@ export default function PerformerPage() {
                   <div className="relative">
                     <Clock3 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
                     <input
-                      type="text"
-                      placeholder="Duration (e.g. 3:45) *"
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder="--:--"
                       value={form.trackDuration}
-                      onChange={(e) => updateField("trackDuration", e.target.value)}
+                      onChange={(e) => updateField("trackDuration", normalizeDurationInput(e.target.value))}
+                      maxLength={5}
+                      pattern="^\d{1,2}:[0-5]\d$"
+                      title="Enter duration in MM:SS format, e.g. 03:25"
                       className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-700 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition-all"
                       required
                     />

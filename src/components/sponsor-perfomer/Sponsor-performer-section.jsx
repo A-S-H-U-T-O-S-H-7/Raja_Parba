@@ -31,7 +31,8 @@ export default function SponsorPerformerSection() {
     groupName: '',
     memberCount: '',
     memberNames: [],
-    trackMusicName: ''
+    trackMusicName: '',
+    trackDuration: ''
   });
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -74,6 +75,13 @@ export default function SponsorPerformerSection() {
 
     const isGroup = performerForm.participationType === 'Group';
     const memberCount = Number(performerForm.memberCount || 0);
+    const trackDuration = (performerForm.trackDuration || '').trim();
+    const durationMatch = trackDuration.match(/^(\d{1,2}):([0-5]\d)$/);
+
+    if (!durationMatch) {
+      showToastMessage('Please enter track duration in MM:SS format (example: 03:25).');
+      return;
+    }
 
     const isFormValid =
       (performerForm.name || '').trim() &&
@@ -93,6 +101,9 @@ export default function SponsorPerformerSection() {
         groupName: isGroup ? performerForm.groupName : '',
         memberCount: isGroup ? String(memberCount) : '',
         memberNames: isGroup ? (performerForm.memberNames || []) : [],
+        trackDuration: durationMatch
+          ? `${durationMatch[1].padStart(2, '0')}:${durationMatch[2]}`
+          : trackDuration,
       };
 
       try {
@@ -121,7 +132,8 @@ export default function SponsorPerformerSection() {
           groupName: '',
           memberCount: '',
           memberNames: [],
-          trackMusicName: ''
+          trackMusicName: '',
+          trackDuration: ''
         });
         setShowPerformerModal(false);
       } catch (error) {
