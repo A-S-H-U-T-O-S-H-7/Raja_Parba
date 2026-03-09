@@ -72,7 +72,7 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
   const modalMaxWidthClass = isReceiptView ? "max-w-4xl" : "max-w-lg";
   const modalHeightClass = isReceiptView
     ? "max-h-[78vh] md:max-h-[92vh]"
-    : "max-h-[calc(95vh-80px)] md:max-h-[calc(100vh-104px)]";
+    : "max-h-[calc(92vh-80px)] md:max-h-[calc(98vh-104px)]";
 
   const fitPassToViewport = useCallback(() => {
     if (!isOpen || !showPass || !passViewportRef.current || !passContentRef.current) return;
