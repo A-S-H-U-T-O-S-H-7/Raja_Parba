@@ -133,6 +133,41 @@ const PassReceiptModal = ({ isOpen, onClose, booking, receiptOnly = false }) => 
       offscreenWrapper.appendChild(clone);
       document.body.appendChild(offscreenWrapper);
 
+      // Ensure all images are fully loaded in the cloned node before rendering to PNG.
+      const clonedImages = Array.from(clone.querySelectorAll("img"));
+      await Promise.all(
+        clonedImages.map(
+          (img) =>
+            new Promise((resolve) => {
+              const rawSrc = img.getAttribute("src") || "";
+              if (!rawSrc) {
+                resolve();
+                return;
+              }
+
+              if (rawSrc.startsWith("/")) {
+                img.src = `${window.location.origin}${rawSrc}`;
+              }
+
+              img.crossOrigin = "anonymous";
+              img.loading = "eager";
+              img.decoding = "sync";
+
+              if (img.complete && img.naturalWidth > 0) {
+                resolve();
+                return;
+              }
+
+              const done = () => resolve();
+              img.addEventListener("load", done, { once: true });
+              img.addEventListener("error", done, { once: true });
+
+              // Don't block forever on any single image.
+              setTimeout(done, 4000);
+            })
+        )
+      );
+
       const dataUrl = await toPng(clone, {
         cacheBust: true,
         pixelRatio: 2,

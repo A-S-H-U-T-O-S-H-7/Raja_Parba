@@ -141,6 +141,8 @@ const MemberPass = ({ booking, participantName, purpose }) => {
                   src="/raja-logo.png"
                   alt="Raja Logo"
                   className="h-18 w-18 object-contain"
+                  loading="eager"
+                  decoding="sync"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
@@ -194,6 +196,8 @@ const MemberPass = ({ booking, participantName, purpose }) => {
                   src={qrSrc}
                   alt="QR Code"
                   crossOrigin="anonymous"
+                  loading="eager"
+                  decoding="sync"
                   className="h-44 w-44 object-contain"
                   onError={() => {
                     if (!usedFallbackQr) {
@@ -265,6 +269,8 @@ const MemberPass = ({ booking, participantName, purpose }) => {
                   src="/logo.png"
                   alt="Samudayik Vikas Samiti"
                   className="w-full h-full object-contain"
+                  loading="eager"
+                  decoding="sync"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
