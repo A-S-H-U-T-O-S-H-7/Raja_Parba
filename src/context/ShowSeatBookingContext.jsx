@@ -16,6 +16,12 @@ import { useAuth } from './AuthContext';
 import { toast } from 'react-hot-toast';
 import { formatDateKey } from '@/utils/dateUtils';
 import { calculatePriceBreakdown, getNextBulkMilestone, formatCurrency, getDiscountDisplayInfo } from '@/utils/pricingUtils';
+import {
+  getBlockPrice,
+  getSeatBlock,
+  normalizeShowPricing,
+  normalizeShowSettings
+} from '@/utils/showSeatUtils';
 
 const ShowSeatBookingContext = createContext();
 
@@ -96,25 +102,21 @@ const ACTIONS = {
 // Helper function to get seat price based on seat type
 // This needs to be inside the provider to access current state
 let currentPriceSettings = null;
+let currentShowSettings = null;
 
 const getSeatPrice = (seatId) => {
   // Convert to string to handle cases where seatId might be a number or object
   const seatStr = String(seatId);
-  let price = 0;
-  
-  if (seatStr.startsWith('A-') || seatStr.startsWith('B-')) {
-    // Use dynamic pricing from current settings
-    price = currentPriceSettings?.seatTypes?.VIP?.price || SHOW_SEAT_TYPES.VIP.price; // VIP seats
-  } else if (seatStr.startsWith('C-')) {
-    price = currentPriceSettings?.seatTypes?.REGULAR_C?.price || SHOW_SEAT_TYPES.REGULAR_C.price; // Block C
-  } else if (seatStr.startsWith('D-')) {
-    price = currentPriceSettings?.seatTypes?.REGULAR_D?.price || SHOW_SEAT_TYPES.REGULAR_D.price; // Block D
-  } else {
-    price = 500; // Default fallback
-  }
+  const block = getSeatBlock(currentShowSettings, seatStr);
+  const price = getBlockPrice({
+    showPricing: currentPriceSettings,
+    showSettings: currentShowSettings,
+    seatId: seatStr,
+    fallbackPrice: 0
+  });
   
   // Ensure we return a number, not a string
-  return Number(price) || 500;
+  return Number.isFinite(Number(price)) ? Number(price) : 0;
 };
 
 // Reducer function
@@ -246,19 +248,30 @@ const showSeatBookingReducer = (state, action) => {
     case ACTIONS.SET_PRICE_SETTINGS:
       // Update pricing settings and recalculate totals if seats are selected
       const currentSeats = Array.isArray(state.selectedSeats) ? state.selectedSeats : [];
-      const recalculatedPrice = currentSeats.reduce((sum, id) => sum + getSeatPrice(id), 0);
+      const nextPriceSettings = normalizeShowPricing(action.payload, state.eventSettings);
+      const recalculatedPrice = currentSeats.reduce((sum, id) => {
+        const block = getSeatBlock(state.eventSettings, id);
+        return sum + getBlockPrice({
+          showPricing: nextPriceSettings,
+          showSettings: state.eventSettings,
+          seatId: id,
+          fallbackPrice: 0
+        });
+      }, 0);
       
       newState = {
         ...state,
-        priceSettings: action.payload,
+        priceSettings: nextPriceSettings,
         totalPrice: recalculatedPrice
       };
       break;
 
     case ACTIONS.SET_EVENT_SETTINGS:
+      const normalizedSettings = normalizeShowSettings(action.payload);
       newState = {
         ...state,
-        eventSettings: action.payload
+        eventSettings: normalizedSettings,
+        priceSettings: normalizeShowPricing(state.priceSettings, normalizedSettings)
       };
       break;
 
@@ -283,24 +296,20 @@ export const ShowSeatBookingProvider = ({ children }) => {
   
   // Update the global reference when state changes
   currentPriceSettings = state.priceSettings;
+  currentShowSettings = state.eventSettings;
   
   // Create context-aware getSeatPrice function
   const getSeatPriceWithContext = (seatId) => {
     const seatStr = String(seatId);
-    let price = 0;
+    const block = getSeatBlock(state.eventSettings, seatStr);
+    const price = getBlockPrice({
+      showPricing: state.priceSettings,
+      showSettings: state.eventSettings,
+      seatId: seatStr,
+      fallbackPrice: 0
+    });
     
-    if (seatStr.startsWith('A-') || seatStr.startsWith('B-')) {
-      // Both A and B use Block A price (sync functionality)
-      price = state.priceSettings?.seatTypes?.VIP?.price || 1200;
-    } else if (seatStr.startsWith('C-')) {
-      price = state.priceSettings?.seatTypes?.REGULAR_C?.price || 600;
-    } else if (seatStr.startsWith('D-')) {
-      price = state.priceSettings?.seatTypes?.REGULAR_D?.price || 400;
-    } else {
-      price = 500; // Default fallback
-    }
-    
-    return Number(price) || 500;
+    return Number.isFinite(Number(price)) ? Number(price) : 0;
   };
 
   // Real-time sync with admin pricing settings for shows
@@ -311,52 +320,36 @@ export const ShowSeatBookingProvider = ({ children }) => {
     const unsubscribePricing = onSnapshot(pricingRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const newPriceSettings = {
-          seatTypes: {
-            VIP: { price: data.seatTypes?.blockA?.price || 1200 }, // Both A and B use Block A price
-            REGULAR_C: { price: data.seatTypes?.blockC?.price || 600 },
-            REGULAR_D: { price: data.seatTypes?.blockD?.price || 400 }
-          },
-          earlyBirdDiscounts: data.earlyBirdDiscounts || [],
-          bulkBookingDiscounts: data.bulkBookingDiscounts || [],
-          taxRate: data.taxRate || 0
-        };
+        const newPriceSettings = normalizeShowPricing({
+          ...data,
+          taxRate: Number(data.taxRate || 0)
+        }, state.eventSettings);
         
         // Update global SHOW_SEAT_TYPES
-        SHOW_SEAT_TYPES.VIP.price = newPriceSettings.seatTypes.VIP.price;
-        SHOW_SEAT_TYPES.REGULAR_C.price = newPriceSettings.seatTypes.REGULAR_C.price;
-        SHOW_SEAT_TYPES.REGULAR_D.price = newPriceSettings.seatTypes.REGULAR_D.price;
+        SHOW_SEAT_TYPES.VIP.price = newPriceSettings.blockPrices?.A?.price || SHOW_SEAT_TYPES.VIP.price;
+        SHOW_SEAT_TYPES.REGULAR_C.price = newPriceSettings.blockPrices?.C?.price || SHOW_SEAT_TYPES.REGULAR_C.price;
+        SHOW_SEAT_TYPES.REGULAR_D.price = newPriceSettings.blockPrices?.D?.price || SHOW_SEAT_TYPES.REGULAR_D.price;
         
         dispatch({ type: ACTIONS.SET_PRICE_SETTINGS, payload: newPriceSettings });
         
         // Only show toast when prices actually change and user has selections
       } else {
         // Set default values if document doesn't exist
-        const defaultSettings = {
-          seatTypes: {
-            VIP: { price: 1000 },
-            REGULAR_C: { price: 1000 },
-            REGULAR_D: { price: 500 }
-          },
+        const defaultSettings = normalizeShowPricing({
           earlyBirdDiscounts: [],
           bulkBookingDiscounts: [],
           taxRate: 0
-        };
+        }, state.eventSettings);
         dispatch({ type: ACTIONS.SET_PRICE_SETTINGS, payload: defaultSettings });
       }
     }, (error) => {
       console.error('Error listening to show price settings:', error);
       // Set default values on error
-      const defaultSettings = {
-        seatTypes: {
-          VIP: { price: 1000 },
-          REGULAR_C: { price: 1000 },
-          REGULAR_D: { price: 500 }
-        },
+      const defaultSettings = normalizeShowPricing({
         earlyBirdDiscounts: [],
         bulkBookingDiscounts: [],
         taxRate: 0
-      };
+      }, state.eventSettings);
       dispatch({ type: ACTIONS.SET_PRICE_SETTINGS, payload: defaultSettings });
     });
 

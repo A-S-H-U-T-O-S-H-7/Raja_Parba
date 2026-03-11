@@ -4,6 +4,12 @@ import { db } from '@/lib/firebase/config';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import useAdminAuthStore from './useAdminAuthStore';
+import {
+  DEFAULT_PREMIUM_BLOCKS,
+  DEFAULT_REGULAR_BLOCKS,
+  normalizeShowPricing,
+  normalizeShowSettings
+} from '@/utils/showSeatUtils';
 
 const usePriceStore = create((set, get) => ({
   // State
@@ -26,12 +32,7 @@ const usePriceStore = create((set, get) => ({
 
   // Show Settings
   show: {
-    seatTypes: {
-      blockA: { price: 1200, label: 'Block A Premium' },
-      blockB: { price: 1000, label: 'Block B Premium' },
-      blockC: { price: 600, label: 'Block C Regular' },
-      blockD: { price: 400, label: 'Block D Regular' }
-    },
+    blockPrices: {},
     earlyBirdDiscounts: [
       { daysBeforeEvent: 30, discountPercent: 20, isActive: true },
       { daysBeforeEvent: 7, discountPercent: 10, isActive: true }
@@ -41,9 +42,14 @@ const usePriceStore = create((set, get) => ({
       { minSeats: 10, discountPercent: 15, isActive: true }
     ]
   },
+  showLayout: {
+    premiumBlocks: DEFAULT_PREMIUM_BLOCKS,
+    regularBlocks: DEFAULT_REGULAR_BLOCKS
+  },
 
-  // Unsubscribe function for real-time listener
+  // Unsubscribe functions for real-time listeners
   unsubscribe: null,
+  unsubscribeShowLayout: null,
 
   // Set active tab
   setActiveTab: (tab) => set({ activeTab: tab }),
@@ -58,7 +64,7 @@ const usePriceStore = create((set, get) => ({
           const data = docSnap.data();
           set({
             stall: { ...get().stall, ...data.stall },
-            show: { ...get().show, ...data.show },
+            show: normalizeShowPricing({ ...get().show, ...data.show }, { seatLayout: get().showLayout }),
             syncStatus: 'connected',
             lastSync: new Date()
           });
@@ -72,6 +78,30 @@ const usePriceStore = create((set, get) => ({
 
     set({ unsubscribe });
     return unsubscribe;
+  },
+
+  initializeShowLayoutListener: () => {
+    const showSettingsRef = doc(db, 'settings', 'shows');
+
+    const unsubscribeShowLayout = onSnapshot(
+      showSettingsRef,
+      (docSnap) => {
+        const normalizedShowSettings = docSnap.exists()
+          ? normalizeShowSettings(docSnap.data())
+          : normalizeShowSettings();
+
+        set((state) => ({
+          showLayout: normalizedShowSettings.seatLayout,
+          show: normalizeShowPricing(state.show, normalizedShowSettings)
+        }));
+      },
+      (error) => {
+        console.error('Show layout sync error:', error);
+      }
+    );
+
+    set({ unsubscribeShowLayout });
+    return unsubscribeShowLayout;
   },
 
   // Fetch all price settings
@@ -88,12 +118,29 @@ const usePriceStore = create((set, get) => ({
       // Fetch Show pricing
       const showRef = doc(db, 'settings', 'showPricing');
       const showSnap = await getDoc(showRef);
+
+      const showSettingsRef = doc(db, 'settings', 'shows');
+      const showSettingsSnap = await getDoc(showSettingsRef);
+      const normalizedShowSettings = showSettingsSnap.exists()
+        ? normalizeShowSettings(showSettingsSnap.data())
+        : normalizeShowSettings();
+      const normalizedShowLayout = normalizedShowSettings.seatLayout;
+
+      set({ showLayout: normalizedShowLayout });
+
       if (showSnap.exists()) {
-        set(state => ({ show: { ...state.show, ...showSnap.data() } }));
+        set(state => ({
+          show: normalizeShowPricing({ ...state.show, ...showSnap.data() }, normalizedShowSettings)
+        }));
+      } else {
+        set(state => ({
+          show: normalizeShowPricing(state.show, normalizedShowSettings)
+        }));
       }
 
       // Initialize real-time listener
       get().initializeListener();
+      get().initializeShowLayoutListener();
     } catch (error) {
       console.error('Error fetching price settings:', error);
       toast.error('Failed to load price settings');
@@ -108,7 +155,8 @@ const usePriceStore = create((set, get) => ({
     set({ saving: true });
 
     try {
-      const { stall, show } = get();
+      const { stall, show, showLayout } = get();
+      const normalizedShow = normalizeShowPricing(show, { seatLayout: showLayout });
 
       // Save Stall settings
       await setDoc(doc(db, 'settings', 'stallPricing'), {
@@ -119,14 +167,16 @@ const usePriceStore = create((set, get) => ({
 
       // Save Show settings
       await setDoc(doc(db, 'settings', 'showPricing'), {
-        ...show,
+        ...normalizedShow,
         updatedAt: new Date(),
         updatedBy: admin?.id
       });
 
       // Save consolidated pricing for real-time sync
       await setDoc(doc(db, 'settings', 'pricing'), {
-        stall, show,
+        stall,
+        show: normalizedShow,
+        showLayout,
         updatedAt: new Date(),
         updatedBy: admin?.id
       });
@@ -245,13 +295,13 @@ const usePriceStore = create((set, get) => ({
     show: { ...state.show, ...updates } 
   })),
 
-  // Update Show seat type price
+  // Update Show block price
   updateShowSeatType: (block, field, value) => set(state => ({
     show: {
       ...state.show,
-      seatTypes: {
-        ...state.show.seatTypes,
-        [block]: { ...state.show.seatTypes[block], [field]: value }
+      blockPrices: {
+        ...state.show.blockPrices,
+        [block]: { ...state.show.blockPrices[block], [field]: Number(value) || 0 }
       }
     }
   })),
@@ -324,10 +374,14 @@ const usePriceStore = create((set, get) => ({
 
   // Cleanup listener
   cleanup: () => {
-    const { unsubscribe } = get();
+    const { unsubscribe, unsubscribeShowLayout } = get();
     if (unsubscribe) {
       unsubscribe();
       set({ unsubscribe: null });
+    }
+    if (unsubscribeShowLayout) {
+      unsubscribeShowLayout();
+      set({ unsubscribeShowLayout: null });
     }
   },
 
@@ -344,12 +398,7 @@ const usePriceStore = create((set, get) => ({
       bulkBookingDiscounts: [{ minSeats: 2, discountPercent: 10, isActive: true }]
     },
     show: {
-      seatTypes: {
-        blockA: { price: 1200, label: 'Block A Premium' },
-        blockB: { price: 1000, label: 'Block B Premium' },
-        blockC: { price: 600, label: 'Block C Regular' },
-        blockD: { price: 400, label: 'Block D Regular' }
-      },
+      blockPrices: {},
       earlyBirdDiscounts: [
         { daysBeforeEvent: 30, discountPercent: 20, isActive: true },
         { daysBeforeEvent: 7, discountPercent: 10, isActive: true }
@@ -358,6 +407,10 @@ const usePriceStore = create((set, get) => ({
         { minSeats: 5, discountPercent: 10, isActive: true },
         { minSeats: 10, discountPercent: 15, isActive: true }
       ]
+    },
+    showLayout: {
+      premiumBlocks: DEFAULT_PREMIUM_BLOCKS,
+      regularBlocks: DEFAULT_REGULAR_BLOCKS
     }
   })
 }));

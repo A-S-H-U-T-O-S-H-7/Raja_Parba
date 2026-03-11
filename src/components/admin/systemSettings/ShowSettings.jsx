@@ -18,7 +18,6 @@ import {
 import useThemeStore from '@/lib/stores/useThemeStore';
 import useSystemSettingsStore from '@/lib/stores/useSystemSettingsStore';
 import { useState } from 'react';
-import { format } from 'date-fns';
 
 export default function ShowSettings() {
   const { isDarkMode } = useThemeStore();
@@ -26,14 +25,17 @@ export default function ShowSettings() {
     showSettings, 
     iconOptions,
     newShow,
-    editingShow,
     updateShowEventDates,
     toggleShowEventDates,
     updateShowAvailableDays,
     updatePremiumBlock,
     togglePremiumBlockActive,
+    addPremiumBlock,
+    removePremiumBlock,
     updateRegularBlock,
     toggleRegularBlockActive,
+    addRegularBlock,
+    removeRegularBlock,
     updateNewShow,
     addShowTiming,
     removeShowTiming,
@@ -42,6 +44,18 @@ export default function ShowSettings() {
   } = useSystemSettingsStore();
 
   const [showAllShows, setShowAllShows] = useState(false);
+  const [newPremiumBlock, setNewPremiumBlock] = useState({
+    id: '',
+    name: '',
+    maxRows: 8,
+    maxPairsPerRow: 7
+  });
+  const [newRegularBlock, setNewRegularBlock] = useState({
+    id: '',
+    name: '',
+    maxRows: 25,
+    maxSeatsPerRow: 15
+  });
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
@@ -208,6 +222,13 @@ export default function ShowSettings() {
                 >
                   {block.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
+                <button
+                  onClick={() => removePremiumBlock(index)}
+                  className="p-1 rounded mt-1 text-red-500 hover:bg-red-100"
+                  title="Remove block"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
 
                 <div className="flex-1">
                   <div className={`text-sm font-medium mb-2 ${
@@ -269,6 +290,59 @@ export default function ShowSettings() {
           </div>
         </div>
 
+        <div className={`mb-6 p-4 rounded-md border ${
+          isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+        }`}>
+          <h5 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Add Premium Block
+          </h5>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <input
+              type="text"
+              placeholder="ID"
+              value={newPremiumBlock.id}
+              onChange={(e) => setNewPremiumBlock((prev) => ({ ...prev, id: e.target.value.toUpperCase() }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+            <input
+              type="text"
+              placeholder="Name"
+              value={newPremiumBlock.name}
+              onChange={(e) => setNewPremiumBlock((prev) => ({ ...prev, name: e.target.value }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+            <input
+              type="number"
+              min="1"
+              value={newPremiumBlock.maxRows}
+              onChange={(e) => setNewPremiumBlock((prev) => ({ ...prev, maxRows: parseInt(e.target.value) || 1 }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+            <input
+              type="number"
+              min="1"
+              value={newPremiumBlock.maxPairsPerRow}
+              onChange={(e) => setNewPremiumBlock((prev) => ({ ...prev, maxPairsPerRow: parseInt(e.target.value) || 1 }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+          </div>
+          <div className={`mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            <span>Total Seats: {(newPremiumBlock.maxRows || 0) * (newPremiumBlock.maxPairsPerRow || 0) * 2}</span>
+            <button
+              onClick={() => {
+                const added = addPremiumBlock(newPremiumBlock);
+                if (added) {
+                  setNewPremiumBlock({ id: '', name: '', maxRows: 8, maxPairsPerRow: 7 });
+                }
+              }}
+              className="inline-flex items-center justify-center px-3 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Premium Block
+            </button>
+          </div>
+        </div>
+
         {/* Regular Blocks */}
         <div className={`mb-6 p-4 rounded-md ${
           isDarkMode ? 'bg-gray-600' : 'bg-white'
@@ -295,6 +369,13 @@ export default function ShowSettings() {
                   title={block.isActive ? 'Disable block' : 'Enable block'}
                 >
                   {block.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={() => removeRegularBlock(index)}
+                  className="p-1 rounded mt-1 text-red-500 hover:bg-red-100"
+                  title="Remove block"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
 
                 <div className="flex-1">
@@ -354,6 +435,59 @@ export default function ShowSettings() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className={`mb-6 p-4 rounded-md border ${
+          isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+        }`}>
+          <h5 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Add Regular Block
+          </h5>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <input
+              type="text"
+              placeholder="ID"
+              value={newRegularBlock.id}
+              onChange={(e) => setNewRegularBlock((prev) => ({ ...prev, id: e.target.value.toUpperCase() }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+            <input
+              type="text"
+              placeholder="Name"
+              value={newRegularBlock.name}
+              onChange={(e) => setNewRegularBlock((prev) => ({ ...prev, name: e.target.value }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+            <input
+              type="number"
+              min="1"
+              value={newRegularBlock.maxRows}
+              onChange={(e) => setNewRegularBlock((prev) => ({ ...prev, maxRows: parseInt(e.target.value) || 1 }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+            <input
+              type="number"
+              min="1"
+              value={newRegularBlock.maxSeatsPerRow}
+              onChange={(e) => setNewRegularBlock((prev) => ({ ...prev, maxSeatsPerRow: parseInt(e.target.value) || 1 }))}
+              className={`px-3 py-2 text-sm rounded border ${isDarkMode ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+            />
+          </div>
+          <div className={`mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            <span>Total Seats: {(newRegularBlock.maxRows || 0) * (newRegularBlock.maxSeatsPerRow || 0)}</span>
+            <button
+              onClick={() => {
+                const added = addRegularBlock(newRegularBlock);
+                if (added) {
+                  setNewRegularBlock({ id: '', name: '', maxRows: 25, maxSeatsPerRow: 15 });
+                }
+              }}
+              className="inline-flex items-center justify-center px-3 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Regular Block
+            </button>
           </div>
         </div>
 

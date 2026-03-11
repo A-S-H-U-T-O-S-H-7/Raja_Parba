@@ -34,56 +34,56 @@ const awardFieldOptions = [
 const awardDetailsByLanguage = {
   odia: [
     {
-      title: "୧. ଉତ୍କଳ ସେବା ସମ୍ମାନ (Utkal Seva Samman)",
-      description: "ଉତ୍କଳ ସେବା ସମ୍ମାନ ସେହି ବ୍ୟକ୍ତିବିଶେଷଙ୍କୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ ନଏଡା, ଦିଲ୍ଲୀ NCR ରେ ଶ୍ରୀ ଜଗନ୍ନାଥ ମନ୍ଦିର ସ୍ଥାପନାରେ ନିଜର ନିଷ୍ଠା, ଭକ୍ତି ଓ ନିଷ୍କାମ ସେବା ମାଧ୍ୟମରେ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଅବଦାନ ରଖିଛନ୍ତି। ଏହି ସମ୍ମାନ ମନ୍ଦିରର ଉନ୍ନତି ଓ ଧାର୍ମିକ କାର୍ଯ୍ୟକଳାପରେ ତାଙ୍କର ଅବିରତ ସମର୍ଥନକୁ ସମ୍ମାନିତ କରେ।",
+      title: "୧. *ଉତ୍କଳ ସେବା ସମ୍ମାନ*",
+      description: "ସାମୁଦାୟିକ ବିକାଶ ସମିତି ଦ୍ୱାରା ଓଡ଼ିଶା ରଜ ପର୍ବରେ ପ୍ରଦାନ କରାଯିବ। ଉତ୍କଳ ସେବା ସମ୍ମାନ ସେହି ସବୁ ବ୍ୟକ୍ତିଙ୍କୁ ସ୍ୱୀକୃତି ଜଣାଯିବ, ଯେଉଁମାନେ ନିଜର ନିଷ୍ଠା, ଭକ୍ତି ଓ ନିରହଙ୍କମକ ସହାୟତା ଦ୍ୱାରା ଦିଲ୍ଲୀ ଏନସିଆରରେ ଜଗନ୍ନାଥ ମନ୍ଦିରର ନିର୍ମାଣରେ ମୁଖ୍ୟଭାବେ ଅବଦାନ ରଖିଛନ୍ତି। ଏହି ସମ୍ମାନ ଏହାକୁ ସମ୍ମାନିତ କରିବାପାଇଁ ଯେଉଁମାନେ ମନ୍ଦିର ନିର୍ମାଣ ସମୟରେ ଅଟୁଟ ଦୃଢ଼ତା ପ୍ରଦର୍ଶନ କରିଛନ୍ତି ଏବଂ ଆଧ୍ୟାତ୍ମିକ ଓ ସାମୁଦାୟିକ କାର୍ଯ୍ୟକଳାପକୁ ପୋଷଣ କରି, ଜଗନ୍ନାଥ ସଂସ୍କୃତିକୁ ଓଡ଼ିଶା ସୀମା ପାର କରି ପ୍ରସାର କରୁଛନ୍ତି।",
     },
     {
-      title: "୨. ଓଡିଶା ପ୍ରତିଭା ସମ୍ମାନ (Odisha Pratibha Samman)",
-      description: "ଓଡିଶା ପ୍ରତିଭା ସମ୍ମାନ ସେହି ଗରିମାମୟ ଓଡ଼ିଆ ବ୍ୟକ୍ତିବିଶେଷଙ୍କୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ କେନ୍ଦ୍ର ସରକାରୀ ସେବା ମାଧ୍ୟମରେ ଦେଶକୁ ନିଷ୍ଠା ଓ ସତ୍ୟନିଷ୍ଠା ସହିତ ସେବା କରିଛନ୍ତି। ସମାଜ ଓ ଜନସେବାରେ ତାଙ୍କର ମୂଲ୍ୟବାନ ଅବଦାନକୁ ଏହି ସମ୍ମାନ ସ୍ୱୀକାର କରେ।",
+      title: "୨. *ଓଡ଼ିଶା ପ୍ରତିଭା ସମ୍ମାନ*",
+      description: "ସାମୁଦାୟିକ ବିକାଶ ସମିତି ଦ୍ୱାରା ଓଡ଼ିଶା ରଜ ପର୍ବରେ ପ୍ରଦାନ କରାଯିବ, ଓଡ଼ିଶା ପ୍ରତିଭା ସମ୍ମାନ ସେହି ଓଡ଼ିଆ ପ୍ରତିଭାଶାଳୀ ବ୍ୟକ୍ତିମାନଙ୍କୁ ସମ୍ମାନ ଦିଆଯିବ ଯେଉଁମାନେ କେନ୍ଦ୍ର ସରକାର କିମ୍ବା ବେସରକାରୀ କ୍ଷେତ୍ରରେ ନିଷ୍ଠା ଓ ସତ୍ୟତା ସହିତ ଜାତୀୟ ସେବା କରିଛନ୍ତି। ଏହି ସମ୍ମାନ ସେମାନଙ୍କର ଉତ୍କୃଷ୍ଟ ସାର୍ବଜନୀନ ସେବା, ସାମାଜିକ ଉନ୍ନତି ଓ ଲୋକକଳ୍ୟାଣ ପ୍ରତି ଦୀର୍ଘକାଳୀନ ପ୍ରତିବଦ୍ଧତାକୁ ସ୍ୱୀକୃତି ଦେଇଅଛି ଯାହା ଓଡ଼ିଆ ସମୁଦାୟକୁ ଗର୍ବ ଆଣିଦେଇଛି।",
     },
     {
-      title: "୩. ଓଡିଶା ଗୌରବ ପୁରସ୍କାର (Odisha Gaurav Award)",
-      description: "ଓଡିଶା ଗୌରବ ପୁରସ୍କାର ଦିଲ୍ଲୀ NCR ଅଞ୍ଚଳରେ କାର୍ଯ୍ୟରତ ସେହି ଓଡ଼ିଆ ସଂଗଠନଗୁଡ଼ିକୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ ଓଡ଼ିଆ ସମୁଦାୟର ସମର୍ଥନ, ସମାଜସେବା ଓ ସାମ୍ପ୍ରଦାୟିକ ଉନ୍ନତି ପାଇଁ ଉଲ୍ଲେଖନୀୟ କାମ କରୁଛନ୍ତି। ତାଙ୍କର ନିରନ୍ତର ପ୍ରୟାସ ଓଡ଼ିଆ ସମୁଦାୟ ପାଇଁ ଗର୍ବର କାରଣ।",
+      title: "୩. *ଓଡ଼ିଶା ଗୌରବ ସମ୍ମାନ*",
+      description: "ସାମୁଦାୟିକ ବିକାଶ ସମିତି ଦ୍ୱାରା ଓଡ଼ିଶା ରଜ ପର୍ବରେ ପ୍ରଦାନ କରାଯିବ, ଓଡ଼ିଶା ଗୌରବ ସମ୍ମାନ ଦିଲ୍ଲୀ ଏନସିଆରରେ ଥିବା ସେହି ଓଡ଼ିଆ ସଂସ୍ଥାମାନଙ୍କୁ ସ୍ୱୀକାର କରାଯିବ ଯେଉଁମାନେ ଓଡ଼ିଆ ସମୁଦାୟକୁ ସମର୍ଥନ ଓ ଉନ୍ନତି କରିବାରେ ଅପୂର୍ବ ଅବଦାନ ରଖିଛନ୍ତି। ଏହି ସମ୍ମାନ ସାମୁଦାୟିକ ସେବା, ସାଂସ୍କୃତିକ କାର୍ଯ୍ୟକ୍ରମ ଓ ସମୁଦାୟ କଲ୍ୟାଣରେ ଦୀର୍ଘକାଳୀନ ଉତ୍କୃଷ୍ଟତାକୁ ପ୍ରଶଂସା କରାଯିବ।",
     },
     {
-      title: "୪. ଓଡିଶା ରତ୍ନ ପୁରସ୍କାର (Odisha Ratna Award)",
-      description: "ଓଡିଶା ରତ୍ନ ପୁରସ୍କାର ସେହି ବ୍ୟକ୍ତିବିଶେଷଙ୍କୁ ପ୍ରଦାନ କରାଯାଏ, ଯେଉଁମାନେ ଦିଲ୍ଲୀ NCR ରେ ଓଡ଼ିଶାର ସମୃଦ୍ଧ ସଂସ୍କୃତି, ପାରମ୍ପରିକତା ଓ ପବିତ୍ର ଜଗନ୍ନାଥ ସଂସ୍କୃତିର ପ୍ରଚାର ଓ ପ୍ରସାର ପାଇଁ ଅସାଧାରଣ ଅବଦାନ ରଖିଛନ୍ତି। ତାଙ୍କର ନିଷ୍ଠା, ସମର୍ପଣ ଓ ସଂସ୍କୃତି ପ୍ରତି ଅଟୁଟ ଭଲପାଇବା ଓଡ଼ିଆ ପରମ୍ପରାକୁ ଦେଶର ବିଭିନ୍ନ ସ୍ଥାନରେ ଉଜ୍ଜ୍ୱଳ କରିଛି। ଏହି ସମ୍ମାନ ତାଙ୍କର ଉଲ୍ଲେଖନୀୟ ଅବଦାନକୁ ସ୍ୱୀକାର କରି ଓଡ଼ିଶାର ଗୌରବ ଓ ଆତ୍ମପରିଚୟକୁ ଅଧିକ ସୁଦୃଢ଼ କରିବା ପାଇଁ ପ୍ରଦାନ କରାଯାଏ।",
+      title: "୪. *ଓଡ଼ିଶା ରତ୍ନ ସମ୍ମାନ*",
+      description: "ସାମୁଦାୟିକ ବିକାଶ ସମିତି ଦ୍ୱାରା ଓଡ଼ିଶା ରଜ ପର୍ବରେ ପ୍ରଦାନ କରାଯିବ, ଓଡ଼ିଶା ରତ୍ନ ସମ୍ମାନ ସେହି ବ୍ୟକ୍ତିମାନେକୁ ଦିଆଯିବ ଯେଉଁମାନେ ଓଡ଼ିଶାର ସଂସ୍କୃତି, ଐତିହ୍ୟ ଓ ପବିତ୍ର ଜଗନ୍ନାଥ ସଂସ୍କୃତିର ପ୍ରଚାର-ପ୍ରସାର କରିବାରେ ଓଡ଼ିଶା ଏବଂ ଦିଲ୍ଲୀ ଏନସିଆରରେ ଅପୂର୍ବ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ସମ୍ମାନ ସେମାନଙ୍କର ସେଇ ଉତ୍ସାହ, ନିଷ୍ଠା ଓ ସଂସ୍କୃତିକ ପ୍ରତି ନିସ୍ଵାର୍ଥ ଯୋଗଦାନକୁ ଉଦ୍‌ଘାଟିତ କରିବ।",
     },
   ],
   english: [
     {
-      title: "1. Utkal Seva Samman",
-      description: "Utkal Seva Samman is presented to individuals whose dedication, devotion, and selfless support played a significant role in the establishment of the Jagannath Temple in Noida, Delhi NCR. This award honors those who stood with unwavering commitment during the temple's journey and continue to support its spiritual and community activities.",
+      title: "1. *Utkal Seva Samman*",
+      description: "Presented by Samudayik Vikas Samiti on the occasion of Odisha Raja Parba, the Utkal Seva Samman recognizes individuals whose dedication, devotion, and selfless support were instrumental in establishing the Jagannath Temple in Delhi NCR. This award honors those who stood with unwavering commitment during the temple's founding and who continue to nurture spiritual and community activities, spreading Jagannath Sanskriti beyond Odisha.",
     },
     {
-      title: "2. Odisha Pratibha Samman",
-      description: "Odisha Pratibha Samman honors distinguished Odia individuals who have served the nation with integrity and dedication through Central Government service. This award recognizes their valuable contributions to public service and their commitment to the welfare and development of society.",
+      title: "2. *Odisha Pratibha Samman*",
+      description: "Presented by Samudayik Vikas Samiti on Odisha Raja Parba, the Odisha Pratibha Samman honors distinguished Odia individuals who have served the nation with integrity and dedication in Central government or private service. The award recognizes their outstanding public service and sustained commitment to social welfare and development, bringing pride to the Odia community.",
     },
     {
-      title: "3. Odisha Gaurav Award",
-      description: "Odisha Gaurav Award recognizes Odia organizations in Delhi NCR that have made remarkable contributions in supporting and uplifting the Odia community. Their continuous efforts in social service, cultural activities, and community welfare bring pride and strength to the Odia diaspora.",
+      title: "3. *Odisha Gaurav Award*",
+      description: "Presented by Samudayik Vikas Samiti on Odisha Raja Parba, the Odisha Gaurav Award recognizes Odia organizations in the Delhi NCR that have made remarkable contributions to supporting and uplifting the Odia community. This award celebrates sustained excellence in social service, cultural initiatives, and community welfare that strengthen the Odia diaspora.",
     },
     {
-      title: "4. Odisha Ratna Award",
-      description: "Odisha Ratna Award is presented to individuals who have made exceptional efforts in promoting Odisha's culture, heritage, and the sacred Jagannath Sanskriti in Delhi NCR. This honor celebrates their dedication in spreading the spiritual and cultural identity of Odisha beyond its borders.",
+      title: "4. *Odisha Ratna Award*",
+      description: "Presented by Samudayik Vikas Samiti on Odisha Raja Parba, the Odisha Ratna Award honors individuals who have made exceptional contributions to promoting Odisha's culture, heritage, and the sacred Jagannath Sanskriti in Odisha, Delhi NCR. The award celebrates their dedication to preserving and propagating the spiritual and cultural identity of Odisha beyond its borders.",
     },
   ],
   hindi: [
     {
-      title: "1. उत्कल सेवा सम्मान (Utkal Seva Samman)",
-      description: "उत्कल सेवा सम्मान उन व्यक्तियों को प्रदान किया जाता है जिन्होंने नोएडा, दिल्ली NCR में श्री जगन्नाथ मंदिर की स्थापना और विकास में अपनी निष्ठा, भक्ति और निःस्वार्थ सेवा के माध्यम से महत्वपूर्ण योगदान दिया है। यह सम्मान उन महान व्यक्तियों को समर्पित है जिन्होंने मंदिर के निर्माण की यात्रा में अटूट समर्पण के साथ सहयोग किया और आज भी इसके आध्यात्मिक एवं सामाजिक कार्यों में अपना समर्थन प्रदान कर रहे हैं।",
+      title: "1. *उत्कल सेवा सम्मान*",
+      description: "सामुदायिक विकास समिति द्वारा ओडिशा रज पर्व के अवसर पर प्रस्तुत, उत्कल सेवा सम्मान उन व्यक्तियों को सम्मानित करता है जिनके समर्पण, भक्ति और निःस्वार्थ सहयोग ने दिल्ली एनसीआर में जगन्नाथ मंदिर की स्थापना में महत्वपूर्ण भूमिका निभाई। यह सम्मान उन लोगों को दिया जायेगा जिन्होंने मंदिर की स्थापना के दौरान अटूट प्रतिबद्धता दिखाई और जो आज भी आध्यात्मिक एवं सामुदायिक गतिविधियों को संवारते हुए जगन्नाथ संस्कृति को ओडिशा से परे फैलाने का कार्य कर रहे हैं।",
     },
     {
-      title: "2. ओडिशा प्रतिभा सम्मान (Odisha Pratibha Samman)",
-      description: "ओडिशा प्रतिभा सम्मान उन विशिष्ट ओड़िया व्यक्तियों को प्रदान किया जाता है जिन्होंने केंद्रीय सरकारी सेवाओं में रहकर राष्ट्र की सेवा निष्ठा, ईमानदारी और समर्पण के साथ की है। यह सम्मान उनके उत्कृष्ट सार्वजनिक सेवा और समाज के विकास में उनके महत्वपूर्ण योगदान को मान्यता देता है।",
+      title: "2. *ओडिशा प्रतिभा सम्मान*",
+      description: "सामुदायिक विकास समिति द्वारा ओडिशा रज पर्व पर प्रस्तुत, ओडिशा प्रतिभा सम्मान उन प्रतिष्ठित ओडिया व्यक्तियों को दिया जाता है जिन्होंने केंद्र सरकार या निजी क्षेत्र में ईमानदारी और समर्पण के साथ देश सेवा की है। यह पुरस्कार उनके उत्कृष्ट सार्वजनिक सेवा और सामाजिक कल्याण व विकास के प्रति दीर्घकालिक प्रतिबद्धता को पहचान देता है, जिससे ओडिशा समुदाय को गौरव होता है।",
     },
     {
-      title: "3. ओडिशा गौरव पुरस्कार (Odisha Gaurav Award)",
-      description: "ओडिशा गौरव पुरस्कार दिल्ली NCR में कार्यरत उन ओड़िया संगठनों को प्रदान किया जाता है जिन्होंने ओड़िया समुदाय के सहयोग, सामाजिक सेवा, सांस्कृतिक संरक्षण और सामुदायिक विकास के लिए उल्लेखनीय कार्य किए हैं। उनके निरंतर प्रयास ओड़िया समाज की एकता, गौरव और प्रगति को सुदृढ़ करते हैं।",
+      title: "3. *ओडिशा गौरव पुरस्कार*",
+      description: "सामुदायिक विकास समिति द्वारा ओडिशा रज पर्व पर प्रस्तुत, ओडिशा गौरव पुरस्कार दिल्ली एनसीआर में स्थित उन ओडिया संस्थाओं को सम्मानित करता है जिन्होंने ओडिशा समुदाय के समर्थन और उत्थान में उल्लेखनीय योगदान दिया है। यह पुरस्कार सामाजिक सेवा, सांस्कृतिक पहलों और सामुदायिक कल्याण में उनकी निरंतर उत्कृष्टता को सम्मानित करता है, जिससे ओडिशा प्रवासी समाज मजबूत होता है।",
     },
     {
-      title: "4. ओडिशा रत्न पुरस्कार (Odisha Ratna Award)",
-      description: "ओडिशा रत्न पुरस्कार उन विशिष्ट व्यक्तियों को प्रदान किया जाता है जिन्होंने दिल्ली NCR में ओडिशा की समृद्ध संस्कृति, परंपरा और पवित्र जगन्नाथ संस्कृति के प्रचार-प्रसार में असाधारण योगदान दिया है। उनके समर्पण और प्रयासों ने ओडिशा की आध्यात्मिक और सांस्कृतिक पहचान को व्यापक स्तर पर प्रतिष्ठित किया है और ओड़िया समाज के गौरव को और अधिक सशक्त बनाया है।",
+      title: "4. *ओडिशा रत्न सम्मान*",
+      description: "सामुदायिक विकास समिति द्वारा ओडिशा रज पर्व पर प्रस्तुत, ओडिशा रत्न सम्मान उन व्यक्तियों को दिया जाता है जिन्होंने ओडिशा की संस्कृति, विरासत और पवित्र जगन्नाथ संस्कृति को ओडिशा तथा दिल्ली एनसीआर में प्रसार एवं संवर्धन करने में असाधारण योगदान दिया है। यह सम्मान उनके समर्पण और निःस्वार्थ योगदान के माध्यम से ओडिशा की आध्यात्मिक एवं सांस्कृतिक पहचान के संरक्षण व प्रचार को सराहता है।",
     },
   ],
 };

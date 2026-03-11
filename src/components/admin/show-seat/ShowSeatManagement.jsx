@@ -15,6 +15,7 @@ export default function ShowSeatsPage() {
   const { admin } = useAdminAuthStore();
   const { 
     seats,
+    showSettings,
     loading,
     dateLoading,
     selectedDate,
@@ -294,8 +295,8 @@ export default function ShowSeatsPage() {
       ) : viewMode === 'grid' ? (
         <ShowSeatGridView 
           seats={filteredSeats}
+          showSettings={showSettings}
           onSeatClick={(seat) => useShowSeatManagementStore.getState().handleSeatClick(seat)}
-          selectedSeats={selectedSeats}
           getSeatColor={(seat) => useShowSeatManagementStore.getState().getSeatColor(seat)}
         />
       ) : (
@@ -323,11 +324,7 @@ export default function ShowSeatsPage() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 md:w-4 md:h-4 rounded bg-emerald-400"></div>
-            <span className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Block C Available</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 md:w-4 md:h-4 rounded bg-teal-300"></div>
-            <span className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Block D Available</span>
+            <span className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Regular Available</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 md:w-4 md:h-4 rounded bg-blue-500"></div>

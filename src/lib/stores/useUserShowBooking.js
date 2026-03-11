@@ -19,6 +19,12 @@ import { toast } from 'react-hot-toast';
 import useAuthStore from './useAuthStore';
 import { formatDateKey } from '@/utils/dateUtils';
 import { calculatePriceBreakdown, getNextBulkMilestone } from '@/utils/pricingUtils';
+import {
+  getBlockPrice,
+  getSeatBlock,
+  normalizeShowPricing,
+  normalizeShowSettings
+} from '@/utils/showSeatUtils';
 
 // Seat types configuration
 const SEAT_TYPES = {
@@ -45,11 +51,7 @@ const useUserShowBookingStore = create(
         emergencyContact: ''
       },
       priceSettings: {
-        seatTypes: {
-          VIP: { price: 1200 },
-          REGULAR_C: { price: 600 },
-          REGULAR_D: { price: 400 }
-        },
+        blockPrices: {},
         earlyBirdDiscounts: [],
         bulkBookingDiscounts: [],
         taxRate: 0
@@ -62,8 +64,27 @@ const useUserShowBookingStore = create(
       
       // Real-time listeners
       unsubscribePricing: null,
+      unsubscribePricingMirror: null,
       unsubscribeShowSettings: null,
       unsubscribeAvailability: null,
+      rawShowPricing: {},
+      rawConsolidatedShowPricing: {},
+
+      applyMergedPricing: () => {
+        const { rawShowPricing, rawConsolidatedShowPricing, showSettings } = get();
+        const mergedPricing = {
+          ...rawConsolidatedShowPricing,
+          ...rawShowPricing,
+          blockPrices: {
+            ...(rawConsolidatedShowPricing?.blockPrices || {}),
+            ...(rawShowPricing?.blockPrices || {})
+          }
+        };
+
+        set({
+          priceSettings: normalizeShowPricing(mergedPricing, showSettings)
+        });
+      },
 
       // Initialize all listeners
       initializeListeners: () => {
@@ -81,23 +102,8 @@ const useUserShowBookingStore = create(
         const unsubscribe = onSnapshot(pricingRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
-            const seatTypes = data.seatTypes || {};
-            const blockAPrice = Number(seatTypes.blockA?.price || 0);
-            const blockBPrice = Number(seatTypes.blockB?.price || 0);
-            const blockCPrice = Number(seatTypes.blockC?.price || 0);
-            const blockDPrice = Number(seatTypes.blockD?.price || 0);
             const newPriceSettings = {
-              seatTypes: {
-                VIP: { 
-                  price: blockAPrice || blockBPrice || 1200 
-                },
-                REGULAR_C: { 
-                  price: blockCPrice || 600 
-                },
-                REGULAR_D: { price: blockDPrice || 400 }
-              },
-              earlyBirdDiscounts: data.earlyBirdDiscounts || [],
-              bulkBookingDiscounts: data.bulkBookingDiscounts || [],
+              ...normalizeShowPricing(data, get().showSettings),
               taxRate: Number(data.taxRate || 0)
             };
             
@@ -115,17 +121,64 @@ const useUserShowBookingStore = create(
         set({ unsubscribePricing: unsubscribe });
       },
 
+      setupPricingListener: () => {
+        const pricingRef = doc(db, 'settings', 'showPricing');
+        const consolidatedPricingRef = doc(db, 'settings', 'pricing');
+
+        const unsubscribe = onSnapshot(pricingRef, (docSnap) => {
+          set({ rawShowPricing: docSnap.exists() ? docSnap.data() : {} });
+          get().applyMergedPricing();
+
+          if (get().selectedSeats.length > 0) {
+            toast.success('Show pricing updated', { duration: 3000 });
+          }
+        }, (error) => {
+          console.error('Error listening to show pricing:', error);
+        });
+
+        const unsubscribeMirror = onSnapshot(consolidatedPricingRef, (docSnap) => {
+          set({ rawConsolidatedShowPricing: docSnap.exists() ? (docSnap.data()?.show || {}) : {} });
+          get().applyMergedPricing();
+        }, (error) => {
+          console.error('Error listening to consolidated show pricing:', error);
+        });
+
+        set({ unsubscribePricing: unsubscribe, unsubscribePricingMirror: unsubscribeMirror });
+      },
+
       // Setup show settings listener
       setupShowSettingsListener: () => {
         const showSettingsRef = doc(db, 'settings', 'shows');
         
         const unsubscribe = onSnapshot(showSettingsRef, (docSnap) => {
           if (docSnap.exists()) {
-            const data = docSnap.data();
+            const data = normalizeShowSettings(docSnap.data());
             set({ 
               showSettings: data,
               eventSettings: data.eventDates || null
             });
+            set((state) => ({
+              priceSettings: normalizeShowPricing(state.priceSettings, data)
+            }));
+          }
+        }, (error) => {
+          console.error('Error listening to show settings:', error);
+        });
+
+        set({ unsubscribeShowSettings: unsubscribe });
+      },
+
+      setupShowSettingsListener: () => {
+        const showSettingsRef = doc(db, 'settings', 'shows');
+        
+        const unsubscribe = onSnapshot(showSettingsRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = normalizeShowSettings(docSnap.data());
+            set({
+              showSettings: data,
+              eventSettings: data.eventDates || null
+            });
+            get().applyMergedPricing();
           }
         }, (error) => {
           console.error('Error listening to show settings:', error);
@@ -163,34 +216,23 @@ const useUserShowBookingStore = create(
         if (unsubscribeAvailability) unsubscribeAvailability();
       },
 
+      cleanupListeners: () => {
+        const {
+          unsubscribePricing,
+          unsubscribePricingMirror,
+          unsubscribeShowSettings,
+          unsubscribeAvailability
+        } = get();
+        if (unsubscribePricing) unsubscribePricing();
+        if (unsubscribePricingMirror) unsubscribePricingMirror();
+        if (unsubscribeShowSettings) unsubscribeShowSettings();
+        if (unsubscribeAvailability) unsubscribeAvailability();
+      },
+
       // Get seat price based on seat ID
       getSeatPrice: (seatId) => {
         const { priceSettings, showSettings } = get();
-        const seatStr = String(seatId);
-        const blockId = seatStr.split('-')[0];
-        const premiumBlocks = showSettings?.seatLayout?.premiumBlocks || [];
-        const regularBlocks = showSettings?.seatLayout?.regularBlocks || [];
-        const premiumBlock = premiumBlocks.find((block) => block.id === blockId);
-        const regularBlock = regularBlocks.find((block) => block.id === blockId);
-
-        // Price Settings must be the source of truth for user-facing seat prices.
-        if (seatStr.startsWith('A-') || seatStr.startsWith('B-')) {
-          const vipPrice = Number(priceSettings?.seatTypes?.VIP?.price);
-          if (vipPrice > 0) return vipPrice;
-          if (premiumBlock?.price != null) return Number(premiumBlock.price) || 1200;
-          return 1200;
-        } else if (seatStr.startsWith('C-')) {
-          const regularCPrice = Number(priceSettings?.seatTypes?.REGULAR_C?.price);
-          if (regularCPrice > 0) return regularCPrice;
-          if (regularBlock?.price != null) return Number(regularBlock.price) || 600;
-          return 600;
-        } else if (seatStr.startsWith('D-')) {
-          const regularDPrice = Number(priceSettings?.seatTypes?.REGULAR_D?.price);
-          if (regularDPrice > 0) return regularDPrice;
-          if (regularBlock?.price != null) return Number(regularBlock.price) || 400;
-          return 400;
-        }
-        return 500;
+        return getBlockPrice({ showPricing: priceSettings, showSettings, seatId, fallbackPrice: 0 });
       },
 
       // Get seat status
@@ -214,13 +256,11 @@ const useUserShowBookingStore = create(
           case 'blocked': return 'bg-gray-600 cursor-not-allowed';
           default:
             const seatStr = String(seatId);
-            if (seatStr.startsWith('A-') || seatStr.startsWith('B-')) {
+            const block = getSeatBlock(get().showSettings, seatStr);
+            if (block?.type === 'premium') {
               return 'bg-gradient-to-br from-amber-300 to-yellow-400 hover:from-amber-400 hover:to-yellow-500';
-            } else if (seatStr.startsWith('C-')) {
-              return 'bg-emerald-400 hover:bg-emerald-500';
-            } else {
-              return 'bg-teal-300 hover:bg-teal-400';
             }
+            return 'bg-emerald-400 hover:bg-emerald-500';
         }
       },
 
@@ -536,7 +576,10 @@ const useUserShowBookingStore = create(
             lastUpdated: serverTimestamp()
           }, { merge: true });
 
-          set({ selectedSeats: [], loading: false });
+          set((state) => ({
+            loading: false,
+            selectedSeats: paymentDetails.method === 'pending_payment' ? state.selectedSeats : []
+          }));
           
           return { success: true, bookingId };
 

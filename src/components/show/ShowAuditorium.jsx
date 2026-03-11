@@ -1,17 +1,8 @@
 "use client";
-import { useState } from 'react';
-import { ChevronDown, Info, ZoomIn, ZoomOut } from 'lucide-react';
-import useUserShowBookingStore from '@/lib/stores/useUserShowBooking';
-
-const DEFAULT_PREMIUM_BLOCKS = [
-  { id: 'A', name: 'Block A', maxRows: 8, maxPairsPerRow: 7, isActive: true },
-  { id: 'B', name: 'Block B', maxRows: 8, maxPairsPerRow: 7, isActive: true }
-];
-
-const DEFAULT_REGULAR_BLOCKS = [
-  { id: 'C', name: 'Block C', maxRows: 25, maxSeatsPerRow: 15, isActive: true },
-  { id: 'D', name: 'Block D', maxRows: 25, maxSeatsPerRow: 15, isActive: true }
-];
+import { useState } from "react";
+import { ChevronDown, Info, ZoomIn, ZoomOut } from "lucide-react";
+import useUserShowBookingStore from "@/lib/stores/useUserShowBooking";
+import { getAllShowBlocks } from "@/utils/showSeatUtils";
 
 export default function ShowAuditorium() {
   const {
@@ -24,138 +15,75 @@ export default function ShowAuditorium() {
   } = useUserShowBookingStore();
 
   const [zoomLevel, setZoomLevel] = useState(1);
+  const blocks = getAllShowBlocks(showSettings, { includeInactive: false });
+  const premiumBlocks = blocks.filter((block) => block.type === "premium");
+  const regularBlocks = blocks.filter((block) => block.type === "regular");
 
-  const premiumBlocks = (showSettings?.seatLayout?.premiumBlocks || DEFAULT_PREMIUM_BLOCKS)
-    .filter((block) => block?.isActive !== false);
-  const regularBlocks = (showSettings?.seatLayout?.regularBlocks || DEFAULT_REGULAR_BLOCKS)
-    .filter((block) => block?.isActive !== false);
-
-  const generateSeats = () => {
-    const seats = {};
-
-    premiumBlocks.forEach((block) => {
-      const rows = Number(block.maxRows) || 0;
-      const pairs = Number(block.maxPairsPerRow) || 0;
-      for (let row = 1; row <= rows; row++) {
-        for (let pair = 0; pair < pairs; pair++) {
-          const letter = String.fromCharCode(65 + pair);
-          [1, 2].forEach((pos) => {
-            const seatId = `${block.id}-R${row}-${letter}${pos}`;
-            seats[seatId] = { id: seatId };
-          });
+  const getFreeSeatsCount = () =>
+    blocks.reduce((acc, block) => {
+      let count = 0;
+      if (block.type === "premium") {
+        for (let row = 1; row <= block.maxRows; row++) {
+          for (let pair = 0; pair < block.maxPairsPerRow; pair++) {
+            const letter = String.fromCharCode(65 + pair);
+            [1, 2].forEach((position) => {
+              const seatId = `${block.id}-R${row}-${letter}${position}`;
+              if (getSeatStatus(seatId) === "available") count += 1;
+            });
+          }
+        }
+      } else {
+        for (let row = 1; row <= block.maxRows; row++) {
+          for (let seat = 1; seat <= block.maxSeatsPerRow; seat++) {
+            const seatId = `${block.id}-R${row}-S${seat}`;
+            if (getSeatStatus(seatId) === "available") count += 1;
+          }
         }
       }
-    });
-
-    regularBlocks.forEach((block) => {
-      const rows = Number(block.maxRows) || 0;
-      const seatsPerRow = Number(block.maxSeatsPerRow) || 0;
-      for (let row = 1; row <= rows; row++) {
-        for (let seat = 1; seat <= seatsPerRow; seat++) {
-          const seatId = `${block.id}-R${row}-S${seat}`;
-          seats[seatId] = { id: seatId };
-        }
-      }
-    });
-
-    return seats;
-  };
-
-  const allSeats = generateSeats();
-
-  const getFreeSeatsCount = () => {
-    const counts = {};
-    Object.keys(allSeats).forEach((seatId) => {
-      if (getSeatStatus(seatId) === 'available') {
-        const section = seatId.charAt(0);
-        counts[section] = (counts[section] || 0) + 1;
-      }
-    });
-    return counts;
-  };
+      acc[block.id] = count;
+      return acc;
+    }, {});
 
   const freeSeats = getFreeSeatsCount();
-  const totalFree = Object.values(freeSeats).reduce((a, b) => a + b, 0);
+  const totalFree = Object.values(freeSeats).reduce((sum, count) => sum + count, 0);
+  const getDisplayPrice = (amount) => amount <= 0 ? <span className="font-extrabold text-emerald-700">FREE</span> : `Rs ${amount.toLocaleString()}`;
 
-  const renderVIPSection = () => {
-    if (premiumBlocks.length === 0) return null;
-    const hasTwoColumns = premiumBlocks.length === 2;
-    const maxRows = Math.max(...premiumBlocks.map((block) => Number(block.maxRows) || 0));
-    const rows = Array.from({ length: maxRows }, (_, i) => i + 1);
+  const renderPremiumBlock = (block) => {
+    const rows = Array.from({ length: block.maxRows }, (_, index) => index + 1);
 
     return (
-      <div className="mb-8">
+      <div key={block.id} className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
         <div className="text-center mb-4">
-          <h3 className="text-xl font-bold text-amber-700">Premium Seating</h3>
-          <p className="text-sm text-gray-600">
-            From Rs {getSeatPrice(`${premiumBlocks[0].id}-R1-A1`).toLocaleString()} per seat
-          </p>
-        </div>
-
-        <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
-          {premiumBlocks.map((block) => (
-            <div key={block.id} className="px-6 py-2 bg-amber-50 border-2 border-amber-300 rounded-lg font-bold text-amber-800">
-              {block.name || `Block ${block.id}`}
-            </div>
-          ))}
+          <h3 className="text-lg font-bold text-amber-700">{block.name}</h3>
+          <p className="text-sm text-gray-600">From {getDisplayPrice(getSeatPrice(`${block.id}-R1-A1`))}</p>
         </div>
 
         <div className="space-y-2">
           {rows.map((row) => (
-            <div key={row} className="flex items-center justify-center gap-4 flex-wrap">
-              {premiumBlocks.map((block, index) => {
-                const blockRows = Number(block.maxRows) || 0;
-                const pairCount = Number(block.maxPairsPerRow) || 0;
-                const blockContent = row > blockRows
-                  ? <div key={`${block.id}-${row}`} className="min-w-[140px] h-6" />
-                  : (
-                    <div key={`${block.id}-${row}`} className="flex gap-1">
-                      {Array.from({ length: pairCount }, (_, i) => String.fromCharCode(65 + i)).map((letter) => (
-                        <div key={`${block.id}-${letter}`} className="flex gap-0.5">
-                          {[1, 2].map((pos) => {
-                            const seatId = `${block.id}-R${row}-${letter}${pos}`;
-                            if (!allSeats[seatId]) return null;
-                            const isSelected = selectedSeats.includes(seatId);
-                            const status = getSeatStatus(seatId);
-                            return (
-                              <button
-                                key={seatId}
-                                onClick={() => toggleSeat(seatId)}
-                                disabled={status !== 'available' && !isSelected}
-                                className={`
-                                  w-7 h-6 rounded-md text-xs font-bold transition-all
-                                  ${getSeatColor(seatId)}
-                                  ${status === 'available' || isSelected ? 'hover:scale-105 cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                                  border border-amber-200 shadow-sm
-                                `}
-                              >
-                                {letter}{pos}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </div>
-                  );
+            <div key={`${block.id}-${row}`} className="flex items-center justify-center gap-3 flex-wrap">
+              <div className="flex gap-1">
+                {Array.from({ length: block.maxPairsPerRow }, (_, pairIndex) => String.fromCharCode(65 + pairIndex)).map((letter) => (
+                  <div key={`${block.id}-${letter}`} className="flex gap-0.5">
+                    {[1, 2].map((position) => {
+                      const seatId = `${block.id}-R${row}-${letter}${position}`;
+                      const isSelected = selectedSeats.includes(seatId);
+                      const status = getSeatStatus(seatId);
 
-                if (hasTwoColumns && index === 0) {
-                  return (
-                    <div key={`vip-left-${row}`} className="flex items-center gap-4">
-                      {blockContent}
-                      <div className="w-12 text-center font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded">
-                        R{row}
-                      </div>
-                    </div>
-                  );
-                }
-
-                return blockContent;
-              })}
-              {!hasTwoColumns && (
-                <div className="w-12 text-center font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded">
-                  R{row}
-                </div>
-              )}
+                      return (
+                        <button
+                          key={seatId}
+                          onClick={() => toggleSeat(seatId)}
+                          disabled={status !== "available" && !isSelected}
+                          className={`w-7 h-6 rounded-md text-xs font-bold transition-all border border-amber-200 shadow-sm ${getSeatColor(seatId)} ${status === "available" || isSelected ? "hover:scale-105 cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+                        >
+                          {letter}{position}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+              <div className="w-12 text-center font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded">R{row}</div>
             </div>
           ))}
         </div>
@@ -163,89 +91,40 @@ export default function ShowAuditorium() {
     );
   };
 
-  const renderRegularSection = () => {
-    if (regularBlocks.length === 0) return null;
-    const hasTwoColumns = regularBlocks.length === 2;
-    const maxRows = Math.max(...regularBlocks.map((block) => Number(block.maxRows) || 0));
-    const rows = Array.from({ length: maxRows }, (_, i) => i + 1);
+  const renderRegularBlock = (block, index) => {
+    const rows = Array.from({ length: block.maxRows }, (_, rowIndex) => rowIndex + 1);
+    const accentClass = index % 2 === 0 ? "border-emerald-300 bg-emerald-50/60" : "border-teal-300 bg-teal-50/60";
+    const badgeClass = index % 2 === 0 ? "text-emerald-800" : "text-teal-800";
 
     return (
-      <div>
+      <div key={block.id} className={`rounded-xl border p-4 ${accentClass}`}>
         <div className="text-center mb-4">
-          <h3 className="text-xl font-bold text-emerald-700">Regular Seating</h3>
-          <p className="text-sm text-gray-600">
-            {regularBlocks.map((block) => `${block.name || `Block ${block.id}`}: Rs ${getSeatPrice(`${block.id}-R1-S1`).toLocaleString()}`).join(' | ')}
-          </p>
-        </div>
-
-        <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
-          {regularBlocks.map((block, index) => (
-            <div
-              key={block.id}
-              className={`px-6 py-2 border-2 rounded-lg font-bold ${
-                index % 2 === 0
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                  : 'bg-teal-50 border-teal-300 text-teal-800'
-              }`}
-            >
-              {block.name || `Block ${block.id}`}
-            </div>
-          ))}
+          <h3 className={`text-lg font-bold ${badgeClass}`}>{block.name}</h3>
+          <p className="text-sm text-gray-600">From {getDisplayPrice(getSeatPrice(`${block.id}-R1-S1`))}</p>
         </div>
 
         <div className="space-y-2">
           {rows.map((row) => (
-            <div key={row} className="flex items-center justify-center gap-4 flex-wrap">
-              {regularBlocks.map((block, index) => {
-                const blockRows = Number(block.maxRows) || 0;
-                const seatsCount = Number(block.maxSeatsPerRow) || 0;
-                const blockContent = row > blockRows
-                  ? <div key={`${block.id}-${row}`} className="min-w-[140px] h-5" />
-                  : (
-                    <div key={`${block.id}-${row}`} className="flex gap-1">
-                      {Array.from({ length: seatsCount }, (_, i) => i + 1).map((seat) => {
-                        const seatId = `${block.id}-R${row}-S${seat}`;
-                        if (!allSeats[seatId]) return null;
-                        const isSelected = selectedSeats.includes(seatId);
-                        const status = getSeatStatus(seatId);
-                        const borderClass = index % 2 === 0 ? 'border-emerald-200' : 'border-teal-200';
-                        return (
-                          <button
-                            key={seatId}
-                            onClick={() => toggleSeat(seatId)}
-                            disabled={status !== 'available' && !isSelected}
-                            className={`
-                              w-5 h-5 rounded text-xs font-bold transition-all
-                              ${getSeatColor(seatId)}
-                              ${status === 'available' || isSelected ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                              ${borderClass} border shadow-sm
-                            `}
-                          >
-                            {seat}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  );
+            <div key={`${block.id}-${row}`} className="flex items-center justify-center gap-3 flex-wrap">
+              <div className="flex gap-1">
+                {Array.from({ length: block.maxSeatsPerRow }, (_, seatIndex) => seatIndex + 1).map((seat) => {
+                  const seatId = `${block.id}-R${row}-S${seat}`;
+                  const isSelected = selectedSeats.includes(seatId);
+                  const status = getSeatStatus(seatId);
 
-                if (hasTwoColumns && index === 0) {
                   return (
-                    <div key={`regular-left-${row}`} className="flex items-center gap-4">
-                      {blockContent}
-                      <div className="w-10 text-center text-xs font-bold text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
-                        R{row}
-                      </div>
-                    </div>
+                    <button
+                      key={seatId}
+                      onClick={() => toggleSeat(seatId)}
+                      disabled={status !== "available" && !isSelected}
+                      className={`w-5 h-5 rounded text-xs font-bold transition-all border shadow-sm ${getSeatColor(seatId)} ${status === "available" || isSelected ? "hover:scale-110 cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+                    >
+                      {seat}
+                    </button>
                   );
-                }
-
-                return blockContent;
-              })}
-              {!hasTwoColumns && (
-                <div className="w-10 text-center text-xs font-bold text-gray-600 bg-gray-100 px-1 py-0.5 rounded">
-                  R{row}
-                </div>
-              )}
+                })}
+              </div>
+              <div className="w-10 text-center text-xs font-bold text-gray-600 bg-gray-100 px-1 py-0.5 rounded">R{row}</div>
             </div>
           ))}
         </div>
@@ -259,17 +138,11 @@ export default function ShowAuditorium() {
         <h2 className="text-xl font-bold text-gray-900">Auditorium Layout</h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">Zoom:</span>
-          <button
-            onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
-            className="p-1.5 bg-gray-100 rounded hover:bg-gray-200"
-          >
+          <button onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))} className="p-1.5 bg-gray-100 rounded hover:bg-gray-200">
             <ZoomOut className="w-4 h-4" />
           </button>
           <span className="text-sm text-gray-600">{Math.round(zoomLevel * 100)}%</span>
-          <button
-            onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.1))}
-            className="p-1.5 bg-gray-100 rounded hover:bg-gray-200"
-          >
+          <button onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.1))} className="p-1.5 bg-gray-100 rounded hover:bg-gray-200">
             <ZoomIn className="w-4 h-4" />
           </button>
         </div>
@@ -277,15 +150,13 @@ export default function ShowAuditorium() {
 
       <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
         <div className="flex flex-wrap items-center justify-center gap-4">
-          {Object.entries(freeSeats).map(([section, count]) => (
-            <div key={section} className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg">
+          {blocks.map((block) => (
+            <div key={block.id} className="flex items-center gap-2 px-3 py-2 bg-amber-100 rounded-lg">
               <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
-              <span className="font-semibold text-amber-800">{section}: {count}</span>
+              <span className="font-semibold text-amber-800">{block.id}: {freeSeats[block.id] || 0}</span>
             </div>
           ))}
-          <div className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold">
-            Total: {totalFree}
-          </div>
+          <div className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold">Total: {totalFree}</div>
         </div>
       </div>
 
@@ -308,10 +179,7 @@ export default function ShowAuditorium() {
         </div>
       </div>
 
-      <div
-        className="overflow-auto"
-        style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center' }}
-      >
+      <div className="overflow-auto" style={{ transform: `scale(${zoomLevel})`, transformOrigin: "top center" }}>
         <div className="min-w-max pb-4">
           <div className="text-center mb-6">
             <div className="inline-block px-12 py-3 bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-dashed border-yellow-400 rounded-lg">
@@ -319,11 +187,33 @@ export default function ShowAuditorium() {
             </div>
           </div>
 
-          {renderVIPSection()}
-          <div className="flex justify-center my-4">
-            <div className="w-3/4 h-px bg-gray-300"></div>
-          </div>
-          {renderRegularSection()}
+          {premiumBlocks.length > 0 && (
+            <div className="space-y-4 mb-6">
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-amber-700">Premium Seating</h3>
+              </div>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {premiumBlocks.map(renderPremiumBlock)}
+              </div>
+            </div>
+          )}
+
+          {premiumBlocks.length > 0 && regularBlocks.length > 0 && (
+            <div className="flex justify-center my-4">
+              <div className="w-3/4 h-px bg-gray-300"></div>
+            </div>
+          )}
+
+          {regularBlocks.length > 0 && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-emerald-700">Regular Seating</h3>
+              </div>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {regularBlocks.map((block, index) => renderRegularBlock(block, index))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -333,7 +223,7 @@ export default function ShowAuditorium() {
             <Info className="w-4 h-4 text-rose-500" />
             <span className="text-rose-600 text-xs">Scroll down to continue</span>
             <button
-              onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+              onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}
               className="w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center hover:bg-rose-600 transition-colors"
             >
               <ChevronDown className="w-4 h-4 text-white animate-bounce" />

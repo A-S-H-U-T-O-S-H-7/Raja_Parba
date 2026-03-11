@@ -5,6 +5,12 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import useAdminAuthStore from './useAdminAuthStore';
 import adminLogger from '@/lib/adminLogger';
+import {
+  DEFAULT_PREMIUM_BLOCKS,
+  DEFAULT_REGULAR_BLOCKS,
+  normalizeShowSettings,
+  sanitizeBlockId
+} from '@/utils/showSeatUtils';
 
 const useSystemSettingsStore = create((set, get) => ({
   // State
@@ -34,14 +40,8 @@ const useSystemSettingsStore = create((set, get) => ({
     },
     shows: [],
     seatLayout: {
-      premiumBlocks: [
-        { id: 'A', name: 'Block A', maxRows: 8, maxPairsPerRow: 7, price: 1000, isActive: true },
-        { id: 'B', name: 'Block B', maxRows: 8, maxPairsPerRow: 7, price: 1000, isActive: true }
-      ],
-      regularBlocks: [
-        { id: 'C', name: 'Block C', maxRows: 25, maxSeatsPerRow: 15, price: 1000, isActive: true },
-        { id: 'D', name: 'Block D', maxRows: 25, maxSeatsPerRow: 15, price: 500, isActive: true }
-      ]
+      premiumBlocks: DEFAULT_PREMIUM_BLOCKS,
+      regularBlocks: DEFAULT_REGULAR_BLOCKS
     }
   },
 
@@ -93,7 +93,7 @@ const useSystemSettingsStore = create((set, get) => ({
       const showRef = doc(db, 'settings', 'shows');
       const showSnap = await getDoc(showRef);
       if (showSnap.exists()) {
-        set({ showSettings: showSnap.data() });
+        set({ showSettings: normalizeShowSettings(showSnap.data()) });
       }
 
     } catch (error) {
@@ -135,7 +135,7 @@ const useSystemSettingsStore = create((set, get) => ({
 
       // Save show settings
       await setDoc(doc(db, 'settings', 'shows'), {
-        ...showSettings,
+        ...normalizeShowSettings(showSettings),
         updatedAt: serverTimestamp(),
         updatedBy: admin?.id
       });
@@ -401,6 +401,45 @@ const useSystemSettingsStore = create((set, get) => ({
     });
   },
 
+  addPremiumBlock: (block) => {
+    const blockId = sanitizeBlockId(block?.id);
+    if (!blockId) {
+      toast.error('Block ID is required');
+      return false;
+    }
+
+    const showSettings = normalizeShowSettings(get().showSettings);
+    const exists = [...showSettings.seatLayout.premiumBlocks, ...showSettings.seatLayout.regularBlocks]
+      .some((item) => item.id === blockId);
+
+    if (exists) {
+      toast.error(`Block ${blockId} already exists`);
+      return false;
+    }
+
+    const newBlock = {
+      id: blockId,
+      name: block?.name || `Block ${blockId}`,
+      maxRows: Math.max(1, Number(block?.maxRows) || 1),
+      maxPairsPerRow: Math.max(1, Number(block?.maxPairsPerRow) || 1),
+      price: Number(block?.price) || 0,
+      isActive: block?.isActive !== false,
+      type: 'premium'
+    };
+
+    set(state => ({
+      showSettings: {
+        ...state.showSettings,
+        seatLayout: {
+          ...state.showSettings.seatLayout,
+          premiumBlocks: [...state.showSettings.seatLayout.premiumBlocks, newBlock]
+        }
+      }
+    }));
+    toast.success(`Added premium block ${blockId}`);
+    return true;
+  },
+
   // Toggle premium block active
   togglePremiumBlockActive: (index) => {
     set(state => {
@@ -435,6 +474,45 @@ const useSystemSettingsStore = create((set, get) => ({
     });
   },
 
+  addRegularBlock: (block) => {
+    const blockId = sanitizeBlockId(block?.id);
+    if (!blockId) {
+      toast.error('Block ID is required');
+      return false;
+    }
+
+    const showSettings = normalizeShowSettings(get().showSettings);
+    const exists = [...showSettings.seatLayout.premiumBlocks, ...showSettings.seatLayout.regularBlocks]
+      .some((item) => item.id === blockId);
+
+    if (exists) {
+      toast.error(`Block ${blockId} already exists`);
+      return false;
+    }
+
+    const newBlock = {
+      id: blockId,
+      name: block?.name || `Block ${blockId}`,
+      maxRows: Math.max(1, Number(block?.maxRows) || 1),
+      maxSeatsPerRow: Math.max(1, Number(block?.maxSeatsPerRow) || 1),
+      price: Number(block?.price) || 0,
+      isActive: block?.isActive !== false,
+      type: 'regular'
+    };
+
+    set(state => ({
+      showSettings: {
+        ...state.showSettings,
+        seatLayout: {
+          ...state.showSettings.seatLayout,
+          regularBlocks: [...state.showSettings.seatLayout.regularBlocks, newBlock]
+        }
+      }
+    }));
+    toast.success(`Added regular block ${blockId}`);
+    return true;
+  },
+
   // Toggle regular block active
   toggleRegularBlockActive: (index) => {
     set(state => {
@@ -450,6 +528,32 @@ const useSystemSettingsStore = create((set, get) => ({
         }
       };
     });
+  },
+
+  removePremiumBlock: (index) => {
+    set(state => ({
+      showSettings: {
+        ...state.showSettings,
+        seatLayout: {
+          ...state.showSettings.seatLayout,
+          premiumBlocks: state.showSettings.seatLayout.premiumBlocks.filter((_, currentIndex) => currentIndex !== index)
+        }
+      }
+    }));
+    toast.success('Premium block removed');
+  },
+
+  removeRegularBlock: (index) => {
+    set(state => ({
+      showSettings: {
+        ...state.showSettings,
+        seatLayout: {
+          ...state.showSettings.seatLayout,
+          regularBlocks: state.showSettings.seatLayout.regularBlocks.filter((_, currentIndex) => currentIndex !== index)
+        }
+      }
+    }));
+    toast.success('Regular block removed');
   },
 
   // Update new show field
@@ -553,14 +657,8 @@ const useSystemSettingsStore = create((set, get) => ({
       eventDates: { startDate: '', endDate: '', isActive: false, availableDays: 5 },
       shows: [],
       seatLayout: {
-        premiumBlocks: [
-          { id: 'A', name: 'Block A', maxRows: 8, maxPairsPerRow: 7, price: 1000, isActive: true },
-          { id: 'B', name: 'Block B', maxRows: 8, maxPairsPerRow: 7, price: 1000, isActive: true }
-        ],
-        regularBlocks: [
-          { id: 'C', name: 'Block C', maxRows: 25, maxSeatsPerRow: 15, price: 1000, isActive: true },
-          { id: 'D', name: 'Block D', maxRows: 25, maxSeatsPerRow: 15, price: 500, isActive: true }
-        ]
+        premiumBlocks: DEFAULT_PREMIUM_BLOCKS,
+        regularBlocks: DEFAULT_REGULAR_BLOCKS
       }
     },
     editingShow: null,

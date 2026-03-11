@@ -1,41 +1,41 @@
-// components/show/ShowSeatSelection.jsx
 "use client";
-import { Calendar, Clock, Users, ShoppingBag, Info, ChevronDown } from 'lucide-react';
-import { format } from 'date-fns';
-import useUserShowBookingStore from '@/lib/stores/useUserShowBooking';
-import ShowAuditorium from './ShowAuditorium';
+import { Calendar, Clock, Users, ShoppingBag, Info, ChevronDown, X, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import useUserShowBookingStore from "@/lib/stores/useUserShowBooking";
+import ShowAuditorium from "./ShowAuditorium";
 
 export default function ShowSeatSelection() {
-  const { 
-    selectedDate, 
+  const {
+    selectedDate,
     selectedSeats,
+    toggleSeat,
+    clearSelection,
+    getSeatPrice,
     getTotalAmount,
     getDiscountAmount,
     getBaseAmount,
     getEarlyBirdDiscount,
     getBulkDiscount,
     getNextMilestone,
-    getCurrentDiscountInfo,
     showSettings
   } = useUserShowBookingStore();
 
   const formatTime = (time) => {
-    if (!time) return '';
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const activeShows = showSettings?.shows?.filter(
-    (show) => show?.active === true || show?.isActive === true
-  ) || [];
+  const activeShows = showSettings?.shows?.filter((show) => show?.active === true || show?.isActive === true) || [];
   const currentShow = activeShows.length > 0 ? activeShows[0] : null;
+  const totalAmount = getTotalAmount();
+  const isFreeSelection = totalAmount <= 0;
 
   return (
     <div className="space-y-6 p-0 md:p-2">
-      {/* Header */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mb-4 shadow-lg">
           <Users className="w-8 h-8 text-white" />
@@ -44,7 +44,6 @@ export default function ShowSeatSelection() {
         <p className="text-gray-600">Select your preferred places</p>
       </div>
 
-      {/* Show Information */}
       <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-4 border border-gray-300 backdrop-blur-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -52,11 +51,11 @@ export default function ShowSeatSelection() {
             <div>
               <h3 className="text-gray-900 font-semibold">Show Details</h3>
               <p className="text-gray-600 text-sm">
-                {selectedDate ? (
-                  typeof selectedDate === 'string' 
-                    ? format(new Date(selectedDate), 'EEEE, MMMM d, yyyy')
-                    : format(selectedDate, 'EEEE, MMMM d, yyyy')
-                ) : 'N/A'}
+                {selectedDate
+                  ? typeof selectedDate === "string"
+                    ? format(new Date(selectedDate), "EEEE, MMMM d, yyyy")
+                    : format(selectedDate, "EEEE, MMMM d, yyyy")
+                  : "N/A"}
               </p>
             </div>
           </div>
@@ -81,105 +80,99 @@ export default function ShowSeatSelection() {
         </div>
       </div>
 
-      {/* Auditorium Layout */}
       <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl p-2 border border-gray-300 backdrop-blur-sm">
         <ShowAuditorium />
       </div>
 
-      {/* Selected Seats Summary - RESTORED */}
       {selectedSeats.length > 0 && (
-        <div className="bg-white border border-blue-200 rounded-xl p-4 md:py-2 md:px-6 shadow-lg sticky bottom-4 z-20">
+        <div className="bg-white border border-blue-200 rounded-xl p-4 md:py-3 md:px-6 shadow-lg sticky bottom-4 z-20">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1 w-full sm:w-auto">
-              <div className="flex items-center gap-2 mb-3">
-                <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-                <h4 className="text-lg sm:text-xl font-semibold text-blue-800">
-                  Selected Seats ({selectedSeats.length})
-                </h4>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                  <h4 className="text-lg sm:text-xl font-semibold text-blue-800">
+                    Selected Seats ({selectedSeats.length})
+                  </h4>
+                </div>
+                <button
+                  onClick={clearSelection}
+                  className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 border border-red-200 hover:bg-red-100"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Remove all
+                </button>
               </div>
-              
+
               <div className="flex flex-wrap gap-2 mb-3">
-                {selectedSeats.slice(0, 10).map(seatId => (
-                  <div key={seatId} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center">
-                    {seatId}
+                {selectedSeats.map((seatId) => (
+                  <div key={seatId} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center gap-2">
+                    <span>{seatId}</span>
+                    <span className="text-blue-700/80 font-semibold">
+                      {getSeatPrice(seatId) <= 0 ? "FREE" : `₹${getSeatPrice(seatId).toLocaleString()}`}
+                    </span>
+                    <button
+                      onClick={() => toggleSeat(seatId)}
+                      className="rounded-full bg-blue-200 p-0.5 text-blue-800 hover:bg-blue-300"
+                      aria-label={`Remove ${seatId}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </div>
                 ))}
-                {selectedSeats.length > 10 && (
-                  <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                    +{selectedSeats.length - 10} more
-                  </div>
-                )}
               </div>
             </div>
-            
-            <div className="text-center sm:text-right bg-blue-50 rounded-lg p-2 border border-blue-200 w-full sm:w-auto min-w-[200px]">
-              {/* Current Total */}
-              <div className="text-xl sm:text-2xl font-bold text-blue-700 mb-1">
-                ₹{getTotalAmount().toLocaleString()}
+
+            <div className="text-center sm:text-right bg-blue-50 rounded-lg p-2 border border-blue-200 w-full sm:w-auto min-w-[220px]">
+              <div className={`text-xl sm:text-2xl font-bold mb-1 ${isFreeSelection ? "text-emerald-700" : "text-blue-700"}`}>
+                {isFreeSelection ? "FREE" : `₹${totalAmount.toLocaleString()}`}
               </div>
-              
-              {/* Base calculation */}
-              {getDiscountAmount() > 0 ? (
+
+              {getDiscountAmount() > 0 && !isFreeSelection ? (
                 <div className="text-xs text-gray-600 space-y-0.5 mb-1">
-                  <div className="line-through">
-                    ₹{getBaseAmount().toLocaleString()}
-                  </div>
-                  <div className="text-green-600 font-medium">
-                    -₹{getDiscountAmount().toLocaleString()}
-                  </div>
+                  <div className="line-through">₹{getBaseAmount().toLocaleString()}</div>
+                  <div className="text-green-600 font-medium">-₹{getDiscountAmount().toLocaleString()}</div>
                 </div>
               ) : (
                 <div className="text-xs text-gray-600 mb-1">
-                  {selectedSeats.length} seats
+                  {isFreeSelection ? "No payment required" : `${selectedSeats.length} seats`}
                 </div>
               )}
-              
-              {/* Discount Badges */}
+
               <div className="space-y-0.5">
-                {getEarlyBirdDiscount() > 0 && (
+                {getEarlyBirdDiscount() > 0 && !isFreeSelection && (
                   <div className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                    🎉 {getEarlyBirdDiscount()}% Early Bird!
+                    {getEarlyBirdDiscount()}% Early Bird
                   </div>
                 )}
-                
-                {getBulkDiscount() > 0 && (
+
+                {getBulkDiscount() > 0 && !isFreeSelection && (
                   <div className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                    🎯 {getBulkDiscount()}% Bulk!
+                    {getBulkDiscount()}% Bulk
                   </div>
                 )}
-                
-                {/* Next Milestone */}
-                {(() => {
+
+                {!isFreeSelection && (() => {
                   const milestone = getNextMilestone();
-                  if (milestone) {
-                    return (
-                      <div className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
-                        Add {milestone.quantityNeeded} more for {milestone.discountPercent}% discount
-                      </div>
-                    );
-                  }
-                  return null;
+                  if (!milestone) return null;
+                  return (
+                    <div className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                      Add {milestone.quantityNeeded} more for {milestone.discountPercent}% discount
+                    </div>
+                  );
                 })()}
               </div>
             </div>
           </div>
-          
-          {/* Scroll Down Section */}
+
           <div className="mt-1 flex justify-end border-gray-200">
-            <div className="flex max-w-[200px] items-center gap-2 bg-rose-50 border border-rose-200 rounded px-2 py-1">
+            <div className="flex max-w-[220px] items-center gap-2 bg-rose-50 border border-rose-200 rounded px-2 py-1">
               <div className="flex items-center gap-1">
                 <Info className="h-3 w-3 text-rose-500 flex-shrink-0" />
-                <span className="text-rose-800 text-xs font-medium">
-                  Scroll down to proceed next
-                </span>
+                <span className="text-rose-800 text-xs font-medium">Scroll down to proceed next</span>
               </div>
-              <button 
-                onClick={() => {
-                  window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: 'smooth'
-                  });
-                }}
+              <button
+                onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}
                 className="relative focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-1 rounded-full transition-transform hover:scale-110"
                 aria-label="Scroll to bottom of page"
               >

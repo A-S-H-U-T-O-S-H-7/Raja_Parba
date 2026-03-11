@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 
 const MemberPass = ({ booking, participantName, purpose }) => {
   const bookingId = booking?.id || booking?.bookingId || "N/A";
   const isFreePass = booking?.category === "free_pass" || booking?.eventDetails?.delegateType === "freePass";
+  const isFreeShowPass =
+    !!booking?.showDetails &&
+    (Number(booking?.showDetails?.totalPrice || booking?.totalAmount || 0) <= 0 ||
+      booking?.paymentDetails?.method === "free_booking");
 
   const name =
     booking?.delegateDetails?.name ||
@@ -216,6 +221,17 @@ const MemberPass = ({ booking, participantName, purpose }) => {
               </span>
             </div>
 
+            {isFreeShowPass && (
+              <div className="mb-4 rounded-lg border border-amber-200 bg-gradient-to-r from-amber-50 via-rose-50 to-pink-50 p-3">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-700" />
+                  <p className="text-xs font-semibold leading-5 text-amber-900">
+                    Free seating is first come, first served. Exact seat availability cannot be guaranteed at the venue.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Name Section */}
             <div className="relative mb-4">
               <div className="absolute -top-2 left-4 px-3 bg-white text-xs font-semibold text-indigo-600">
@@ -254,6 +270,8 @@ const MemberPass = ({ booking, participantName, purpose }) => {
                 <p className="break-words text-sm font-bold text-indigo-900">{showSeatNumbers.join(", ")}</p>
               </div>
             )}
+
+            
 
             {passType === "STALL RESERVATION" && stallNumbers.length > 0 && (
               <div className="mb-4 rounded-lg border border-fuchsia-200 bg-fuchsia-50/70 p-3">

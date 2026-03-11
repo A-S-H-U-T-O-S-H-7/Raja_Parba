@@ -10,112 +10,17 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
-
-// Helper function to generate seat layout
-const generateSeatLayout = (showSettings) => {
-  const seats = [];
-  
-  // Normalize blocks (handle both array and object formats)
-  const normalizeBlocks = (blocks, defaultBlocks) => {
-    if (!blocks) return defaultBlocks;
-    if (Array.isArray(blocks)) {
-      const normalized = {};
-      blocks.forEach(block => {
-        if (block.id) {
-          normalized[block.id] = {
-            ...block,
-            active: block.active !== undefined ? block.active : block.isActive
-          };
-        }
-      });
-      return normalized;
-    }
-    return blocks;
-  };
-  
-  // Use dynamic show settings or fallback to defaults
-  const premiumBlocks = normalizeBlocks(
-    showSettings?.seatLayout?.premiumBlocks, 
-    {
-      'A': { name: 'Block A', maxRows: 8, maxPairsPerRow: 7, price: 1000, active: true },
-      'B': { name: 'Block B', maxRows: 8, maxPairsPerRow: 7, price: 1000, active: true }
-    }
-  );
-  
-  const regularBlocks = normalizeBlocks(
-    showSettings?.seatLayout?.regularBlocks,
-    {
-      'C': { name: 'Block C', maxRows: 25, maxSeatsPerRow: 15, price: 1000, active: true },
-      'D': { name: 'Block D', maxRows: 25, maxSeatsPerRow: 15, price: 500, active: true }
-    }
-  );
-  
-  // VIP Section - Dynamic configuration
-  Object.entries(premiumBlocks).forEach(([blockId, block]) => {
-    if (!block.active) return;
-    
-    for (let row = 1; row <= block.maxRows; row++) {
-      const letters = Array.from({ length: block.maxPairsPerRow }, (_, i) => String.fromCharCode(65 + i));
-      
-      letters.forEach((letter) => {
-        // Seat 1 of pair
-        seats.push({
-          id: `${blockId}-R${row}-${letter}1`,
-          row,
-          seat: `${letter}1`,
-          section: blockId,
-          type: 'VIP',
-          price: block.price,
-          displayName: `${letter}1`,
-          pairLetter: letter,
-          pairPosition: 1,
-          status: 'available'
-        });
-        
-        // Seat 2 of pair
-        seats.push({
-          id: `${blockId}-R${row}-${letter}2`,
-          row,
-          seat: `${letter}2`,
-          section: blockId,
-          type: 'VIP',
-          price: block.price,
-          displayName: `${letter}2`,
-          pairLetter: letter,
-          pairPosition: 2,
-          status: 'available'
-        });
-      });
-    }
-  });
-
-  // Regular Section - Dynamic configuration
-  Object.entries(regularBlocks).forEach(([blockId, block]) => {
-    if (!block.active) return;
-    
-    for (let row = 1; row <= block.maxRows; row++) {
-      for (let seat = 1; seat <= block.maxSeatsPerRow; seat++) {
-        seats.push({
-          id: `${blockId}-R${row}-S${seat}`,
-          row,
-          seat,
-          section: blockId,
-          type: 'REGULAR',
-          price: block.price,
-          displayName: `${seat}`,
-          status: 'available'
-        });
-      }
-    }
-  });
-  
-  return seats;
-};
+import {
+  generateShowSeatLayout,
+  normalizeShowPricing,
+  normalizeShowSettings
+} from '@/utils/showSeatUtils';
 
 const useShowSeatManagementStore = create((set, get) => ({
   // State
   seats: [],
   showSettings: null,
+  showPricing: { blockPrices: {} },
   selectedDate: new Date(),
   viewMode: 'grid',
   selectedSeats: [],
@@ -128,11 +33,33 @@ const useShowSeatManagementStore = create((set, get) => ({
   
   // Real-time listeners
   unsubscribeShowSettings: null,
+  unsubscribeShowPricing: null,
   unsubscribeAvailability: null,
 
   // Initialize
   initialize: () => {
     get().setupShowSettingsListener();
+    get().setupShowPricingListener();
+  },
+
+  setupShowPricingListener: () => {
+    const showPricingRef = doc(db, 'settings', 'showPricing');
+
+    const unsubscribe = onSnapshot(
+      showPricingRef,
+      (docSnap) => {
+        const pricing = normalizeShowPricing(docSnap.exists() ? docSnap.data() : {}, get().showSettings);
+        set({
+          showPricing: pricing,
+          seats: generateShowSeatLayout(get().showSettings, pricing.blockPrices)
+        });
+      },
+      (error) => {
+        console.error('Error listening to show pricing:', error);
+      }
+    );
+
+    set({ unsubscribeShowPricing: unsubscribe });
   },
 
   // Setup show settings listener
@@ -143,11 +70,11 @@ const useShowSeatManagementStore = create((set, get) => ({
       showSettingsRef,
       (doc) => {
         if (doc.exists()) {
-          const data = doc.data();
+          const data = normalizeShowSettings(doc.data());
           set({ showSettings: data });
           
           // Generate seats layout
-          const seatLayout = generateSeatLayout(data);
+          const seatLayout = generateShowSeatLayout(data, get().showPricing?.blockPrices);
           set({ seats: seatLayout, loading: false });
           
           // Set default date if not initialized
@@ -169,7 +96,7 @@ const useShowSeatManagementStore = create((set, get) => ({
           }
         } else {
           // Generate default seats layout
-          const seatLayout = generateSeatLayout(null);
+          const seatLayout = generateShowSeatLayout(null, get().showPricing?.blockPrices);
           set({ seats: seatLayout, showSettings: null, loading: false });
           set({ dateInitialized: true });
         }
@@ -179,7 +106,7 @@ const useShowSeatManagementStore = create((set, get) => ({
         toast.error('Failed to load show settings');
         
         // Generate default seats layout on error
-        const seatLayout = generateSeatLayout(null);
+        const seatLayout = generateShowSeatLayout(null, get().showPricing?.blockPrices);
         set({ seats: seatLayout, loading: false, dateInitialized: true });
       }
     );
@@ -415,8 +342,9 @@ const useShowSeatManagementStore = create((set, get) => ({
 
   // Cleanup listeners
   cleanup: () => {
-    const { unsubscribeShowSettings, unsubscribeAvailability } = get();
+    const { unsubscribeShowSettings, unsubscribeShowPricing, unsubscribeAvailability } = get();
     if (unsubscribeShowSettings) unsubscribeShowSettings();
+    if (unsubscribeShowPricing) unsubscribeShowPricing();
     if (unsubscribeAvailability) unsubscribeAvailability();
   },
 
@@ -466,11 +394,8 @@ const useShowSeatManagementStore = create((set, get) => ({
     
     if (seat.type === 'VIP') 
       return isDarkMode ? 'bg-gradient-to-br from-amber-700/80 via-yellow-700/80 to-amber-800/80 text-yellow-100' : 'bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 text-amber-900';
-    
-    if (seat.section === 'C') 
-      return isDarkMode ? 'bg-emerald-700/80 text-emerald-100' : 'bg-emerald-400 text-emerald-900';
-    
-    return isDarkMode ? 'bg-teal-700/80 text-teal-100' : 'bg-teal-400 text-teal-900';
+
+    return isDarkMode ? 'bg-emerald-700/80 text-emerald-100' : 'bg-emerald-400 text-emerald-900';
   },
 
   // Reset
@@ -479,6 +404,7 @@ const useShowSeatManagementStore = create((set, get) => ({
     set({
       seats: [],
       showSettings: null,
+      showPricing: { blockPrices: {} },
       selectedDate: new Date(),
       viewMode: 'grid',
       selectedSeats: [],

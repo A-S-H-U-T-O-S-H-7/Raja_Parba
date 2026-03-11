@@ -1,6 +1,7 @@
 "use client";
 import { format, differenceInDays } from 'date-fns';
 import { useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { cancelBooking } from '@/utils/cancellationUtils';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '@/lib/stores/useAuthStore';
@@ -9,7 +10,10 @@ import PassReceiptModal from '../PassReceiptModal';
 const ShowBookingCard = ({ booking, onCancel }) => {
   const { user } = useAuthStore();
   const [isCancelling, setIsCancelling] = useState(false);
-    const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+  const isFreeShowPass =
+    Number(booking?.showDetails?.totalPrice || booking?.totalAmount || 0) <= 0 ||
+    booking?.paymentDetails?.method === 'free_booking';
   
   const canCancelBooking = (eventDate) => {
     const today = new Date();
@@ -49,6 +53,8 @@ const ShowBookingCard = ({ booking, onCancel }) => {
       className={`border rounded-xl p-3 sm:p-6 transform hover:scale-[1.02] transition-all duration-200 ${
         booking.status === 'cancelled' 
           ? 'border-red-200 bg-red-50 shadow-md' 
+          : isFreeShowPass
+          ? 'border-rose-200 bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50 shadow-lg hover:shadow-xl'
           : 'border-gray-200 bg-white shadow-lg hover:shadow-xl'
       }`}
     >
@@ -68,7 +74,11 @@ const ShowBookingCard = ({ booking, onCancel }) => {
                booking.status === 'cancelled' ? '✗ Cancelled' : 
                booking.status}
             </span>
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+              isFreeShowPass
+                ? 'bg-rose-100 text-rose-800 border-rose-200'
+                : 'bg-purple-100 text-purple-800 border-purple-200'
+            }`}>
               🎭 Show Booking
             </span>
           </div>
@@ -114,6 +124,19 @@ const ShowBookingCard = ({ booking, onCancel }) => {
             </p>
           </div>
         </div>
+
+        {isFreeShowPass && (
+          <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 via-rose-50 to-pink-50 p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-full bg-amber-100 p-2">
+                <AlertTriangle className="h-4 w-4 text-amber-700" />
+              </div>
+              <p className="text-sm font-medium leading-6 text-amber-900">
+                Free seating is available on a first-come, first-served basis. We cannot guarantee that the exact seat selected here will still be available at the venue.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Seat IDs Details - Show when multiple seats */}
         {booking.showDetails?.selectedSeats?.length > 3 && (

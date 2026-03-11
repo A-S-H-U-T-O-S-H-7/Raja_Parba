@@ -17,14 +17,16 @@ export default function ShowBookingFlow() {
     currentStep,
     nextStep,
     prevStep,
+    resetBooking,
     initializeListeners,
     cleanupListeners
   } = useUserShowBookingStore();
 
   useEffect(() => {
+    resetBooking();
     initializeListeners();
     return () => cleanupListeners();
-  }, [initializeListeners, cleanupListeners]);
+  }, [resetBooking, initializeListeners, cleanupListeners]);
 
   const steps = [
     { id: 1, title: 'Select Date', subtitle: 'Choose your day', icon: Calendar },
