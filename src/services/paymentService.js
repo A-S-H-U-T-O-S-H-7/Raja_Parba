@@ -185,11 +185,33 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
             bookingId: enrichedBookingData?.bookingId || enrichedBookingData?.id,
             email: enrichedBookingData?.delegateDetails?.email
           });
-          const { sendEntryPassConfirmationEmail } = await import('@/services/emailService');
+          const { sendEntryPassConfirmationEmail } = await import('@/services/entryPassEmailService');
           const emailResult = await sendEntryPassConfirmationEmail(enrichedBookingData);
-          console.log('Entry pass email sent:', emailResult.success ? 'Success' : emailResult.error);
-          if (!emailResult.success) {
-            console.error('Email error details:', emailResult.error);
+          console.log('[PAYMENT_EMAIL] Entry pass email result:', {
+            orderId,
+            success: Boolean(emailResult?.success),
+            message: emailResult?.message || null,
+            error: emailResult?.error || null,
+            rawResponse: emailResult?.data || emailResult?.rawResponse || null
+          });
+          try {
+            await updateDoc(bookingRef, {
+              emailNotification: {
+                type: 'entry_pass',
+                attemptedAt: serverTimestamp(),
+                success: Boolean(emailResult?.success),
+                endpoint: emailResult?.endpoint || null,
+                httpStatus: emailResult?.httpStatus || null,
+                message: emailResult?.message || null,
+                error: emailResult?.error || null
+              },
+              updatedAt: serverTimestamp()
+            });
+          } catch (emailStatusError) {
+            console.error('[PAYMENT_EMAIL] Failed to save entry pass email debug status:', {
+              orderId,
+              error: emailStatusError?.message || emailStatusError
+            });
           }
         } else if (bookingType === 'delegate') {
           // Ensure numberOfPersons is properly set in enrichedBookingData

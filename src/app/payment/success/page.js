@@ -145,7 +145,11 @@ function PaymentSuccessContent() {
             const bookingRef = doc(db, 'donations', orderId);
             const bookingSnap = await getDoc(bookingRef);
             if (bookingSnap.exists()) bookingData = bookingSnap.data();
-          } else if (orderId.startsWith('DELEGATE-')) {
+          } else if (
+            orderId.startsWith('DELEGATE-') ||
+            orderIdLower.startsWith('orp-epass-') ||
+            orderIdLower.includes('epass')
+          ) {
             detectedType = 'delegate';
             const bookingRef = doc(db, 'delegateBookings', orderId);
             const bookingSnap = await getDoc(bookingRef);
@@ -164,11 +168,18 @@ function PaymentSuccessContent() {
                 detectedType = "stall";
                 bookingData = stallBookingSnap.data();
               } else {
-              // Default to havan booking
-              detectedType = "havan";
-              const bookingRef = doc(db, "bookings", orderId);
-              const bookingSnap = await getDoc(bookingRef);
-              if (bookingSnap.exists()) bookingData = bookingSnap.data();
+                const delegateBookingRef = doc(db, "delegateBookings", orderId);
+                const delegateBookingSnap = await getDoc(delegateBookingRef);
+                if (delegateBookingSnap.exists()) {
+                  detectedType = "delegate";
+                  bookingData = delegateBookingSnap.data();
+                } else {
+                  // Default to havan booking
+                  detectedType = "havan";
+                  const bookingRef = doc(db, "bookings", orderId);
+                  const bookingSnap = await getDoc(bookingRef);
+                  if (bookingSnap.exists()) bookingData = bookingSnap.data();
+                }
               }
             }
           }
