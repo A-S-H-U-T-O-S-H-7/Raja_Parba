@@ -22,6 +22,7 @@ const createEmptyMember = () => ({
 
 const EVENT_DATE_LABEL = '13, 14, 15 June 2026';
 const EVENT_DATE_RANGE = ['2026-06-13', '2026-06-14', '2026-06-15'];
+const ENTRY_PASS_DONATION_PER_PERSON = 10;
 
 const FreePassForm = () => {
   const router = useRouter();
@@ -50,6 +51,7 @@ const FreePassForm = () => {
 
   const { countries, states, cities, loading } = useLocationData(formData);
   const totalPersons = Math.min(20, Math.max(1, parseInt(formData.numberOfPersons, 10) || 1));
+  const totalAmount = totalPersons * ENTRY_PASS_DONATION_PER_PERSON;
 
   useEffect(() => {
     const persons = Math.min(20, Math.max(1, parseInt(formData.numberOfPersons, 10) || 1));
@@ -238,6 +240,88 @@ const FreePassForm = () => {
     }
   };
 
+  const submitToCCAvenue = (encRequest, accessCode) => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://secure.ccavenue.com/transaction/transaction.do?command=initiateTransaction';
+    form.target = '_self';
+    form.style.display = 'none';
+
+    const encInput = document.createElement('input');
+    encInput.type = 'hidden';
+    encInput.name = 'encRequest';
+    encInput.value = encRequest;
+    form.appendChild(encInput);
+
+    const accessInput = document.createElement('input');
+    accessInput.type = 'hidden';
+    accessInput.name = 'access_code';
+    accessInput.value = accessCode;
+    form.appendChild(accessInput);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => {
+      if (document.body.contains(form)) {
+        document.body.removeChild(form);
+      }
+    }, 1000);
+  };
+
+  const createFreePassBooking = async ({ bookingId, imageUploadResult, paymentData, status }) => {
+    const bookingData = {
+      id: bookingId,
+      bookingId,
+      userId: user.uid,
+      type: 'delegate',
+      category: 'free_pass',
+      status,
+      totalAmount,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      expiryTime: status === 'pending_payment' ? new Date(Date.now() + 5 * 60 * 1000) : null,
+      payment: {
+        paymentId: paymentData.paymentId || `entry_pass_${Date.now()}`,
+        amount: totalAmount,
+        status,
+        orderId: bookingId,
+        transactionId: paymentData.transactionId || paymentData.paymentId || bookingId,
+      },
+      delegateDetails: {
+        name: formData.name,
+        email: formData.email,
+        mobile: formData.mobile,
+        aadharno: formData.aadharno,
+        country: formData.country,
+        state: formData.state,
+        city: formData.city,
+        address: formData.address,
+        pincode: formData.pincode,
+        fileInfo: imageUploadResult
+          ? {
+              fileName: imageUploadResult.fileName,
+              originalName: imageUploadResult.originalName,
+              fileSize: imageUploadResult.size,
+              fileType: imageUploadResult.type,
+              fileUploaded: true,
+              imageUrl: imageUploadResult.url,
+            }
+          : { fileUploaded: false },
+      },
+      eventDetails: {
+        participationType: 'Entry Pass',
+        delegateType: 'freePass',
+        duration: '3',
+        numberOfPersons: String(totalPersons),
+        eventDates: EVENT_DATE_RANGE,
+        members: formData.members,
+      },
+    };
+
+    await setDoc(doc(db, 'delegateBookings', bookingId), bookingData);
+  };
+
   const hasExistingFreePass = async (userId) => {
     if (!userId) return false;
 
@@ -316,86 +400,57 @@ const FreePassForm = () => {
         return;
       }
 
-      const bookingId = await generateBookingId();
       let imageUploadResult = null;
+      const bookingId = await generateBookingId();
+
       if (selectedFile) {
         setImageUploading(true);
-        imageUploadResult = await uploadDelegateImage(selectedFile, bookingId);
-        setImageUploading(false);
-        if (!imageUploadResult.success) {
-          throw new Error(imageUploadResult.error || 'Failed to upload photo');
+        try {
+          imageUploadResult = await uploadDelegateImage(selectedFile, bookingId);
+          if (!imageUploadResult.success) {
+            throw new Error(imageUploadResult.error || 'Failed to upload photo');
+          }
+        } finally {
+          setImageUploading(false);
         }
       }
 
-      const bookingData = {
-        id: bookingId,
+      await createFreePassBooking({
         bookingId,
-        userId: user.uid,
-        type: 'delegate',
-        category: 'free_pass',
-        status: 'confirmed',
-        totalAmount: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        payment: {
-          paymentId: 'free_pass',
-          amount: 0,
-          status: 'confirmed',
-          orderId: bookingId,
-          transactionId: 'FREE_PASS',
+        imageUploadResult,
+        paymentData: {
+          paymentId: `pending_${Date.now()}`,
+          transactionId: `pending_${Date.now()}`
         },
-        delegateDetails: {
-          name: formData.name,
-          email: formData.email,
-          mobile: formData.mobile,
-          aadharno: formData.aadharno,
-          country: formData.country,
-          state: formData.state,
-          city: formData.city,
-          address: formData.address,
-          pincode: formData.pincode,
-          fileInfo: imageUploadResult
-            ? {
-                fileName: imageUploadResult.fileName,
-                originalName: imageUploadResult.originalName,
-                fileSize: imageUploadResult.size,
-                fileType: imageUploadResult.type,
-                fileUploaded: true,
-                imageUrl: imageUploadResult.url,
-              }
-            : { fileUploaded: false },
-        },
-        eventDetails: {
-          participationType: 'Free Pass',
-          delegateType: 'freePass',
-          duration: '3',
-          numberOfPersons: String(totalPersons),
-          eventDates: EVENT_DATE_RANGE,
-          members: formData.members,
-        },
+        status: 'pending_payment'
+      });
+
+      const paymentRequest = {
+        order_id: bookingId,
+        purpose: 'delegate_booking',
+        amount: totalAmount.toString(),
+        name: formData.name,
+        email: formData.email,
+        phone: formData.mobile,
+        address: `${formData.address}, ${formData.city}, ${formData.state}, ${formData.country} - ${formData.pincode}`
       };
 
-      await setDoc(doc(db, 'delegateBookings', bookingId), bookingData);
+      const response = await fetch('/api/payment/ccavenue-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentRequest)
+      });
 
-      try {
-        await sendConfirmationEmail(bookingId);
-      } catch (mailError) {
-        toast.error(`Booking saved but email failed: ${mailError.message}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      resetForm();
-      await Swal.fire({
-        icon: 'success',
-        title: 'Successfully Submitted',
-        text: 'Your Entry Pass registration has been submitted.',
-        showConfirmButton: false,
-        timer: 1800,
-        timerProgressBar: true,
-        background: '#f0fdf4',
-        color: '#14532d',
-        iconColor: '#16a34a',
-      });
-      router.push('/profile?tab=entryPass');
+      const data = await response.json();
+      if (!data.status || !data.encRequest || !data.access_code) {
+        throw new Error(data.errors?.join(', ') || 'Unable to initiate payment');
+      }
+
+      submitToCCAvenue(data.encRequest, data.access_code);
     } catch (error) {
       toast.error(error.message || 'Unable to complete free pass booking');
     } finally {
@@ -535,11 +590,14 @@ const FreePassForm = () => {
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                   <div>
                     <p className="bg-gradient-to-r from-emerald-700 to-rose-700 bg-clip-text text-2xl font-bold text-transparent">
-                      Total: Free
+                      Total: ₹{totalAmount.toLocaleString('en-IN')}
                     </p>
                     <p className="flex items-center gap-1 text-sm font-medium text-slate-700">
                       <Ticket className="h-4 w-4" />
                       {totalPersons} person(s) for 3 days ({EVENT_DATE_LABEL})
+                    </p>
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-slate-700">
+                      A humble contribution of <span className="font-semibold text-rose-700">₹{ENTRY_PASS_DONATION_PER_PERSON} per person</span> helps us support a noble cause and keep this celebration meaningful for the community. Your small donation becomes part of something truly beautiful.
                     </p>
                   </div>
                   <button
@@ -556,7 +614,7 @@ const FreePassForm = () => {
                       ) : (
                         <>
                           <Sparkles className="h-4 w-4" />
-                          <span>Confirm Free Pass</span>
+                          <span>Proceed to Payment</span>
                         </>
                       )}
                     </span>
