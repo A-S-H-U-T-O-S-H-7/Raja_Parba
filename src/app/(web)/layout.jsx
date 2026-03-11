@@ -1,6 +1,7 @@
 "use client"
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
+import FloatingShareButton from "@/components/home/FloatingShareButton";
 import { ArrowLeft } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import useAuthStore from "@/lib/stores/useAuthStore";
@@ -61,6 +62,8 @@ function layout({ children }) {
       )}
 
       {children}
+
+      <FloatingShareButton />
       
       <Footer/>
       
