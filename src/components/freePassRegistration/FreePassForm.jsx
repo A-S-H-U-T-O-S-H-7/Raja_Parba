@@ -328,12 +328,16 @@ const FreePassForm = () => {
     const existingPassQuery = query(
       collection(db, 'delegateBookings'),
       where('userId', '==', userId),
-      where('category', '==', 'free_pass'),
-      limit(1)
+      where('category', '==', 'free_pass')
     );
 
     const existingPassSnap = await getDocs(existingPassQuery);
-    return !existingPassSnap.empty;
+    if (existingPassSnap.empty) return false;
+
+    return existingPassSnap.docs.some((docSnap) => {
+      const status = String(docSnap.data()?.status || '').toLowerCase();
+      return ['confirmed', 'completed', 'paid', 'success'].includes(status);
+    });
   };
 
   const resetForm = () => {
