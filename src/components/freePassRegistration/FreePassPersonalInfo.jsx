@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Phone, Mail, CreditCard } from 'lucide-react';
+import { User, Phone, Mail, CreditCard, AlertTriangle } from 'lucide-react';
 
 const FreePassPersonalInfo = ({ formData, errors, handleInputChange, handleBlur }) => {
   return (
@@ -85,6 +85,20 @@ const FreePassPersonalInfo = ({ formData, errors, handleInputChange, handleBlur 
             />
           </div>
           {errors.aadharno && <p className="mt-1 text-xs text-red-600">{errors.aadharno}</p>}
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-rose-50 p-4">
+        <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:text-left">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 sm:mt-0.5">
+            <AlertTriangle className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Important verification note</p>
+            <p className="mt-1 text-sm leading-6 text-slate-700">
+              Please provide your correct <span className="font-semibold text-slate-900">Aadhaar number</span> and <span className="font-semibold text-slate-900">mobile number</span> for verification. If the submitted details are found to be incorrect or invalid, the organisers reserve the <span className="font-semibold text-slate-900">right to cancel the pass</span>.
+            </p>
+          </div>
         </div>
       </div>
     </div>

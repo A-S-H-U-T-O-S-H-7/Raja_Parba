@@ -176,6 +176,21 @@ export async function updateBookingAfterPayment(orderId, paymentData, bookingTyp
               error: emailStatusError?.message || emailStatusError
             });
           }
+        } else if (
+          bookingType === 'delegate' &&
+          (enrichedBookingData?.category === 'free_pass' ||
+            enrichedBookingData?.eventDetails?.delegateType === 'freePass')
+        ) {
+          console.log('Entry pass booking data before email:', {
+            bookingId: enrichedBookingData?.bookingId || enrichedBookingData?.id,
+            email: enrichedBookingData?.delegateDetails?.email
+          });
+          const { sendEntryPassConfirmationEmail } = await import('@/services/emailService');
+          const emailResult = await sendEntryPassConfirmationEmail(enrichedBookingData);
+          console.log('Entry pass email sent:', emailResult.success ? 'Success' : emailResult.error);
+          if (!emailResult.success) {
+            console.error('Email error details:', emailResult.error);
+          }
         } else if (bookingType === 'delegate') {
           // Ensure numberOfPersons is properly set in enrichedBookingData
           console.log('📋 Delegate booking data before email:', {

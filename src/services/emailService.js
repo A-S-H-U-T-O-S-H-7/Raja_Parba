@@ -186,6 +186,57 @@ export const sendDonationConfirmationEmail = async (donationData) => {
 };
 
 /**
+ * Send entry pass confirmation email
+ * @param {Object} entryPassData - Entry pass booking information
+ * @returns {Promise<Object>} - API response
+ */
+export const sendEntryPassConfirmationEmail = async (entryPassData) => {
+  try {
+    const name = (entryPassData?.delegateDetails?.name || entryPassData?.name || '').toString().trim();
+    const email = (entryPassData?.delegateDetails?.email || entryPassData?.email || '').toString().trim();
+    const passNo = (entryPassData?.bookingId || entryPassData?.id || entryPassData?.order_id || '').toString().trim();
+
+    if (!name || !email || !passNo) {
+      return { success: false, error: 'Missing required entry pass email fields' };
+    }
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('pass_no', passNo);
+
+    const response = await fetch('https://svsamiti.com/rajaparba/entry-pass.php', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'User-Agent': 'Raja-Parba-Entry-Pass/1.0'
+      }
+    });
+
+    const responseText = await response.text();
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      return { success: false, error: 'Invalid response from entry pass email service', rawResponse: responseText };
+    }
+
+    if (!response.ok || !result?.status) {
+      return { success: false, error: result?.message || 'Entry pass email service failed', data: result };
+    }
+
+    return {
+      success: true,
+      message: result.message || 'Entry pass confirmation sent successfully',
+      data: result
+    };
+  } catch (error) {
+    return { success: false, error: 'Failed to send entry pass email: ' + error.message };
+  }
+};
+
+/**
  * Send delegate confirmation email
  * @param {Object} delegateData - Delegate information
  * @returns {Promise<Object>} - API response
