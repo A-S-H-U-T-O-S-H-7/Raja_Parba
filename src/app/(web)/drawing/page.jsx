@@ -61,7 +61,7 @@ const calculateAgeFromDob = (dobString) => {
 const detectCategoryByAge = (ageNum) => {
   if (!Number.isFinite(ageNum) || ageNum <= 0) return "";
   if (ageNum < 16) return "Junior";
-  if (ageNum <= 30) return "Senior";
+  if (ageNum <= 45) return "Senior";
   return "";
 };
 
@@ -137,11 +137,11 @@ export default function DrawingPage() {
       return;
     }
 
-    if (payload.age > 30) {
+    if (payload.age > 45) {
       await Swal.fire({
         icon: "warning",
         title: "Age Not Eligible",
-        text: "Drawing competition categories are only: Junior (below 16) and Senior (16 to 30).",
+        text: "Drawing competition categories are only: Junior (below 16) and Senior (16 to 45).",
         confirmButtonColor: "#10b981",
       });
       return;
@@ -151,7 +151,7 @@ export default function DrawingPage() {
       await Swal.fire({
         icon: "warning",
         title: "Category Required",
-        text: "Please select a valid category based on age: Junior (below 16) or Senior (16 to 30).",
+        text: "Please select a valid category based on age: Junior (below 16) or Senior (16 to 45).",
         confirmButtonColor: "#10b981",
       });
       return;
@@ -193,17 +193,17 @@ export default function DrawingPage() {
       await Swal.fire({
         icon: "warning",
         title: "Category Mismatch",
-        text: "Senior category is only for candidates aged 16 to 30.",
+        text: "Senior category is only for candidates aged 16 to 45.",
         confirmButtonColor: "#10b981",
       });
       return;
     }
 
-    if (payload.category === "Senior" && payload.age > 30) {
+    if (payload.category === "Senior" && payload.age > 45) {
       await Swal.fire({
         icon: "warning",
         title: "Category Mismatch",
-        text: "Senior category is only for candidates aged 16 to 30.",
+        text: "Senior category is only for candidates aged 16 to 45.",
         confirmButtonColor: "#10b981",
       });
       return;
@@ -446,7 +446,7 @@ export default function DrawingPage() {
                   />
                   <div className="flex items-center justify-center gap-1.5">
                     <Palette className="w-4 h-4" />
-                    <span className="text-sm font-medium">Senior (16-30)</span>
+                    <span className="text-sm font-medium">Senior (16-45)</span>
                   </div>
                 </label>
               </div>

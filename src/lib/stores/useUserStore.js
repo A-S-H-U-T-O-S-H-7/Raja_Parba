@@ -7,13 +7,9 @@ import {
   getDocs, 
   getDoc, 
   updateDoc, 
-  deleteDoc,
   query,
   where,
-  orderBy,
-  limit,
-  startAfter,
-  Timestamp
+  orderBy
 } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 
@@ -36,9 +32,7 @@ const useUserStore = create((set, get) => ({
   // Pagination
   pagination: {
     page: 1,
-    limit: 20,
-    lastVisible: null,
-    hasMore: true
+    limit: 20
   },
 
   // Stats
@@ -56,7 +50,7 @@ const useUserStore = create((set, get) => ({
   },
 
   // Fetch all users with filters
-  fetchUsers: async (loadMore = false) => {
+  fetchUsers: async () => {
     const { filters, pagination } = get();
     set({ loading: true, error: null });
 
@@ -74,22 +68,8 @@ const useUserStore = create((set, get) => ({
         constraints.push(where('role', '==', filters.role));
       }
 
-      // Apply search filter (by email or displayName)
-      if (filters.search) {
-        // Note: For production, consider using Algolia or similar for better search
-        constraints.push(where('email', '>=', filters.search));
-        constraints.push(where('email', '<=', filters.search + '\uf8ff'));
-      }
-
       // Add sorting
       constraints.push(orderBy('createdAt', 'desc'));
-      
-      // Add pagination
-      constraints.push(limit(pagination.limit));
-      
-      if (loadMore && pagination.lastVisible) {
-        constraints.push(startAfter(pagination.lastVisible));
-      }
 
       q = query(q, ...constraints);
       const snapshot = await getDocs(q);
@@ -106,19 +86,42 @@ const useUserStore = create((set, get) => ({
       });
 
       // Determine sign-in method for each user
-      const usersWithMethod = users.map(user => ({
+      let usersWithMethod = users.map(user => ({
         ...user,
         signInMethod: user.uid?.startsWith('google') ? 'google' : 'email'
       }));
 
+      if (filters.signInMethod !== 'all') {
+        usersWithMethod = usersWithMethod.filter(
+          (user) => user.signInMethod === filters.signInMethod
+        );
+      }
+
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase().trim();
+        usersWithMethod = usersWithMethod.filter((user) => {
+          const displayName = user.displayName?.toLowerCase() || '';
+          const email = user.email?.toLowerCase() || '';
+          const phone = user.phone?.toLowerCase?.() || String(user.phone || '').toLowerCase();
+
+          return (
+            displayName.includes(searchTerm) ||
+            email.includes(searchTerm) ||
+            phone.includes(searchTerm)
+          );
+        });
+      }
+
+      const totalUsers = usersWithMethod.length;
+      const totalPages = Math.max(1, Math.ceil(totalUsers / pagination.limit));
+
       set(state => ({
-        users: loadMore ? [...state.users, ...usersWithMethod] : usersWithMethod,
+        users: usersWithMethod,
         pagination: {
           ...state.pagination,
-          lastVisible: snapshot.docs[snapshot.docs.length - 1] || null,
-          hasMore: snapshot.docs.length === state.pagination.limit
+          page: Math.min(state.pagination.page, totalPages)
         },
-        totalUsers: users.length,
+        totalUsers,
         loading: false
       }));
 
@@ -349,9 +352,7 @@ const useUserStore = create((set, get) => ({
     set(state => ({
       pagination: { 
         ...state.pagination, 
-        page: 1, 
-        lastVisible: null,
-        hasMore: true 
+        page: 1
       }
     }));
     
@@ -369,22 +370,20 @@ const useUserStore = create((set, get) => ({
       },
       pagination: {
         page: 1,
-        limit: 20,
-        lastVisible: null,
-        hasMore: true
+        limit: 20
       }
     });
     get().fetchUsers();
   },
 
-  // Load more users
-  loadMore: () => {
-    if (get().pagination.hasMore) {
-      set(state => ({
-        pagination: { ...state.pagination, page: state.pagination.page + 1 }
-      }));
-      get().fetchUsers(true);
-    }
+  setCurrentPage: (page) => {
+    const nextPage = Math.max(1, page);
+    set(state => ({
+      pagination: {
+        ...state.pagination,
+        page: nextPage
+      }
+    }));
   },
 
   // Clear selected user
@@ -408,9 +407,7 @@ const useUserStore = create((set, get) => ({
     },
     pagination: {
       page: 1,
-      limit: 20,
-      lastVisible: null,
-      hasMore: true
+      limit: 20
     },
     stats: {
       total: 0,

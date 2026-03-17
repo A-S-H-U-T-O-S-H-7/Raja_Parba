@@ -1,25 +1,18 @@
 // components/admin/users/UserTable.jsx
 "use client";
-import { useEffect } from 'react';
 import { Users, AlertCircle } from 'lucide-react';
 import useThemeStore from '@/lib/stores/useThemeStore';
 import useUserStore from '@/lib/stores/useUserStore';
 import UserRow from './UserRow';
 import TableSkeleton from './TableSkeleton';
 
-export default function UserTable() {
+export default function UserTable({ users = [] }) {
   const { isDarkMode } = useThemeStore();
   const { 
-    users, 
     loading, 
     error, 
-    fetchUsers,
     filters
   } = useUserStore();
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
 
   if (loading) {
     return <TableSkeleton columns={5} rows={5} />;

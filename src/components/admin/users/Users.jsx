@@ -1,6 +1,5 @@
-// app/admin/users/page.jsx
 "use client";
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ArrowLeft, Download, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import useUserStore from '@/lib/stores/useUserStore';
@@ -19,19 +18,23 @@ export default function UsersPage() {
     totalUsers, 
     fetchUsers,
     setCurrentPage: setStorePage,
+    pagination,
     loading
   } = useUserStore();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
+  const currentPage = pagination.page;
+  const pageSize = pagination.limit;
 
-  // Fetch users when page or pageSize changes
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, pageSize, fetchUsers]);
+  }, [fetchUsers]);
+
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return users.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, pageSize, users]);
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
     setStorePage(page);
   };
 
@@ -140,7 +143,7 @@ export default function UsersPage() {
       <UserFilters />
 
       {/* Users Table */}
-      <UserTable />
+      <UserTable users={paginatedUsers} />
 
       {/* Pagination */}
       {totalUsers > 0 && (

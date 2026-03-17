@@ -114,7 +114,7 @@ export default function RajaQueenPage() {
       gender: (form.gender || "").trim(),
       dob: form.dob || "",
       age: Number(form.age || 0),
-      ageGroup: "15-30",
+      ageGroup: "15-45",
       userId: user?.uid || null,
     };
 
@@ -139,11 +139,11 @@ export default function RajaQueenPage() {
       return;
     }
 
-    if (payload.age < 15 || payload.age > 30) {
+    if (payload.age < 15 || payload.age > 45) {
       await Swal.fire({
         icon: "warning",
         title: "Age Not Eligible",
-        text: "Raja Queen age group is 15 to 30 years only.",
+        text: "Raja Queen age group is 15 to 45 years only.",
         confirmButtonColor: "#a855f7",
       });
       return;
@@ -261,7 +261,7 @@ export default function RajaQueenPage() {
             Raja Queen Registration
           </h1>
           <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
-            For talented young women aged 15 to 30 years
+            For talented young women aged 15 to 45 years
           </p>
         </div>
 
@@ -285,7 +285,7 @@ export default function RajaQueenPage() {
 
           <div className="flex mx-5 mt-1 justify-center items-center border border-pink-400 bg-linear-to-br from-pink-200 via-white to-pink-300 py-1 px-2 rounded-lg">
           <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
-    For talented young women aged  <span className="text-red-600 font-bold text-base">15 to 30 years</span>
+    For talented young women aged  <span className="text-red-600 font-bold text-base">15 to 45 years</span>
   </p>
   </div>
 
