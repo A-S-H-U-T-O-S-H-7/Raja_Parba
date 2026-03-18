@@ -21,6 +21,7 @@ import { createRajaKumariApplication } from "@/services/rajaKumariService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
+import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const competitionItems = [
   "Self-introduction",
@@ -257,11 +258,12 @@ export default function RajaKumariPage() {
     <Flower2 className="w-3.5 h-3.5 text-rose-500" />
   </div>
   <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">
-    Raja Kumari Registration
+    Raja Kumari 
   </h1>
   <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
     For talented young girls aged <span className="text-red-600 font-bold text-base">6 to 15 years</span>
   </p>
+  <DonationSupportCard className="mx-auto mt-4 max-w-4xl text-left" />
 </div>
 
         {/* Main Form Card */}

@@ -21,6 +21,7 @@ import {
 import { createPerformerApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
+import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const performanceOptions = ["Song", "Dance", "Others"];
 const participationOptions = ["Solo", "Group"];
@@ -247,6 +248,7 @@ export default function PerformerPage() {
           <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
             Showcase your talent at the biggest cultural festival of Odisha
           </p>
+          <DonationSupportCard className="mx-auto mt-4 max-w-4xl text-left" />
         </div>
 
         {/* Main Form Card */}

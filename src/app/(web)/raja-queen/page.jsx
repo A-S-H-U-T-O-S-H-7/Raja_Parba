@@ -22,6 +22,7 @@ import { createRajaQueenApplication } from "@/services/rajaQueenService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
+import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const competitionItems = [
   "Self-introduction",
@@ -258,11 +259,12 @@ export default function RajaQueenPage() {
             <Flower2 className="w-3.5 h-3.5 text-purple-500" />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-600">
-            Raja Queen Registration
+            Raja Queen 
           </h1>
           <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
             For talented young women aged 15 to 45 years
           </p>
+          <DonationSupportCard className="mx-auto mt-4 max-w-4xl text-left" />
         </div>
 
         {/* Main Form Card */}

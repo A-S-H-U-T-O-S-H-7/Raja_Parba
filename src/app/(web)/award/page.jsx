@@ -23,6 +23,7 @@ import {
 import { createAwardApplication } from "@/services/awardService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
+import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const awardFieldOptions = [
   { label: "Utkal Seva Samman", icon: "🏛️" },
@@ -345,6 +346,7 @@ export default function AwardPage() {
           <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
             Nominate yourself for prestigious awards at Raja Parba 2026
           </p>
+          <DonationSupportCard className="mx-auto mt-4 max-w-4xl text-left" />
         </div>
 
         {/* Main Form Card */}

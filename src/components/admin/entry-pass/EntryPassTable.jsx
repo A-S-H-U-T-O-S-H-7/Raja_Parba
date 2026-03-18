@@ -1,7 +1,7 @@
 // components/admin/entry-pass-management/EntryPassTable.jsx
 "use client";
 
-import { Eye, CheckCircle, XCircle, UserCheck, Loader2, Calendar, Mail, Phone, Users, Ticket } from "lucide-react";
+import { Eye, CheckCircle, XCircle, UserCheck, Loader2, Calendar, Mail, Phone, Users, Ticket, ImageOff } from "lucide-react";
 import useThemeStore from "@/lib/stores/useThemeStore";
 import { format } from "date-fns";
 
@@ -25,6 +25,15 @@ const formatSimpleDate = (value) => {
   } catch {
     return "N/A";
   }
+};
+
+const formatCurrency = (amount) => {
+  const value = Number(amount);
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0);
 };
 
 export default function EntryPassTable({
@@ -63,9 +72,11 @@ export default function EntryPassTable({
   const tableHeaders = [
     { label: "S.No", width: "70px" },
     { label: "Entry ID", width: "120px" },
+    { label: "Image", width: "80px" },
     { label: "Applicant Information", width: "200px" },
     { label: "Contact Details", width: "200px" },
     { label: "Persons", width: "80px" },
+    { label: "Amount", width: "90px" },
     { label: "Booking Date", width: "150px" },
     { label: "Status", width: "120px" },
     { label: "Actions", width: "180px" }
@@ -117,7 +128,7 @@ export default function EntryPassTable({
         : "bg-white border-indigo-300 shadow-indigo-500/10"
     }`}>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-max" style={{ minWidth: "1200px" }}>
+        <table className="w-full min-w-max" style={{ minWidth: "1450px" }}>
           <thead className={`border-b-2 ${
             isDark
               ? "bg-gradient-to-r from-indigo-950 via-indigo-900 to-blue-900 border-indigo-600/50"
@@ -184,6 +195,32 @@ export default function EntryPassTable({
                     </div>
                   </td>
 
+                  {/* Image */}
+                  <td className={`px-4 py-4 border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    {booking.imageUrl ? (
+                      <img
+                        src={booking.imageUrl}
+                        alt={`${details.name || "Applicant"} photo`}
+                        className="h-12 w-12 rounded-lg border border-indigo-200 object-cover"
+                      />
+                    ) : (
+                      <div
+                        className={`flex h-12 w-12 items-center justify-center rounded-lg border ${
+                          isDark
+                            ? "border-gray-600 bg-gray-700 text-gray-300"
+                            : "border-gray-300 bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        <div className="flex flex-col items-center gap-1 text-[10px] font-medium">
+                          <ImageOff className="h-3.5 w-3.5" />
+                          <span>No image</span>
+                        </div>
+                      </div>
+                    )}
+                  </td>
+
                   {/* Applicant Information */}
                   <td className={`px-4 py-4 border-r ${
                     isDark ? "border-gray-700" : "border-gray-300"
@@ -233,6 +270,21 @@ export default function EntryPassTable({
                       </span>
                     </div>
                   </td>
+
+                  <td className={`px-4 py-4 border-r ${
+                    isDark ? "border-gray-700" : "border-gray-300"
+                  }`}>
+                    <span className={`text-sm font-semibold ${isDark ? "text-gray-100" : "text-gray-900"}`}>
+                      {formatCurrency(
+                        booking.paidAmount ??
+                        booking.totalAmount ??
+                        booking.payment?.amount ??
+                        0
+                      )}
+                    </span>
+                  </td>
+
+                  
 
                   {/* Booking Date */}
                   <td className={`px-4 py-4 border-r ${

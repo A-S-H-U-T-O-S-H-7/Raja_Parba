@@ -22,6 +22,7 @@ import { createDrawingApplication } from "@/services/drawingService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
 import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
+import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const competitionItems = [
   "Self-introduction",
@@ -323,6 +324,7 @@ export default function DrawingPage() {
           <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
             Showcase your artistic talent at Raja Parba 2026
           </p>
+          <DonationSupportCard className="mx-auto mt-4 max-w-4xl text-left" />
         </div>
 
         {/* Main Form Card */}

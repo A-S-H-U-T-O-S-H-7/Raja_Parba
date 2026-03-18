@@ -70,6 +70,7 @@ export default function OverviewStats() {
     users: 0,
     stallRevenue: 0,
     showRevenue: 0,
+    entryPassRevenue: 0,
     donationRevenue: 0,
     totalRevenue: 0,
     recentBookings: [],
@@ -108,6 +109,7 @@ export default function OverviewStats() {
 
       let stallRevenue = 0;
       let showRevenue = 0;
+      let entryPassRevenue = 0;
       let donationRevenue = 0;
       const recentBookings = [];
 
@@ -148,15 +150,18 @@ export default function OverviewStats() {
       let entryPass = 0;
       delegateSnap.forEach((row) => {
         const data = row.data();
-        if (data.category === "free_pass") {
+        if (data.category === "free_pass" || data?.eventDetails?.delegateType === "freePass") {
           entryPass += 1;
+          if (isRevenueStatus(data.status)) {
+            entryPassRevenue += parseAmount(data);
+          }
           recentBookings.push({
             id: row.id,
             type: "Entry Pass",
             name: getPersonName(data),
             email: getPersonEmail(data),
             status: data.status || "pending",
-            amount: 0,
+            amount: parseAmount(data),
             createdAt: toDateSafe(data.createdAt),
           });
         }
@@ -175,7 +180,7 @@ export default function OverviewStats() {
         return bTime - aTime;
       });
 
-      const totalRevenue = stallRevenue + showRevenue + donationRevenue;
+      const totalRevenue = stallRevenue + showRevenue + entryPassRevenue + donationRevenue;
 
       setMetrics({
         sponsor: sponsorSnap.size,
@@ -190,6 +195,7 @@ export default function OverviewStats() {
         users: usersSnap.size,
         stallRevenue,
         showRevenue,
+        entryPassRevenue,
         donationRevenue,
         totalRevenue,
         recentBookings: recentBookings.slice(0, 10),
@@ -232,6 +238,7 @@ export default function OverviewStats() {
         totalRevenue={metrics.totalRevenue}
         stallRevenue={metrics.stallRevenue}
         showRevenue={metrics.showRevenue}
+        entryPassRevenue={metrics.entryPassRevenue}
         donationRevenue={metrics.donationRevenue}
       />
       

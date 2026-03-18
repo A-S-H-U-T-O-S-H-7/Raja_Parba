@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { setDoc, doc, serverTimestamp, Timestamp, runTransaction, collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
@@ -590,7 +591,40 @@ const FreePassForm = () => {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-orange-50 to-rose-50 p-6">
+              <div className="space-y-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-orange-50 to-rose-50 p-6">
+                <label className="flex items-start gap-3 rounded-2xl border border-rose-100 bg-white/80 p-3 shadow-sm">
+                  <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-blue-600 bg-blue-600 text-xs font-bold text-white shadow-sm">
+                    ✓
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="space-y-2"><p className="hidden">
+                      A humble contribution of <span className="font-semibold text-rose-700">₹{ENTRY_PASS_DONATION_PER_PERSON} per person</span> helps us support child education and women empowerment and keep this celebration meaningful for the community. Your small donation becomes part of something truly beautiful.
+                    </p>
+                    <p className="text-sm leading-6 text-slate-700">
+  <span className="font-semibold text-rose-700">₹{ENTRY_PASS_DONATION_PER_PERSON} per person</span> is a humble contribution that helps support <span className="font-semibold text-emerald-700">child education</span> and <span className="font-semibold text-fuchsia-700">women empowerment</span>. Your small <span className="font-semibold text-rose-700">donation</span> becomes part of something truly meaningful for the community.
+</p>
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="font-medium text-slate-700">Want to contribute more?</span>
+                      <a
+                        href="/donate"
+                        className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1.5 font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-50"
+                      >
+                        Donate Here
+                      </a>
+                    </div>
+                    </div>
+                    <div className="relative h-20 w-30 shrink-0 overflow-hidden rounded-xl border border-rose-100 bg-white">
+                      <Image
+                        src="/donation2.jpg"
+                        alt="Donation support"
+                        fill
+                        sizes="80px"
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                </label>
+
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                   <div>
                     <p className="bg-gradient-to-r from-emerald-700 to-rose-700 bg-clip-text text-2xl font-bold text-transparent">
@@ -600,16 +634,16 @@ const FreePassForm = () => {
                       <Ticket className="h-4 w-4" />
                       {totalPersons} person(s) for 3 days ({EVENT_DATE_LABEL})
                     </p>
-                    <p className="mt-2 max-w-lg text-sm leading-6 text-slate-700">
+                    <p className="hidden">
                       A humble contribution of <span className="font-semibold text-rose-700">₹{ENTRY_PASS_DONATION_PER_PERSON} per person</span> helps us support a noble cause and keep this celebration meaningful for the community. Your small donation becomes part of something truly beautiful.
                     </p>
                   </div>
                   <button
                     type="submit"
                     disabled={isSubmitting || loading.countries}
-                    className="group cursor-pointer relative overflow-hidden rounded-xl bg-gradient-to-r from-rose-500 via-rose-400 to-rose-700 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                    className="group relative cursor-pointer overflow-hidden rounded-xl bg-gradient-to-r from-rose-500 via-rose-400 to-rose-700 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <span className="relative  z-10 flex items-center gap-2">
+                    <span className="relative z-10 flex items-center gap-2">
                       {isSubmitting ? (
                         <>
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

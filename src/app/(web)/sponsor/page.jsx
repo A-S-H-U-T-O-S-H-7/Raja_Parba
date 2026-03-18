@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { createSponsorApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const initialForm = {
   name: "",
@@ -125,7 +126,22 @@ export default function SponsorPage() {
 
   return (
     <div className=" p-5 pb-10 md:p-10 bg-gradient-to-b from-amber-50 to-red-50 flex items-center justify-center">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-4xl">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-amber-200 mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs font-medium text-amber-600">Raja Parba 2026</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-red-600">
+            Sponsor Raja Parba
+          </h1>
+          <p className="text-sm text-gray-600 mt-1 max-w-2xl mx-auto">
+            Stand with us in preserving culture while bringing hope, care, and support to the community.
+          </p>
+          <DonationSupportCard className="mx-auto mt-4 text-left" />
+        </div>
+
         <div className="bg-white rounded-2xl shadow-lg border border-amber-100 overflow-hidden">
           <div className="h-1 bg-gradient-to-r from-amber-400 to-red-500" />
 

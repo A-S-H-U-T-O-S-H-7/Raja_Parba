@@ -15,6 +15,7 @@ export default function DashboardHeader({
   totalRevenue, 
   stallRevenue, 
   showRevenue, 
+  entryPassRevenue,
   donationRevenue 
 }) {
   const { isDarkMode } = useThemeStore();
@@ -56,7 +57,7 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <RevenueCard 
           label="Stall Revenue" 
           value={stallRevenue}
@@ -66,6 +67,11 @@ export default function DashboardHeader({
           label="Show Revenue" 
           value={showRevenue}
           color={isDarkMode ? "text-blue-300" : "text-blue-700"}
+        />
+        <RevenueCard 
+          label="Entry Pass Revenue" 
+          value={entryPassRevenue}
+          color={isDarkMode ? "text-lime-300" : "text-lime-700"}
         />
         <RevenueCard 
           label="Donation Revenue" 

@@ -28,6 +28,18 @@ const normalizeDate = (value) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+const parseAmount = (booking) => {
+  const amountValue =
+    booking?.payment?.amount ??
+    booking?.totalAmount ??
+    booking?.amount ??
+    booking?.paymentDetails?.amount ??
+    0;
+
+  const parsed = Number(amountValue);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 export default function EntryPassManagement() {
   const { isDarkMode } = useThemeStore();
   const { admin, hasPermission } = useAdminAuthStore();
@@ -73,6 +85,11 @@ export default function EntryPassManagement() {
         return {
           id: document.id,
           ...data,
+          paidAmount: parseAmount(data),
+          imageUrl:
+            data?.delegateDetails?.fileInfo?.imageUrl ||
+            data?.delegateDetails?.imageUrl ||
+            "",
           createdAt: normalizeDate(data.createdAt),
           updatedAt: normalizeDate(data.updatedAt),
           participatedAt: normalizeDate(data.participatedAt),
