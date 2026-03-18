@@ -11,8 +11,6 @@ function page() {
   return (
     <div>
       <ProtectedRoute>
-      
-     
       <FreePassForm />
       </ProtectedRoute>
     </div>

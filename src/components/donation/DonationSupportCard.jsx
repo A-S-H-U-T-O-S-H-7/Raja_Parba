@@ -27,19 +27,18 @@ export default function DonationSupportCard({
 }) {
   return (
     <div
-      className={`flex items-stretch overflow-hidden rounded-[20px] border border-rose-300 bg-rose-50/60 shadow-sm ${className}`.trim()}
+      className={`flex flex-col sm:flex-row items-stretch overflow-hidden rounded-[20px] border border-rose-300 bg-rose-50/60 shadow-sm ${className}`.trim()}
     >
-      {/* Image — wider panel */}
-      <div className="relative w-44 min-w-[175px] shrink-0 overflow-hidden bg-rose-100">
+      {/* Image — full width on mobile, fixed width on sm+ */}
+      <div className="relative h-48 w-full sm:h-auto sm:w-44 sm:min-w-[175px] shrink-0 overflow-hidden bg-rose-100">
         <Image
           src="/donation4.png"
           alt="Support donation"
           fill
-          sizes="175px"
+          sizes="(max-width: 640px) 100vw, 175px"
           className="object-cover saturate-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-rose-900/15 to-transparent" />
-        {/* Bottom phrase badge */}
+        <div className="absolute inset-0 bg-gradient-to-b sm:bg-gradient-to-r from-rose-900/15 to-transparent" />
         {badge && (
           <div className="absolute bottom-0 left-0 right-0 z-10 bg-rose-900/75 px-3 py-1.5 text-center font-serif text-[10px] italic text-white backdrop-blur-sm">
             {badge}
