@@ -15,6 +15,7 @@ import useAuthStore from '@/lib/stores/useAuthStore';
 import FreePassPersonalInfo from './FreePassPersonalInfo';
 import FreePassLocationInfo from './FreePassLocationInfo';
 import FreePassMembersInfo from './FreePassMembersInfo';
+import Link from 'next/link';
 
 const createEmptyMember = () => ({ name: '', gender: '', age: '' });
 
@@ -284,7 +285,7 @@ const FreePassForm = () => {
 
       <div className="mx-auto max-w-5xl">
 
-        {/* â”€â”€ HERO HEADER â”€â”€ */}
+        {/*  HERO HEADER */}
         <div className="relative mb-5 overflow-hidden rounded-2xl sm:mb-6 sm:rounded-3xl bg-gradient-to-br from-rose-600 via-orange-500 to-rose-500 shadow-xl">
           {/* Floral watermark â€” top right */}
           <Flower2 className="absolute -top-3 -right-3 h-20 w-20 text-white/10 rotate-12 sm:-top-4 sm:-right-4 sm:h-44 sm:w-44" />
@@ -320,7 +321,7 @@ const FreePassForm = () => {
           </div>
         </div>
 
-        {/* â”€â”€ FORM CARD â”€â”€ */}
+        {/*  FORM CARD */}
         <form onSubmit={handleSubmit}>
           <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white/90 backdrop-blur-sm shadow-lg">
 
@@ -335,7 +336,7 @@ const FreePassForm = () => {
 
             <div className="space-y-5 p-4 sm:p-8">
 
-              {/* â”€â”€ PHOTO UPLOAD â”€â”€ */}
+              {/* PHOTO UPLOAD */}
               <div>
                 <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <Camera className="h-4 w-4 text-emerald-600" />
@@ -371,12 +372,12 @@ const FreePassForm = () => {
                 {imageUploading && <p className="mt-2 text-sm text-emerald-700">Uploading...</p>}
               </div>
 
-              {/* â”€â”€ SECTION COMPONENTS â”€â”€ */}
+              {/*  SECTION COMPONENTS  */}
               <FreePassPersonalInfo formData={formData} errors={errors} handleInputChange={handleInputChange} handleBlur={handleBlur} />
               <FreePassLocationInfo formData={formData} errors={errors} handleInputChange={handleInputChange} handleBlur={handleBlur} countries={countries} states={states} cities={cities} />
               <FreePassMembersInfo formData={formData} errors={errors} memberErrors={memberErrors} totalPersons={totalPersons} onIncrementPersons={incrementPersons} onDecrementPersons={decrementPersons} handleMemberChange={handleMemberChange} />
 
-              {/* â”€â”€ TERMS â”€â”€ */}
+              {/*  TERMS  */}
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:rounded-2xl sm:p-5">
                 <h3 className="mb-3 text-sm font-bold text-slate-800 sm:text-base">Terms &amp; Conditions</h3>
                 <ul className="space-y-1.5 text-xs text-slate-600 sm:text-sm">
@@ -396,38 +397,76 @@ const FreePassForm = () => {
                 </ul>
               </div>
 
-              {/* â”€â”€ DONATION + PAYMENT â”€â”€ */}
-              <div className="rounded-xl border border-rose-200 bg-gradient-to-br from-rose-50 via-orange-50/60 to-emerald-50/60 p-4 sm:rounded-2xl sm:p-6">
-                {/* Donation notice */}
-                <div className="mb-5 rounded-xl border border-rose-100 bg-white/85 p-3 sm:p-4">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      checked
-                      readOnly
-                      tabIndex={-1}
-                      className="pointer-events-none mt-1 h-4 w-4 shrink-0 accent-rose-600"
-                    />
-                    <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="text-left">
-                        <p className="text-sm leading-6 text-slate-700">
-                          <span className="font-semibold text-rose-700">₹{ENTRY_PASS_DONATION_PER_PERSON} per person</span> supports{' '}
-                          <span className="font-semibold text-emerald-700">child education</span> and{' '}
-                          <span className="font-semibold text-fuchsia-700">women empowerment</span>. Your small contribution becomes part of something truly meaningful. 🌸
-                        </p>
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-medium text-slate-600">Want to contribute more?</span>
-                          <a href="/donate" className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-50">
-                            Donate Here →
-                          </a>
-                        </div>
-                      </div>
-                      <div className="relative h-24 w-28 shrink-0 overflow-hidden rounded-xl border border-rose-100 sm:h-20 sm:w-20">
-                        <Image src="/donation2.jpg" alt="Donation support" fill sizes="80px" className="object-contain" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              {/*  DONATION + PAYMENT  */}
+              <div className="rounded-lg border border-rose-200 bg-gradient-to-br from-rose-50 via-orange-50/60 to-emerald-50/60 p-2 md:p-4 sm:rounded-xl sm:p-4">
+               {/* Donation notice */}
+<div className="mb-5 rounded-xl border border-rose-100 bg-white/85 p-3 sm:p-4">
+  <div className="flex items-start gap-3">
+    <input
+      type="checkbox"
+      checked
+      readOnly
+      tabIndex={-1}
+      className="pointer-events-none mt-1 h-4 w-4 shrink-0 accent-blue-600"
+    />
+
+    <div className="flex min-w-0 flex-1 flex-col gap-3">
+
+      {/* Text content — always full width */}
+<div className="min-w-0 w-full">
+  <p className="text-sm leading-6 text-slate-700">
+    <span className="font-semibold text-rose-700">
+      ₹{ENTRY_PASS_DONATION_PER_PERSON} per person
+    </span>
+    {' '}— We all hold the power to{' '}
+    <em className="not-italic font-semibold text-rose-600">give 🤝</em>
+    {' '}even a small act of kindness can bring{' '}
+    <em className="not-italic font-semibold text-amber-700">food to the hungry 🍱</em>
+    {' '}and{' '}
+    <em className="not-italic font-semibold text-rose-600">education</em>
+    {' '}to those who need it{' '}
+    <em className="not-italic font-semibold text-amber-700">most ✨</em>
+  </p>
+  <div className="mt-2 flex flex-wrap items-center gap-2">
+    <span className="text-sm font-medium text-slate-600">
+      Want to contribute more?
+    </span>
+    
+    <Link
+      href="/donate"
+      className="inline-flex items-center rounded-full border border-rose-200 bg-white px-3 py-1 text-sm font-semibold text-rose-700 transition hover:bg-rose-50"
+    >
+      Donate Here →
+    </Link>
+  </div>
+</div>
+
+      {/* Image — full width on mobile, fixed size beside text on sm+ */}
+      <div className="relative h-28 w-full overflow-hidden rounded-xl border border-rose-100 sm:hidden">
+        <Image
+          src="/donation5.jpg"
+          alt="Donation support"
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
+
+    </div>
+
+    {/* Image — hidden on mobile, shown on sm+ beside text */}
+    <div className="relative hidden h-28 w-36 shrink-0 overflow-hidden rounded-xl border border-rose-100 sm:block">
+      <Image
+        src="/donation2.jpg"
+        alt="Donation support"
+        fill
+        sizes="144px"
+        className="object-cover"
+      />
+    </div>
+
+  </div>
+</div>
 
                 {/* Total + CTA */}
                 <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -450,7 +489,7 @@ const FreePassForm = () => {
                       {isSubmitting ? (
                         <>
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                          Processingâ€¦
+                          Processing
                         </>
                       ) : (
                         <>

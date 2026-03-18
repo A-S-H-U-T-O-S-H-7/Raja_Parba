@@ -48,8 +48,8 @@ function Layout({ children }) {
               {/* Logo Section with Text - Now with overflow downward */}
               <div className="flex items-center gap-4 relative group">
                 {/* Logo with overflow - extends below */}
-                <div className="flex-shrink-0 relative mb-[-15px] md:mb-[-10px]">
-                  <div className="w-20 h-20 md:w-24 md:h-24 relative bg-gradient-to-br from-rose-400 to-red-500 rounded-full p-0.5 border border-rose-300 shadow-md transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
+                <div className="flex-shrink-0 relative mb-[-5px] md:mb-[-10px]">
+                  <div className="w-18 h-18 md:w-24 md:h-24 relative bg-gradient-to-br from-rose-400 to-red-500 rounded-full p-0.5 border border-rose-300 shadow-md transform transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl">
                     <div className="relative w-full h-full rounded-full bg-white overflow-hidden">
                       <Image
                         src="/raja-logo.png"
@@ -69,12 +69,12 @@ function Layout({ children }) {
                 {/* Text next to logo */}
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-700 via-red-600 to-amber-700 bg-clip-text text-transparent">
+                    <span className="text-xl md:text-3xl font-bold bg-gradient-to-r from-rose-700 via-red-600 to-amber-700 bg-clip-text text-transparent">
                       Raja Parba
                     </span>
                     <Heart className="w-5 h-5 text-rose-500 fill-rose-500 animate-pulse" />
                   </div>
-                  <span className="text-xl md:text-2xl font-semibold text-amber-600 relative">
+                  <span className="text-lg md:text-2xl font-semibold text-amber-600 relative">
                     2026
                   </span>
                 </div>
@@ -84,7 +84,7 @@ function Layout({ children }) {
               <div className="flex items-center">
                 <button 
                   onClick={handleBack}
-                  className="flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer border border-amber-400/50 group relative overflow-hidden"
+                  className="flex items-center gap-2 px-3 py-2 md:px-5 md:py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer border border-amber-400/50 group relative overflow-hidden"
                   aria-label="Go back"
                 >
                   {/* Shine effect */}
