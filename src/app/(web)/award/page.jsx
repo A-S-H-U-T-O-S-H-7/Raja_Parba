@@ -30,6 +30,7 @@ const awardFieldOptions = [
   { label: "Odisha Pratibha Samman", icon: "🌟" },
   { label: "Odisha Gaurav Award", icon: "🏅" },
   { label: "Odisha Ratna Award", icon: "👑" },
+  { label: "Odisha Yuva Pratibha Samman Award", icon: "✨" },
 ];
 
 const awardDetailsByLanguage = {
@@ -50,6 +51,10 @@ const awardDetailsByLanguage = {
       title: "୪. *ଓଡ଼ିଶା ରତ୍ନ ସମ୍ମାନ*",
       description: "ସାମୁଦାୟିକ ବିକାଶ ସମିତି ଦ୍ୱାରା ଓଡ଼ିଶା ରଜ ପର୍ବରେ ପ୍ରଦାନ କରାଯିବ, ଓଡ଼ିଶା ରତ୍ନ ସମ୍ମାନ ସେହି ବ୍ୟକ୍ତିମାନେକୁ ଦିଆଯିବ ଯେଉଁମାନେ ଓଡ଼ିଶାର ସଂସ୍କୃତି, ଐତିହ୍ୟ ଓ ପବିତ୍ର ଜଗନ୍ନାଥ ସଂସ୍କୃତିର ପ୍ରଚାର-ପ୍ରସାର କରିବାରେ ଓଡ଼ିଶା ଏବଂ ଦିଲ୍ଲୀ ଏନସିଆରରେ ଅପୂର୍ବ ପ୍ରୟାସ କରିଛନ୍ତି। ଏହି ସମ୍ମାନ ସେମାନଙ୍କର ସେଇ ଉତ୍ସାହ, ନିଷ୍ଠା ଓ ସଂସ୍କୃତିକ ପ୍ରତି ନିସ୍ଵାର୍ଥ ଯୋଗଦାନକୁ ଉଦ୍‌ଘାଟିତ କରିବ।",
     },
+    {
+      title: "୫. *ଓଡ଼ିଶା ଯୁବ ପ୍ରତିଭା ସମ୍ମାନ*",
+      description: "ଓଡ଼ିଶା ଯୁବ ପ୍ରତିଭା ସମ୍ମାନ ଏକ ପ୍ରତିଷ୍ଠିତ ସମ୍ମାନ, ଯାହା ଓଡ଼ିଶାରୁ ଉଦ୍ଭୂତ ଯୁବ ପ୍ରତିଭାଙ୍କୁ ସମ୍ମାନିତ କରିବା ପାଇଁ ନିର୍ଦ୍ଦିଷ୍ଟ। ଏହି ସମ୍ମାନ ସେହି ଯୁବମାନଙ୍କୁ ସ୍ୱୀକୃତି ଦେଇଥାଏ ଯେଉଁମାନେ ତାଙ୍କର କ୍ଷେତ୍ରରେ ଅସାଧାରଣ ନିଷ୍ଠା, ନୂତନତା ଓ ପ୍ରଭାବ ପ୍ରଦର୍ଶନ କରିଛନ୍ତି। ଏହା ଏହି ଉଦାହରଣୀୟ ବ୍ୟକ୍ତିମାନେଙ୍କୁ ସମ୍ମାନିତ କରେ, ଯେଉଁମାନେ ତାଙ୍କର ଆଗ୍ରହ ଓ କଠୋର ପରିଶ୍ରମ ମାଧ୍ୟମରୁ ଶିକ୍ଷା, ସାମାଜିକ ସେବା, କଳା, ନେତୃତ୍ୱ କିମ୍ବା ସାର୍ବଜନୀନ ଉନ୍ନତି ଭଳି କ୍ଷେତ୍ରରେ ସମାଜକୁ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଭାବେ ଅବଦାନ ଦେଉଛନ୍ତି। ଏହି ସମ୍ମାନ କେବଳ ତାଙ୍କର ସଫଳତାକୁ ମାନ୍ୟତା ଦେଉନଥାଏ ନୁହେଁ, ଏହା ଯୁବ ପିଢ଼ୀକୁ ଉତ୍ସାହିତ କରେ ଯେ ସେମାନେ ଉତ୍କୃଷ୍ଟତା ପାଇଁ ପ୍ରୟାସ କରନ୍ତୁ ଏବଂ ପରିବର୍ତ୍ତନକାରୀ ହେବାକୁ, ଯାହା ଓଡ଼ିଶାର ଉନ୍ନତି ଓ ଗର୍ବର ଆତ୍ମାକୁ ଆଗେଇ ବଢ଼ାଏ।",
+    },
   ],
   english: [
     {
@@ -68,6 +73,10 @@ const awardDetailsByLanguage = {
       title: "4. *Odisha Ratna Award*",
       description: "Presented by Samudayik Vikas Samiti on Odisha Raja Parba, the Odisha Ratna Award honors individuals who have made exceptional contributions to promoting Odisha's culture, heritage, and the sacred Jagannath Sanskriti in Odisha, Delhi NCR. The award celebrates their dedication to preserving and propagating the spiritual and cultural identity of Odisha beyond its borders.",
     },
+    {
+      title: "5. *Odisha Yuva Pratibha Samman Award*",
+      description: "The Odisha Yuva Pratibha Samman Award is a prestigious recognition dedicated to celebrating young talents from Odisha who have demonstrated exceptional dedication, innovation, and impact in their respective fields. It honours individuals who, through their passion and hard work, are contributing meaningfully to society, whether in education, social service, arts, leadership, or public development. The award not only acknowledges their achievements but also inspires the youth to strive for excellence and become changemakers, carrying forward the spirit of progress and pride of Odisha.",
+    },
   ],
   hindi: [
     {
@@ -85,6 +94,10 @@ const awardDetailsByLanguage = {
     {
       title: "4. *ओडिशा रत्न सम्मान*",
       description: "सामुदायिक विकास समिति द्वारा ओडिशा रज पर्व पर प्रस्तुत, ओडिशा रत्न सम्मान उन व्यक्तियों को दिया जाता है जिन्होंने ओडिशा की संस्कृति, विरासत और पवित्र जगन्नाथ संस्कृति को ओडिशा तथा दिल्ली एनसीआर में प्रसार एवं संवर्धन करने में असाधारण योगदान दिया है। यह सम्मान उनके समर्पण और निःस्वार्थ योगदान के माध्यम से ओडिशा की आध्यात्मिक एवं सांस्कृतिक पहचान के संरक्षण व प्रचार को सराहता है।",
+    },
+    {
+      title: "5. *ओडिशा युवा प्रतिभा सम्मान पुरस्कार*",
+      description: "ओडिशा युवा प्रतिभा सम्मान एक प्रतिष्ठित सम्मान है जो ओडिशा के युवा प्रतिभाओं का अभिनंदन करने के लिए समर्पित है, जिन्होंने अपने-अपने क्षेत्रों में असाधारण समर्पण, नवाचार और प्रभाव दिखाया है। यह उन व्यक्तियों का सम्मान करता है जो अपनी लगन और कड़ी मेहनत के माध्यम से समाज में सार्थक योगदान दे रहे हैं, चाहे वह शिक्षा, सामाजिक सेवा, कला, नेतृत्व या सार्वजनिक विकास के क्षेत्र में हो। यह पुरस्कार न केवल उनकी उपलब्धियों को मान्यता देता है, बल्कि युवाओं को उत्कृष्टता की ओर प्रेरित करता है और उन्हें परिवर्तनकारी नेतृत्व करने के लिए उत्साहित करता है, जिससे ओडिशा की प्रगति और गर्व की भावना बनी रहे।",
     },
   ],
 };
