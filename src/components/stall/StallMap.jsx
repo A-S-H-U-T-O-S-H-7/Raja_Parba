@@ -121,26 +121,26 @@ export default function StallMap() {
           {allStalls.map((stall) => renderStall(stall))}
         </div>
 
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-green-50 p-3 rounded-lg">
-              <div className="text-lg sm:text-xl font-bold text-green-700">
-                {allStalls.filter((s) => getStallStatus(s.id) === 'available').length}
-              </div>
-              <div className="text-xs sm:text-sm text-green-600">Available</div>
-            </div>
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <div className="text-lg sm:text-xl font-bold text-blue-700">{selectedStalls.length}</div>
-              <div className="text-xs sm:text-sm text-blue-600">Selected</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-lg sm:text-xl font-bold text-gray-700">
-                {allStalls.filter((s) => getStallStatus(s.id) === 'booked').length}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600">Booked</div>
-            </div>
-          </div>
-        </div>
+        // <div className="mt-6 pt-4 border-t border-gray-200">
+        //   <div className="grid grid-cols-3 gap-4 text-center">
+        //     <div className="bg-green-50 p-3 rounded-lg">
+        //       <div className="text-lg sm:text-xl font-bold text-green-700">
+        //         {allStalls.filter((s) => getStallStatus(s.id) === 'available').length}
+        //       </div>
+        //       <div className="text-xs sm:text-sm text-green-600">Available</div>
+        //     </div>
+        //     <div className="bg-blue-50 p-3 rounded-lg">
+        //       <div className="text-lg sm:text-xl font-bold text-blue-700">{selectedStalls.length}</div>
+        //       <div className="text-xs sm:text-sm text-blue-600">Selected</div>
+        //     </div>
+        //     <div className="bg-gray-50 p-3 rounded-lg">
+        //       <div className="text-lg sm:text-xl font-bold text-gray-700">
+        //         {allStalls.filter((s) => getStallStatus(s.id) === 'booked').length}
+        //       </div>
+        //       <div className="text-xs sm:text-sm text-gray-600">Booked</div>
+        //     </div>
+        //   </div>
+        // </div>
       </div>
 
       {selectedStalls.length > 0 && (
