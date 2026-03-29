@@ -193,10 +193,11 @@ export default function PerformersTab() {
                     <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                       <p className="max-w-xs whitespace-pre-wrap break-words">{performer.address || 'N/A'}</p>
                     </td>
-                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      <p className="font-semibold">{performer.performanceType || 'N/A'}</p>
-                      <p className="mt-1">{performer.trackMusicName || 'Track N/A'} ({performer.trackDuration || 'N/A'})</p>
-                    </td>
+	                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+	                      <p className="font-semibold">{performer.performanceType || 'N/A'}</p>
+	                      <p className="mt-1">{performer.trackMusicName || 'Track N/A'} ({performer.trackDuration || 'N/A'})</p>
+	                      <p className="mt-1 text-xs">Preferred Date: {performer.preferredDate || 'N/A'}</p>
+	                    </td>
 	                    <td className={`px-4 py-4 text-sm border-r ${cellBorderClass} ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
 	                      {performer.participationType === 'Group' ? (
 	                        <div>
@@ -310,8 +311,9 @@ export default function PerformersTab() {
               <div className="space-y-2 text-sm">
                 <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-cyan-500" /> {performer.email || 'N/A'}</p>
                 <p className="flex items-center gap-2"><Phone className="h-4 w-4 text-cyan-500" /> {performer.phone || 'N/A'}</p>
-                <p className="whitespace-pre-wrap break-words">{performer.address || 'N/A'}</p>
-                <p className="font-semibold">
+	                <p className="whitespace-pre-wrap break-words">{performer.address || 'N/A'}</p>
+	                <p>Preferred Date: {performer.preferredDate || 'N/A'}</p>
+	                <p className="font-semibold">
                   {performer.participationType === 'Group'
                     ? `Group: ${performer.groupName || 'Group'} (${performer.memberCount || 0})`
                     : 'Solo'}

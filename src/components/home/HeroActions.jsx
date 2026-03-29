@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Heart, Star, Users, Mic, Calendar, Sparkles, Award, Crown, Sparkle } from 'lucide-react';
+import { Heart, Star, Users, Mic, Calendar, Sparkles, Award, Crown, Sparkle, Cake } from 'lucide-react';
 import { Playfair_Display, Cinzel } from 'next/font/google';
 import ShowModal from "./ShowModal";
 import PortalModal from "./PortalModal";
@@ -62,6 +62,10 @@ function HeroActions({ user }) {
         window.location.href = '/raja-queen';
         return;
       }
+      if (action === 'poda-pitha') {
+        window.location.href = '/poda-pitha';
+        return;
+      }
       if (action === 'drawing') {
         window.location.href = '/drawing';
         return;
@@ -76,6 +80,7 @@ function HeroActions({ user }) {
       if (action === 'sponsor') window.location.href = '/sponsor';
       else if (action === 'performer') window.location.href = '/performer';
       else if (action === 'raja-queen') window.location.href = '/raja-queen';
+      else if (action === 'poda-pitha') window.location.href = '/poda-pitha';
       else if (action === 'drawing') window.location.href = '/drawing';
       else if (action === 'awards') window.location.href = '/award';
       else if (action === 'show') window.location.href = '/show';
@@ -179,6 +184,18 @@ function HeroActions({ user }) {
     action: 'raja-queen'
   },
   {
+    id: 'poda-pitha',
+    title: 'Poda Pitha',
+    description: 'Traditional cake contest',
+    icon: Cake,
+    gradient: 'from-blue-700 to-indigo-900',
+    lightGradient: 'from-blue-50 to-indigo-100',
+    borderClass: 'border-blue-300/60',
+    viaColor: 'via-blue-700',
+    image: '/podapitha2.png',
+    action: 'poda-pitha'
+  },
+  {
     id: 'drawing',
     title: 'Drawing',
     description: 'Show your creativity',
@@ -191,6 +208,9 @@ function HeroActions({ user }) {
     action: 'drawing'
   }
 ];
+
+  const firstRowCards = cards.slice(0, 5);
+  const secondRowCards = cards.slice(5);
 
   // Generate random values for particles that stay consistent
   const particles = [...Array(6)].map(() => ({
@@ -262,109 +282,103 @@ function HeroActions({ user }) {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
-          {cards.map((card, index) => {
-            const IconComponent = card.icon;
-            
-            return (
-              <motion.div
-                key={card.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="group relative"
-              >
-                {/* Glow Effect */}
-                <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-xl blur-md opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
-                
-                {/* Main Card - Using static border class */}
-                <div className={`relative bg-gradient-to-br ${card.lightGradient} backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border ${card.borderClass} group-hover:-translate-y-0.5 ${
-                  card.featured ? `border-2 ${card.featuredBorderClass} ring-1 ring-white/70 shadow-lg` : ''
-                }`}>
-                  
-                  {/* Top Gradient Bar */}
-                  <div className={`h-1 bg-gradient-to-r ${card.gradient}`}></div>
-                  
-                  {/* Card Content */}
-                  <div className="p-3 flex flex-col items-center">
-                    
-                    {/* Icon/Image Container */}
-                    <div className="relative mb-2">
-                      {/* Outer Glow Ring */}
-                      <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-full blur-sm opacity-0 group-hover:opacity-40 transition-opacity duration-300`}></div>
-                      
-                      {/* Image Container */}
-                      <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br ${card.gradient} p-1 shadow-md`}>
-                        <div className="w-full h-full rounded-full bg-white flex items-center justify-center p-1.5">
-                          <img 
-                            src={card.image} 
-                            alt={card.title} 
-                            className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = `https://via.placeholder.com/32?text=${card.title.charAt(0)}`;
-                            }}
-                          />
+        {[firstRowCards, secondRowCards].map((rowCards, rowIndex) => (
+          <div
+            key={`row-${rowIndex}`}
+            className={`grid grid-cols-2 sm:grid-cols-3 ${rowIndex === 0 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3 md:gap-4 ${rowIndex === 0 ? 'mb-3 md:mb-4' : ''}`}
+          >
+            {rowCards.map((card, index) => {
+              const IconComponent = card.icon;
+              const animationIndex = rowIndex === 0 ? index : index + firstRowCards.length;
+
+              return (
+                <motion.div
+                  key={card.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: animationIndex * 0.05 }}
+                  className="group relative"
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-xl blur-md opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
+
+                  <div className={`relative h-full bg-gradient-to-br ${card.lightGradient} backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border ${card.borderClass} group-hover:-translate-y-0.5 ${
+                    card.featured ? `border-2 ${card.featuredBorderClass} ring-1 ring-white/70 shadow-lg` : ''
+                  }`}>
+                    <div className={`h-1 bg-gradient-to-r ${card.gradient}`}></div>
+
+                    <div className="p-3 flex h-full flex-col items-center">
+                      <div className="relative mb-2">
+                        <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-full blur-sm opacity-0 group-hover:opacity-40 transition-opacity duration-300`}></div>
+
+                        <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br ${card.gradient} p-1 shadow-md`}>
+                          <div className="w-full h-full rounded-full bg-white flex items-center justify-center p-1.5">
+                            <img
+                              src={card.image}
+                              alt={card.title}
+                              className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = `https://via.placeholder.com/32?text=${card.title.charAt(0)}`;
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-r ${card.gradient} flex items-center justify-center shadow-md`}>
+                          <IconComponent className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
                         </div>
                       </div>
 
-                      {/* Floating Icon Overlay */}
-                      <div className={`absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-r ${card.gradient} flex items-center justify-center shadow-md`}>
-                        <IconComponent className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
+                      <h3 className={`${playfair.className} text-xs sm:text-sm font-bold text-gray-800 mb-1 text-center line-clamp-1`}>
+                        {card.title}
+                      </h3>
+
+                      <p className="text-[10px] sm:text-xs text-gray-600 text-center mb-2 line-clamp-1">
+                        {card.description}
+                      </p>
+
+                      <div className={`w-8 h-0.5 bg-gradient-to-r from-transparent ${card.viaColor} to-transparent mb-2`}></div>
+
+                      <div className="mt-auto w-full">
+                        {card.isLink ? (
+                          <Link
+                            href={user ? card.action === 'stall' ? "/stall" : `/${card.action}` : "#"}
+                            onClick={(e) => {
+                              if (!user) {
+                                e.preventDefault();
+                                handleAction(card.action);
+                              }
+                            }}
+                            className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                              card.featured ? card.featuredFocusClass : 'focus-visible:ring-purple-400'
+                            }`}
+                          >
+                            <span>{user ? "Book" : "Join"}</span>
+                            <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        ) : (
+                          <button
+                            onClick={() => handleAction(card.action)}
+                            className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+                              card.featured ? card.featuredFocusClass : 'focus-visible:ring-purple-400'
+                            }`}
+                          >
+                            <span>{user ? "Apply" : "Join"}</span>
+                            <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        )}
                       </div>
                     </div>
-
-                    {/* Title */}
-                    <h3 className={`${playfair.className} text-xs sm:text-sm font-bold text-gray-800 mb-1 text-center line-clamp-1`}>
-                      {card.title}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-[10px] sm:text-xs text-gray-600 text-center mb-2 line-clamp-1">
-                      {card.description}
-                    </p>
-
-                    {/* Decorative Line - Using static via color */}
-                    <div className={`w-8 h-0.5 bg-gradient-to-r from-transparent ${card.viaColor} to-transparent mb-2`}></div>
-
-                    {/* Action Button */}
-                    {card.isLink ? (
-                      <Link
-                        href={user ? card.action === 'stall' ? "/stall" : `/${card.action}` : "#"}
-                        onClick={(e) => {
-                          if (!user) {
-                            e.preventDefault();
-                            handleAction(card.action);
-                          }
-                        }}
-                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                          card.featured ? card.featuredFocusClass : 'focus-visible:ring-purple-400'
-                        }`}
-                      >
-                        <span>{user ? "Book" : "Join"}</span>
-                        <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </Link>
-                    ) : (
-                      <button
-                        onClick={() => handleAction(card.action)}
-                        className={`w-full bg-gradient-to-r ${card.gradient} text-white py-1.5 px-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:shadow-md transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 group/btn focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                          card.featured ? card.featuredFocusClass : 'focus-visible:ring-purple-400'
-                        }`}
-                      >
-                        <span>{user ? "Apply" : "Join"}</span>
-                        <svg className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    )}
                   </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        ))}
 
         {/* Login Prompt Modal */}
         <PortalModal isOpen={showLoginPrompt} onClose={() => setShowLoginPrompt(false)}>
@@ -390,6 +404,7 @@ function HeroActions({ user }) {
                 pendingAction === 'awards' ? 'nominate for awards' :
                 pendingAction === 'kumari' ? 'participate in Raja Kumari' :
                 pendingAction === 'raja-queen' ? 'participate in Raja Queen' :
+                pendingAction === 'poda-pitha' ? 'join the Poda Pitha competition' :
                 pendingAction === 'drawing' ? 'join drawing competition' :
                 pendingAction === 'fancy-dress' ? 'join fancy dress' : 'book a stall'}
             </p>

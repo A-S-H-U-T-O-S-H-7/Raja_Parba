@@ -149,6 +149,7 @@ const SEARCH_SOURCES = [
   { collection: "award_applications", typeLabel: "AWARD PASS" },
   { collection: "raja_kumari_applications", typeLabel: "RAJA KUMARI PASS" },
   { collection: "raja_queen_applications", typeLabel: "RAJA QUEEN PASS" },
+  { collection: "poda_pitha_applications", typeLabel: "PODA PITHA PASS" },
   { collection: "drawing_applications", typeLabel: "DRAWING PASS" },
   { collection: "sponsors", typeLabel: "SPONSOR PASS" },
   { collection: "bookings", typeLabel: "LEGACY PASS" },

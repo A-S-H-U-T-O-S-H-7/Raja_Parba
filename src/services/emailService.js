@@ -538,6 +538,48 @@ export const sendRajaQueenConfirmationEmail = async (candidateData) => {
 };
 
 /**
+ * Send Poda Pitha confirmation email
+ * @param {Object} candidateData - Candidate information
+ * @returns {Promise<Object>} - API response
+ */
+export const sendPodaPithaConfirmationEmail = async (candidateData) => {
+  try {
+    const formData = new FormData();
+    formData.append('name', candidateData.name || '');
+    formData.append('email', candidateData.email || '');
+    formData.append('competition_name', candidateData.competitionName || 'Poda Pitha Competition');
+    formData.append('category', candidateData.category || 'Open to all ages');
+    formData.append('event_date', candidateData.eventDate || '13th-15th June, 2026');
+    formData.append('event_time', candidateData.eventTime || 'To be announced');
+
+    const response = await fetch('https://svsamiti.com/rajaparba/competition-confirmation.php', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'User-Agent': 'Raja-Parba-Competition-Confirmation/1.0'
+      }
+    });
+
+    const responseText = await response.text();
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      return { success: false, error: 'Invalid response from Poda Pitha email service', rawResponse: responseText };
+    }
+
+    if (response.ok && result.status) {
+      return { success: true, message: result.message || 'Poda Pitha confirmation email sent', data: result };
+    } else {
+      return { success: false, error: 'Poda Pitha email service error: ' + (result.message || result.errors?.join(', ') || 'Unknown error'), data: result };
+    }
+  } catch (error) {
+    return { success: false, error: 'Failed to send Poda Pitha email: ' + error.message };
+  }
+};
+
+/**
  * Send Drawing confirmation email
  * @param {Object} candidateData - Candidate information
  * @returns {Promise<Object>} - API response

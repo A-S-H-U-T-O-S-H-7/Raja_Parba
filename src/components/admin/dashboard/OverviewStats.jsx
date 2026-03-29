@@ -64,9 +64,9 @@ export default function OverviewStats() {
     kumari: 0,
     award: 0,
     drawing: 0,
-    stallBookings: 0,
-    showBookings: 0,
-    entryPass: 0,
+    stall: 0,
+    show: 0,
+    entry: 0,
     users: 0,
     stallRevenue: 0,
     showRevenue: 0,
@@ -111,11 +111,15 @@ export default function OverviewStats() {
       let showRevenue = 0;
       let entryPassRevenue = 0;
       let donationRevenue = 0;
+      let successfulStallCount = 0;
+      let successfulShowCount = 0;
+      let successfulEntryPassCount = 0;
       const recentBookings = [];
 
       stallSnap.forEach((row) => {
         const data = row.data();
         if (isRevenueStatus(data.status)) {
+          successfulStallCount += 1;
           stallRevenue += parseAmount(data);
         }
 
@@ -133,6 +137,7 @@ export default function OverviewStats() {
       showSnap.forEach((row) => {
         const data = row.data();
         if (isRevenueStatus(data.status)) {
+          successfulShowCount += 1;
           showRevenue += parseAmount(data);
         }
 
@@ -147,12 +152,11 @@ export default function OverviewStats() {
         });
       });
 
-      let entryPass = 0;
       delegateSnap.forEach((row) => {
         const data = row.data();
         if (data.category === "free_pass" || data?.eventDetails?.delegateType === "freePass") {
-          entryPass += 1;
           if (isRevenueStatus(data.status)) {
+            successfulEntryPassCount += 1;
             entryPassRevenue += parseAmount(data);
           }
           recentBookings.push({
@@ -189,9 +193,9 @@ export default function OverviewStats() {
         kumari: kumariSnap.size,
         award: awardSnap.size,
         drawing: drawingSnap.size,
-        stallBookings: stallSnap.size,
-        showBookings: showSnap.size,
-        entryPass,
+        stall: successfulStallCount,
+        show: successfulShowCount,
+        entry: successfulEntryPassCount,
         users: usersSnap.size,
         stallRevenue,
         showRevenue,

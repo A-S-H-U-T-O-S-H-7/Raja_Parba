@@ -10,6 +10,7 @@ const actions = [
   { href: '/award',       label: 'Apply Award',     icon: Trophy,       color: 'from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700'    },
   { href: '/raja-kumari', label: 'Raja Kumari',     icon: Crown,        color: 'from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700'          },
   { href: '/raja-queen',  label: 'Raja Queen',      icon: Sparkles,     color: 'from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700'    },
+  { href: '/poda-pitha',  label: 'Poda Pitha',      icon: Trophy,       color: 'from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'    },
   { href: '/drawing',     label: 'Drawing Entry',   icon: Palette,      color: 'from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'    },
   { href: '/donate',      label: 'Make Donation',   icon: Heart,        color: 'from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700'          },
 ];

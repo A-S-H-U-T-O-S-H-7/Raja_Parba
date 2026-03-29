@@ -46,6 +46,7 @@ const useUserProfileStore = create((set, get) => ({
   awards: [],
   rajaKumari: [],
   rajaQueen: [],
+  podaPitha: [],
   drawings: [],
 
   fetchProfileData: async (user) => {
@@ -63,6 +64,7 @@ const useUserProfileStore = create((set, get) => ({
         awardRaw,
         kumariRaw,
         queenRaw,
+        podaPithaRaw,
         drawingRaw,
       ] = await Promise.all([
         fetchByUserAndEmail('showBookings', user),
@@ -74,6 +76,7 @@ const useUserProfileStore = create((set, get) => ({
         fetchByUserAndEmail('award_applications', user),
         fetchByUserAndEmail('raja_kumari_applications', user),
         fetchByUserAndEmail('raja_queen_applications', user),
+        fetchByUserAndEmail('poda_pitha_applications', user),
         fetchByUserAndEmail('drawing_applications', user),
       ]);
 
@@ -153,6 +156,14 @@ const useUserProfileStore = create((set, get) => ({
         }))
       );
 
+      const podaPitha = sortByCreatedAtDesc(
+        podaPithaRaw.map((item) => ({
+          ...item,
+          type: 'poda-pitha',
+          createdAt: toDate(item.createdAt),
+        }))
+      );
+
       const drawings = sortByCreatedAtDesc(
         drawingRaw.map((item) => ({
           ...item,
@@ -172,6 +183,7 @@ const useUserProfileStore = create((set, get) => ({
         awards,
         rajaKumari,
         rajaQueen,
+        podaPitha,
         drawings,
       });
     } catch (error) {

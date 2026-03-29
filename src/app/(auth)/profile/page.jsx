@@ -27,6 +27,7 @@ const PROFILE_TABS = [
   'award',
   'rajaKumari',
   'rajaQueen',
+  'podaPitha',
   'drawing',
 ];
 
@@ -51,7 +52,6 @@ const getActiveCount = (items = [], allowedStatuses = null) =>
 const ProfilePage = () => {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState('show');
-  const [showEventLayoutModal, setShowEventLayoutModal] = useState(false);
 
   const {
     loading,
@@ -64,6 +64,7 @@ const ProfilePage = () => {
     awards,
     rajaKumari,
     rajaQueen,
+    podaPitha,
     drawings,
     fetchProfileData,
   } = useUserProfileStore();
@@ -105,22 +106,24 @@ const ProfilePage = () => {
       award: awards.length,
       rajaKumari: rajaKumari.length,
       rajaQueen: rajaQueen.length,
+      podaPitha: podaPitha.length,
       drawing: drawings.length,
     }),
-    [showCount, stallCount, entryPassBookings, donationCount, sponsors, performerCount, awards, rajaKumari, rajaQueen, drawings]
+    [showCount, stallCount, entryPassBookings, donationCount, sponsors, performerCount, awards, rajaKumari, rajaQueen, podaPitha, drawings]
   );
 
   const emptyStates = {
-    show: { type: 'Show bookings', icon: '🎭', color: 'purple', link: '/show', linkText: 'Book Show' },
-    stall: { type: 'Stall bookings', icon: '🏪', color: 'green', link: '/stall', linkText: 'Book Stall' },
-    entryPass: { type: 'Entry pass bookings', icon: '🎟️', color: 'yellow', link: '/free-pass', linkText: 'Book Free Pass' },
-    donations: { type: 'Donations', icon: '💝', color: 'pink', link: '/donate', linkText: 'Make Donation' },
-    sponsor: { type: 'Sponsor applications', icon: '⭐', color: 'orange', link: '/sponsor', linkText: 'Apply Sponsor' },
-    performer: { type: 'Performer applications', icon: '🎤', color: 'blue', link: '/performer', linkText: 'Apply Performer' },
-    award: { type: 'Award applications', icon: '🏆', color: 'yellow', link: '/award', linkText: 'Apply Award' },
-    rajaKumari: { type: 'Raja Kumari applications', icon: '👑', color: 'rose', link: '/raja-kumari', linkText: 'Apply Raja Kumari' },
-    rajaQueen: { type: 'Raja Queen applications', icon: '👸', color: 'pink', link: '/raja-queen', linkText: 'Apply Raja Queen' },
-    drawing: { type: 'Drawing applications', icon: '🖌️', color: 'green', link: '/drawing', linkText: 'Apply Drawing' },
+    show: { type: 'Show bookings', icon: 'S', color: 'purple', link: '/show', linkText: 'Book Show' },
+    stall: { type: 'Stall bookings', icon: 'T', color: 'green', link: '/stall', linkText: 'Book Stall' },
+    entryPass: { type: 'Entry pass bookings', icon: 'P', color: 'yellow', link: '/free-pass', linkText: 'Book Free Pass' },
+    donations: { type: 'Donations', icon: 'D', color: 'pink', link: '/donate', linkText: 'Make Donation' },
+    sponsor: { type: 'Sponsor applications', icon: 'SP', color: 'orange', link: '/sponsor', linkText: 'Apply Sponsor' },
+    performer: { type: 'Performer applications', icon: 'PF', color: 'blue', link: '/performer', linkText: 'Apply Performer' },
+    award: { type: 'Award applications', icon: 'A', color: 'yellow', link: '/award', linkText: 'Apply Award' },
+    rajaKumari: { type: 'Raja Kumari applications', icon: 'RK', color: 'rose', link: '/raja-kumari', linkText: 'Apply Raja Kumari' },
+    rajaQueen: { type: 'Raja Queen applications', icon: 'RQ', color: 'pink', link: '/raja-queen', linkText: 'Apply Raja Queen' },
+    podaPitha: { type: 'Poda Pitha applications', icon: 'PP', color: 'orange', link: '/poda-pitha', linkText: 'Apply Poda Pitha' },
+    drawing: { type: 'Drawing applications', icon: 'DR', color: 'green', link: '/drawing', linkText: 'Apply Drawing' },
   };
 
   const tabData = {
@@ -133,6 +136,7 @@ const ProfilePage = () => {
     award: awards,
     rajaKumari,
     rajaQueen,
+    podaPitha,
     drawing: drawings,
   };
 
@@ -176,6 +180,15 @@ const ProfilePage = () => {
             assessmentType="rajaQueen"
           />
         ));
+      case 'podaPitha':
+        return podaPitha.map((item) => (
+          <ContestApplicationCard
+            key={item.id}
+            item={item}
+            title="Poda Pitha Application"
+            accent="blueIndigo"
+          />
+        ));
       case 'drawing':
         return drawings.map((item) => (
           <ContestApplicationCard
@@ -209,7 +222,6 @@ const ProfilePage = () => {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
         <Header />
         <div className="mx-auto max-w-[96rem] px-4 py-8 sm:px-6 lg:px-8">
-          
           <div className="mb-8">
             <SimpleUserProfile user={user} />
           </div>

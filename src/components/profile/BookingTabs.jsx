@@ -8,13 +8,14 @@ const tabs = [
   { key: 'award',      label: 'Award',       bg: 'bg-blue-100',    activeBg: 'bg-blue-300',    border: 'border-blue-200',    activeBorder: 'border-blue-400',    text: 'text-blue-600',    activeText: 'text-blue-900',    countBg: 'bg-blue-200',    activeCountBg: 'bg-blue-500'    },
   { key: 'rajaKumari', label: 'Raja Kumari', bg: 'bg-rose-100',    activeBg: 'bg-rose-300',    border: 'border-rose-200',    activeBorder: 'border-rose-400',    text: 'text-rose-600',    activeText: 'text-rose-900',    countBg: 'bg-rose-200',    activeCountBg: 'bg-rose-500'    },
   { key: 'rajaQueen',  label: 'Raja Queen',  bg: 'bg-fuchsia-100', activeBg: 'bg-fuchsia-300', border: 'border-fuchsia-200', activeBorder: 'border-fuchsia-400', text: 'text-fuchsia-600', activeText: 'text-fuchsia-900', countBg: 'bg-fuchsia-200', activeCountBg: 'bg-fuchsia-500' },
+  { key: 'podaPitha',  label: 'Poda Pitha',  bg: 'bg-amber-100',   activeBg: 'bg-amber-300',   border: 'border-amber-200',   activeBorder: 'border-amber-400',   text: 'text-amber-700',   activeText: 'text-amber-900',   countBg: 'bg-amber-200',   activeCountBg: 'bg-amber-500'   },
   { key: 'drawing',    label: 'Drawing',     bg: 'bg-green-100',   activeBg: 'bg-green-300',   border: 'border-green-200',   activeBorder: 'border-green-400',   text: 'text-green-600',   activeText: 'text-green-900',   countBg: 'bg-green-200',   activeCountBg: 'bg-green-500'   },
 ];
 
 const BookingTabs = ({ activeTab, setActiveTab, counts }) => {
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-100/80 p-2.5 shadow-inner">
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10">
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-11">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           const count = counts[tab.key] ?? 0;

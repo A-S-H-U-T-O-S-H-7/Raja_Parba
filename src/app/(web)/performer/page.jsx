@@ -16,7 +16,8 @@ import {
   Sparkles,
   Flower2,
   Drama,
-  ChevronDown
+  ChevronDown,
+  Calendar
 } from "lucide-react";
 import { createPerformerApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
@@ -25,6 +26,7 @@ import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const performanceOptions = ["Song", "Dance", "Others"];
 const participationOptions = ["Solo", "Group"];
+const preferredDateOptions = ["13th June", "14th June", "15th June"];
 
 const initialForm = {
   name: "",
@@ -36,6 +38,7 @@ const initialForm = {
   customPerformanceType: "",
   performanceType: "",
   participationType: "",
+  preferredDate: "",
   groupName: "",
   memberCount: "",
   memberNames: [],
@@ -149,6 +152,7 @@ export default function PerformerPage() {
       (form.address || "").trim() &&
       (form.gender || "").trim() &&
       (form.participationType || "").trim() &&
+      (form.preferredDate || "").trim() &&
       (form.trackMusicName || "").trim() &&
       resolvedPerformanceType &&
       (!isGroup || ((form.groupName || "").trim() && memberCount > 0));
@@ -401,9 +405,9 @@ export default function PerformerPage() {
                   </div>
                 )}
 
-                {/* Solo/Group Selection */}
-                <div>
-                  <p className="text-xs font-medium text-gray-700 mb-1.5">Participation Type *</p>
+	                {/* Solo/Group Selection */}
+	                <div>
+	                  <p className="text-xs font-medium text-gray-700 mb-1.5">Participation Type *</p>
                   <div className="flex flex-wrap gap-1.5">
                     {participationOptions.map((option) => (
                       <button
@@ -419,11 +423,28 @@ export default function PerformerPage() {
                         {option}
                       </button>
                     ))}
-                  </div>
-                </div>
+	                  </div>
+	                </div>
 
-                {/* Group Details */}
-                {form.participationType === "Group" && (
+	                {/* Preferred Date */}
+	                <div className="relative">
+	                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400 z-10" />
+	                  <select
+	                    value={form.preferredDate}
+	                    onChange={(e) => updateField("preferredDate", e.target.value)}
+	                    className="w-full rounded-lg border border-blue-200 bg-white py-2.5 pl-9 pr-8 text-sm text-gray-700 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition-all appearance-none"
+	                    required
+	                  >
+	                    <option value="" disabled>Select Preferred Date *</option>
+	                    {preferredDateOptions.map((option) => (
+	                      <option key={option} value={option}>{option}</option>
+	                    ))}
+	                  </select>
+	                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 pointer-events-none" />
+	                </div>
+
+	                {/* Group Details */}
+	                {form.participationType === "Group" && (
                   <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-3 rounded-lg border border-cyan-200 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="relative">

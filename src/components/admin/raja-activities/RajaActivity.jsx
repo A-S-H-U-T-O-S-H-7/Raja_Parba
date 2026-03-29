@@ -7,6 +7,7 @@ import {
   Award, 
   Crown, 
   Palette,
+  Cake,
   Plus,
   RefreshCw
 } from 'lucide-react';
@@ -19,6 +20,7 @@ import PerformersTab from './PerformersTab';
 import AwardNomineesTab from './AwardNomineesTab';
 import RajaKumariTab from './RajaKumariTab';
 import RajaQueenTab from './RajaQueenTab';
+import PodaPithaTab from './PodaPithaTab';
 import DrawingTab from './DrawingTab';
 
 // Import modals
@@ -38,6 +40,7 @@ export default function RajaActivityPage() {
     { id: 'performers', name: 'Performers', icon: Mic, color: 'cyan', modal: 'performer' },
     { id: 'raja-queen', name: 'Raja Queen', icon: Crown, color: 'rose', modal: null },
     { id: 'raja-kumari', name: 'Raja Kumari', icon: Crown, color: 'pink', modal: null },
+    { id: 'poda-pitha', name: 'Poda Pitha', icon: Cake, color: 'amber', modal: null },
     { id: 'drawing', name: 'Drawing', icon: Palette, color: 'emerald', modal: null }
   ];
 
@@ -84,6 +87,8 @@ export default function RajaActivityPage() {
         return <RajaKumariTab key={refreshKey} />;
       case 'raja-queen':
         return <RajaQueenTab key={refreshKey} />;
+      case 'poda-pitha':
+        return <PodaPithaTab key={refreshKey} />;
       case 'drawing':
         return <DrawingTab key={refreshKey} />;
       default:

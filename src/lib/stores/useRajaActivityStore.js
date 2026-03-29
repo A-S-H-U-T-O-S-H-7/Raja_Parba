@@ -24,6 +24,7 @@ const categoryCollectionMap = {
   award: 'award_applications',
   kumari: 'raja_kumari_applications',
   queen: 'raja_queen_applications',
+  podaPitha: 'poda_pitha_applications',
   drawing: 'drawing_applications'
 };
 
@@ -33,6 +34,7 @@ const useRajaActivityStore = create((set, get) => ({
   awardNominees: [],
   rajaKumari: [],
   rajaQueen: [],
+  podaPitha: [],
   drawings: [],
   loading: false,
   error: null,
@@ -125,6 +127,24 @@ const useRajaActivityStore = create((set, get) => ({
     } catch (error) {
       console.error('Error fetching Raja Queen applications:', error);
       toast.error('Failed to fetch Raja Queen applications');
+      set({ loading: false });
+    }
+  },
+
+  fetchPodaPitha: async () => {
+    set({ loading: true });
+    try {
+      const q = query(collection(db, 'poda_pitha_applications'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const podaPitha = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+        createdAt: docItem.data().createdAt?.toDate?.()
+      }));
+      set({ podaPitha, loading: false });
+    } catch (error) {
+      console.error('Error fetching Poda Pitha applications:', error);
+      toast.error('Failed to fetch Poda Pitha applications');
       set({ loading: false });
     }
   },
@@ -401,6 +421,41 @@ const useRajaActivityStore = create((set, get) => ({
         }
       }
 
+      if (category === 'podaPitha' && status === 'confirmed') {
+        const candidateName = existingData?.name || '';
+        const candidateEmail = existingData?.email || '';
+        const eventDate = extraData?.eventDate || existingData?.eventDate || '';
+        const eventTime = extraData?.eventTime || existingData?.eventTime || '';
+
+        if (candidateName && candidateEmail && eventDate && eventTime) {
+          try {
+            const response = await fetch('/api/emails/competition-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: candidateName,
+                email: candidateEmail,
+                competition_name: 'Poda Pitha Competition',
+                category: 'Open to all ages',
+                event_date: eventDate,
+                event_time: eventTime
+              })
+            });
+            const emailResult = await response.json();
+
+            if (!response.ok || !emailResult?.status) {
+              console.error('Poda Pitha confirmation email failed:', emailResult);
+              toast.error('Poda Pitha confirmed, but confirmation email failed.');
+            } else {
+              toast.success('Poda Pitha confirmation email sent.');
+            }
+          } catch (emailError) {
+            console.error('Poda Pitha confirmation email request failed:', emailError);
+            toast.error('Poda Pitha confirmed, but confirmation email failed.');
+          }
+        }
+      }
+
       if (category === 'drawing' && status === 'confirmed') {
         const candidateName = existingData?.name || '';
         const candidateEmail = existingData?.email || '';
@@ -459,6 +514,9 @@ const useRajaActivityStore = create((set, get) => ({
           break;
         case 'queen':
           await get().fetchRajaQueen();
+          break;
+        case 'podaPitha':
+          await get().fetchPodaPitha();
           break;
         case 'drawing':
           await get().fetchDrawings();
@@ -537,6 +595,9 @@ const useRajaActivityStore = create((set, get) => ({
         case 'queen':
           await get().fetchRajaQueen();
           break;
+        case 'podaPitha':
+          await get().fetchPodaPitha();
+          break;
         case 'drawing':
           await get().fetchDrawings();
           break;
@@ -599,6 +660,7 @@ const useRajaActivityStore = create((set, get) => ({
       awardNominees: [],
       rajaKumari: [],
       rajaQueen: [],
+      podaPitha: [],
       drawings: [],
       loading: false,
       error: null,

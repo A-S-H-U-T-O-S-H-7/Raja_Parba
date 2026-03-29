@@ -23,6 +23,7 @@ function layout({ children }) {
       "/raja-kumari",
       "/drawing",
       "/raja-queen",
+      "/poda-pitha",
       "/award",
       "/performer",
       "/sponsor",
