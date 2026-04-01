@@ -91,7 +91,6 @@ export default function DrawingTab() {
     { header: 'Category', accessor: 'category' },
     { header: 'Pincode', accessor: 'pincode' },
     { header: 'Location', accessor: 'location' },
-    { header: 'Photo URL', accessor: 'photoUrl' },
     { header: 'Status', accessor: (item) => statusMeta(item.status, isDarkMode).label },
     { header: 'Event Date', accessor: (item) => formatDate(item.eventDate) },
     { header: 'Event Time', accessor: 'eventTime' },
