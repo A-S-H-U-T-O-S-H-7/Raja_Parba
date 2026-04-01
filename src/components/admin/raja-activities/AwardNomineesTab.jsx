@@ -93,7 +93,6 @@ export default function AwardNomineesTab() {
     { header: 'Pin', accessor: (item) => item.pin || item.pincode || 'N/A' },
     { header: 'Address', accessor: 'address' },
     { header: 'About Self', accessor: 'aboutSelf' },
-    { header: 'Profile URL', accessor: 'profileUrl' },
     { header: 'Status', accessor: (item) => statusMeta(item.status, isDarkMode).label },
     { header: 'Award Date', accessor: (item) => formatDate(item.awardDate) },
     { header: 'Award Time', accessor: 'awardTime' },
