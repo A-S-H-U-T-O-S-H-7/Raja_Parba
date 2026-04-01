@@ -20,6 +20,8 @@ import useThemeStore from '@/lib/stores/useThemeStore';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import useRajaActivityStore from '@/lib/stores/useRajaActivityStore';
 import Pagination from '@/components/admin/shared/Pagination';
+import ExportExcelButton from '@/components/admin/shared/ExportExcelButton';
+import { buildExcelData, exportToExcel } from '@/utils/excelExport';
 
 const formatDate = (value) => {
   if (!value) return 'N/A';
@@ -89,6 +91,37 @@ export default function PerformersTab() {
     return (performers || []).slice(startIndex, startIndex + itemsPerPage);
   }, [performers, currentPage]);
 
+  const exportColumns = useMemo(() => ([
+    { header: 'S.No', accessor: (_, index) => index + 1 },
+    { header: 'Registration ID', accessor: (performer) => performer.registrationId || performer.id || 'N/A' },
+    { header: 'Name', accessor: 'name' },
+    { header: 'Gender', accessor: 'gender' },
+    { header: 'Email', accessor: 'email' },
+    { header: 'Phone', accessor: 'phone' },
+    { header: 'Address', accessor: 'address' },
+    { header: 'Performance Type', accessor: 'performanceType' },
+    { header: 'Track Music Name', accessor: 'trackMusicName' },
+    { header: 'Track Duration', accessor: 'trackDuration' },
+    { header: 'Preferred Date', accessor: 'preferredDate' },
+    { header: 'Participation Type', accessor: 'participationType' },
+    { header: 'Group Name', accessor: 'groupName' },
+    { header: 'Member Count', accessor: 'memberCount' },
+    { header: 'Member Names', accessor: (performer) => performer.memberNames || [] },
+    { header: 'Status', accessor: (performer) => statusBadge(performer.status, isDarkMode).label },
+    { header: 'Performance Date', accessor: (performer) => formatDate(performer.performanceDate) },
+    { header: 'Performance Time', accessor: 'performanceTime' },
+    { header: 'Applied Date', accessor: (performer) => formatDate(performer.createdAt) },
+    { header: 'Admin Notes', accessor: 'adminNotes' }
+  ]), [isDarkMode]);
+
+  const handleExport = () => {
+    const excelData = buildExcelData(performers || [], exportColumns);
+    exportToExcel(excelData, 'raja-performers.xls', {
+      headerBgColor: '#0891b2',
+      textColumns: ['registration id', 'phone']
+    });
+  };
+
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
@@ -151,6 +184,10 @@ export default function PerformersTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <ExportExcelButton onClick={handleExport} />
+      </div>
+
       <div
         className={`hidden overflow-hidden rounded-2xl border lg:block ${
           isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'

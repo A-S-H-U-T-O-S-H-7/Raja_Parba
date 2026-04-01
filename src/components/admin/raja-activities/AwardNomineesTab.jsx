@@ -8,6 +8,8 @@ import useThemeStore from '@/lib/stores/useThemeStore';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import useRajaActivityStore from '@/lib/stores/useRajaActivityStore';
 import Pagination from '@/components/admin/shared/Pagination';
+import ExportExcelButton from '@/components/admin/shared/ExportExcelButton';
+import { buildExcelData, exportToExcel } from '@/utils/excelExport';
 
 const formatDate = (value) => {
   if (!value) return 'N/A';
@@ -78,6 +80,37 @@ export default function AwardNomineesTab() {
     return (awardNominees || []).slice(startIndex, startIndex + itemsPerPage);
   }, [awardNominees, currentPage]);
 
+  const exportColumns = useMemo(() => ([
+    { header: 'S.No', accessor: (_, index) => index + 1 },
+    { header: 'Registration ID', accessor: (item) => item.registrationId || item.id || 'N/A' },
+    { header: 'Name', accessor: 'name' },
+    { header: 'Award Field', accessor: 'awardField' },
+    { header: 'Email', accessor: 'email' },
+    { header: 'Phone', accessor: 'phone' },
+    { header: 'Age', accessor: 'age' },
+    { header: 'Gender', accessor: 'gender' },
+    { header: 'Education', accessor: 'educationQualification' },
+    { header: 'Pin', accessor: (item) => item.pin || item.pincode || 'N/A' },
+    { header: 'Address', accessor: 'address' },
+    { header: 'About Self', accessor: 'aboutSelf' },
+    { header: 'Photo URL', accessor: 'photoUrl' },
+    { header: 'Profile URL', accessor: 'profileUrl' },
+    { header: 'Profile File Name', accessor: 'profileFileName' },
+    { header: 'Status', accessor: (item) => statusMeta(item.status, isDarkMode).label },
+    { header: 'Award Date', accessor: (item) => formatDate(item.awardDate) },
+    { header: 'Award Time', accessor: 'awardTime' },
+    { header: 'Applied Date', accessor: (item) => formatDate(item.createdAt) },
+    { header: 'Admin Notes', accessor: 'adminNotes' }
+  ]), [isDarkMode]);
+
+  const handleExport = () => {
+    const excelData = buildExcelData(awardNominees || [], exportColumns);
+    exportToExcel(excelData, 'raja-award-nominees.xls', {
+      headerBgColor: '#7c3aed',
+      textColumns: ['registration id', 'phone', 'pin']
+    });
+  };
+
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
@@ -141,6 +174,10 @@ export default function AwardNomineesTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <ExportExcelButton onClick={handleExport} />
+      </div>
+
       <div className={`hidden overflow-hidden rounded-2xl border lg:block ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'}`}>
         <div className="overflow-x-auto">
           <table className="min-w-full">

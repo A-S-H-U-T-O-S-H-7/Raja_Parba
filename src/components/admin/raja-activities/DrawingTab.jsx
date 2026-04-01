@@ -8,6 +8,8 @@ import useThemeStore from '@/lib/stores/useThemeStore';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import useRajaActivityStore from '@/lib/stores/useRajaActivityStore';
 import Pagination from '@/components/admin/shared/Pagination';
+import ExportExcelButton from '@/components/admin/shared/ExportExcelButton';
+import { buildExcelData, exportToExcel } from '@/utils/excelExport';
 
 const formatDate = (value) => {
   if (!value) return 'N/A';
@@ -77,6 +79,34 @@ export default function DrawingTab() {
     return (drawings || []).slice(startIndex, startIndex + itemsPerPage);
   }, [drawings, currentPage]);
 
+  const exportColumns = useMemo(() => ([
+    { header: 'S.No', accessor: (_, index) => index + 1 },
+    { header: 'Registration ID', accessor: (item) => item.registrationId || item.id || 'N/A' },
+    { header: 'Name', accessor: 'name' },
+    { header: 'Email', accessor: 'email' },
+    { header: 'Phone', accessor: 'phone' },
+    { header: 'Age', accessor: 'age' },
+    { header: 'DOB', accessor: 'dob' },
+    { header: 'Gender', accessor: 'gender' },
+    { header: 'Category', accessor: 'category' },
+    { header: 'Pincode', accessor: 'pincode' },
+    { header: 'Location', accessor: 'location' },
+    { header: 'Photo URL', accessor: 'photoUrl' },
+    { header: 'Status', accessor: (item) => statusMeta(item.status, isDarkMode).label },
+    { header: 'Event Date', accessor: (item) => formatDate(item.eventDate) },
+    { header: 'Event Time', accessor: 'eventTime' },
+    { header: 'Applied Date', accessor: (item) => formatDate(item.createdAt) },
+    { header: 'Admin Notes', accessor: 'adminNotes' }
+  ]), [isDarkMode]);
+
+  const handleExport = () => {
+    const excelData = buildExcelData(drawings || [], exportColumns);
+    exportToExcel(excelData, 'raja-drawing.xls', {
+      headerBgColor: '#059669',
+      textColumns: ['registration id', 'phone', 'pincode', 'dob']
+    });
+  };
+
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
@@ -139,6 +169,10 @@ export default function DrawingTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <ExportExcelButton onClick={handleExport} />
+      </div>
+
       <div className={`hidden overflow-hidden rounded-2xl border lg:block ${isDarkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white'}`}>
         <div className="overflow-x-auto">
           <table className="min-w-full">

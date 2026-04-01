@@ -19,6 +19,8 @@ import useThemeStore from '@/lib/stores/useThemeStore';
 import useAdminAuthStore from '@/lib/stores/useAdminAuthStore';
 import useRajaActivityStore from '@/lib/stores/useRajaActivityStore';
 import Pagination from '@/components/admin/shared/Pagination';
+import ExportExcelButton from '@/components/admin/shared/ExportExcelButton';
+import { buildExcelData, exportToExcel } from '@/utils/excelExport';
 
 const formatAppliedDate = (value) => {
   if (!value) return 'N/A';
@@ -92,6 +94,28 @@ export default function SponsorsTab() {
     return (sponsors || []).slice(startIndex, startIndex + itemsPerPage);
   }, [sponsors, currentPage]);
 
+  const exportColumns = useMemo(() => ([
+    { header: 'S.No', accessor: (_, index) => index + 1 },
+    { header: 'Registration ID', accessor: (sponsor) => sponsor.registrationId || sponsor.id || 'N/A' },
+    { header: 'Organization', accessor: 'organization' },
+    { header: 'Contact Name', accessor: 'name' },
+    { header: 'Email', accessor: 'email' },
+    { header: 'Phone', accessor: 'phone' },
+    { header: 'Address', accessor: 'address' },
+    { header: 'City', accessor: 'city' },
+    { header: 'Status', accessor: (sponsor) => getStatusMeta(sponsor.status, isDarkMode).label },
+    { header: 'Applied Date', accessor: (sponsor) => formatAppliedDate(sponsor.createdAt) },
+    { header: 'Admin Notes', accessor: 'adminNotes' }
+  ]), [isDarkMode]);
+
+  const handleExport = () => {
+    const excelData = buildExcelData(sponsors || [], exportColumns);
+    exportToExcel(excelData, 'raja-sponsors.xls', {
+      headerBgColor: '#b45309',
+      textColumns: ['registration id', 'phone']
+    });
+  };
+
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
@@ -133,6 +157,10 @@ export default function SponsorsTab() {
 
   return (
     <div className="space-y-5">
+      <div className="flex justify-end">
+        <ExportExcelButton onClick={handleExport} />
+      </div>
+
       {showActivityLog ? (
         <div
           className={`overflow-hidden rounded-2xl border ${
