@@ -21,7 +21,7 @@ import {
 import { createRajaQueenApplication } from "@/services/rajaQueenService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
-import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
+import { DuplicateRegistrationError, hasExistingSingleRegistration } from "@/utils/registrationGuards";
 import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const competitionItems = [
@@ -233,6 +233,16 @@ export default function RajaQueenPage() {
       router.push("/profile?tab=rajaQueen");
     } catch (error) {
       console.error("Error submitting Raja Queen registration:", error);
+      if (error instanceof DuplicateRegistrationError) {
+        await Swal.fire({
+          icon: "info",
+          title: "Already Registered",
+          text: "A Raja Queen registration already exists for this email, phone, or account.",
+          confirmButtonColor: "#a855f7",
+        });
+        router.push("/profile?tab=rajaQueen");
+        return;
+      }
       await Swal.fire({
         icon: "error",
         title: "Submission Failed",

@@ -21,7 +21,7 @@ import {
 import { createDrawingApplication } from "@/services/drawingService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
-import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
+import { DuplicateRegistrationError, hasExistingSingleRegistration } from "@/utils/registrationGuards";
 import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const competitionItems = [
@@ -293,6 +293,16 @@ export default function DrawingPage() {
       router.push("/profile?tab=drawing");
     } catch (error) {
       console.error("Error submitting Drawing registration:", error);
+      if (error instanceof DuplicateRegistrationError) {
+        await Swal.fire({
+          icon: "info",
+          title: "Already Registered",
+          text: "A drawing registration already exists for this email, phone, or account.",
+          confirmButtonColor: "#10b981",
+        });
+        router.push("/profile?tab=drawing");
+        return;
+      }
       await Swal.fire({
         icon: "error",
         title: "Submission Failed",

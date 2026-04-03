@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { createSponsorApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
+import { DuplicateRegistrationError, hasExistingSingleRegistration } from "@/utils/registrationGuards";
 import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const initialForm = {
@@ -100,6 +101,42 @@ export default function SponsorPage() {
       return;
     }
 
+    const alreadyRegistered = await hasExistingSingleRegistration({
+      collectionName: "sponsors",
+      userId: payload.userId,
+      email: payload.email,
+      phone: payload.phone,
+    });
+
+    if (alreadyRegistered) {
+      const result = await Swal.fire({
+        html: `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;">
+            <div style="width:56px;height:56px;border-radius:9999px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;">!</div>
+            <h2 style="margin:0;font-size:1.2rem;color:#111827;">Already Registered</h2>
+            <p style="margin:0;font-size:0.95rem;color:#4b5563;text-align:center;line-height:1.45;">
+              You have already submitted a Sponsor request.<br/>
+              Please go to your profile to view details.
+            </p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Go to Profile",
+        cancelButtonText: "Close",
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#6b7280",
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl shadow-2xl",
+        },
+      });
+
+      if (result.isConfirmed) {
+        router.push("/profile?tab=sponsor");
+      }
+      return;
+    }
+
     try {
       setSubmitting(true);
       await createSponsorApplication(payload);
@@ -118,6 +155,16 @@ export default function SponsorPage() {
       
     } catch (error) {
       console.error("Error submitting sponsor application:", error);
+      if (error instanceof DuplicateRegistrationError) {
+        await Swal.fire({
+          icon: "info",
+          title: "Already Registered",
+          text: "A sponsor request already exists for this email, phone, or account.",
+          confirmButtonColor: "#ef4444",
+        });
+        router.push("/profile?tab=sponsor");
+        return;
+      }
       await showErrorAlert();
     } finally {
       setSubmitting(false);
@@ -258,4 +305,3 @@ export default function SponsorPage() {
     </div>
   );
 }
-

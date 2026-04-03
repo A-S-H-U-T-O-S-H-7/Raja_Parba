@@ -1,6 +1,12 @@
-import { collection, addDoc, Timestamp, doc, runTransaction } from 'firebase/firestore';
+import { Timestamp, doc, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
+import {
+  createSingleRegistrationWithGuard,
+  normalizeRegistrationEmail,
+  normalizeRegistrationPhone,
+  normalizeRegistrationUserId,
+} from '@/utils/registrationGuards';
 
 const PODA_PITHA_COLLECTION = 'poda_pitha_applications';
 
@@ -55,25 +61,38 @@ export const createPodaPithaApplication = async (applicationData, photoFile) => 
     const photoUrl = await getDownloadURL(uploadResult.ref);
     const registrationId = await generatePodaPithaRegistrationId();
 
-    const docRef = await addDoc(collection(db, PODA_PITHA_COLLECTION), {
+    const normalizedApplicationData = {
       ...applicationData,
-      registrationId,
-      photoUrl,
-      photoPath: uploadResult.ref.fullPath,
-      rounds: ['Single physical round'],
-      format: 'physical',
-      status: 'pending',
-      reviewStatus: 'pending',
-      adminNotes: '',
-      confirmedAt: null,
-      eventDate: null,
-      eventTime: null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      type: 'poda-pitha'
+      email: normalizeRegistrationEmail(applicationData?.email),
+      phone: normalizeRegistrationPhone(applicationData?.phone),
+      userId: normalizeRegistrationUserId(applicationData?.userId),
+    };
+
+    const result = await createSingleRegistrationWithGuard({
+      collectionName: PODA_PITHA_COLLECTION,
+      userId: normalizedApplicationData.userId,
+      email: normalizedApplicationData.email,
+      phone: normalizedApplicationData.phone,
+      data: {
+        ...normalizedApplicationData,
+        registrationId,
+        photoUrl,
+        photoPath: uploadResult.ref.fullPath,
+        rounds: ['Single physical round'],
+        format: 'physical',
+        status: 'pending',
+        reviewStatus: 'pending',
+        adminNotes: '',
+        confirmedAt: null,
+        eventDate: null,
+        eventTime: null,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        type: 'poda-pitha'
+      }
     });
 
-    return { id: docRef.id, registrationId, success: true, photoUrl };
+    return { id: result.id, registrationId, success: true, photoUrl };
   } catch (error) {
     console.error('Error creating Poda Pitha application:', error);
     throw error;

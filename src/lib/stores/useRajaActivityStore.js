@@ -17,6 +17,14 @@ import {
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import useAdminAuthStore from './useAdminAuthStore';
+import {
+  createSingleRegistrationWithGuard,
+  DuplicateRegistrationError,
+  deleteSingleRegistrationKeys,
+  normalizeRegistrationEmail,
+  normalizeRegistrationPhone,
+  normalizeRegistrationUserId,
+} from '@/utils/registrationGuards';
 
 const categoryCollectionMap = {
   sponsor: 'sponsors',
@@ -172,13 +180,26 @@ const useRajaActivityStore = create((set, get) => ({
     set({ loading: true });
 
     try {
-      const docRef = await addDoc(collection(db, 'sponsors'), {
+      const normalizedSponsorData = {
         ...data,
-        status: 'requested',
-        reviewStatus: 'requested',
-        createdBy: admin?.id,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        email: normalizeRegistrationEmail(data?.email),
+        phone: normalizeRegistrationPhone(data?.phone),
+        userId: normalizeRegistrationUserId(data?.userId),
+      };
+
+      const docRef = await createSingleRegistrationWithGuard({
+        collectionName: 'sponsors',
+        userId: normalizedSponsorData.userId,
+        email: normalizedSponsorData.email,
+        phone: normalizedSponsorData.phone,
+        data: {
+          ...normalizedSponsorData,
+          status: 'requested',
+          reviewStatus: 'requested',
+          createdBy: admin?.id,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }
       });
 
       await get().logActivity({
@@ -193,6 +214,11 @@ const useRajaActivityStore = create((set, get) => ({
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error adding sponsor:', error);
+      if (error instanceof DuplicateRegistrationError) {
+        toast.error('A sponsor record already exists for this email, phone, or account');
+        set({ loading: false });
+        return { success: false };
+      }
       toast.error('Failed to add sponsor');
       set({ loading: false });
       return { success: false };
@@ -570,7 +596,20 @@ const useRajaActivityStore = create((set, get) => ({
         return { success: false };
       }
 
-      await deleteDoc(doc(db, collectionName, id));
+      const itemRef = doc(db, collectionName, id);
+      const existingSnap = await getDoc(itemRef);
+      const existingData = existingSnap.exists() ? existingSnap.data() : null;
+
+      await deleteDoc(itemRef);
+
+      if (existingData) {
+        await deleteSingleRegistrationKeys({
+          collectionName,
+          userId: existingData.userId,
+          email: existingData.email,
+          phone: existingData.phone,
+        });
+      }
 
       await get().logActivity({
         action: 'DELETE',

@@ -1,6 +1,5 @@
 import { 
   collection, 
-  addDoc, 
   getDocs, 
   updateDoc, 
   doc, 
@@ -13,6 +12,12 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import {
+  createSingleRegistrationWithGuard,
+  normalizeRegistrationEmail,
+  normalizeRegistrationPhone,
+  normalizeRegistrationUserId,
+} from '@/utils/registrationGuards';
 
 const SPONSORS_COLLECTION = 'sponsors';
 const PERFORMERS_COLLECTION = 'performers';
@@ -54,19 +59,32 @@ const generatePerformerRegistrationId = async () => {
 // Create a new sponsor application
 export const createSponsorApplication = async (sponsorData) => {
   try {
-    const docRef = await addDoc(collection(db, SPONSORS_COLLECTION), {
+    const normalizedSponsorData = {
       ...sponsorData,
-      status: 'requested',
-      reviewStatus: 'requested',
-      adminNotes: '',
-      confirmedAt: null,
-      eventDate: null,
-      eventTime: null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      type: 'sponsor'
+      email: normalizeRegistrationEmail(sponsorData?.email),
+      phone: normalizeRegistrationPhone(sponsorData?.phone),
+      userId: normalizeRegistrationUserId(sponsorData?.userId),
+    };
+
+    const result = await createSingleRegistrationWithGuard({
+      collectionName: SPONSORS_COLLECTION,
+      userId: normalizedSponsorData.userId,
+      email: normalizedSponsorData.email,
+      phone: normalizedSponsorData.phone,
+      data: {
+        ...normalizedSponsorData,
+        status: 'requested',
+        reviewStatus: 'requested',
+        adminNotes: '',
+        confirmedAt: null,
+        eventDate: null,
+        eventTime: null,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        type: 'sponsor'
+      }
     });
-    return { id: docRef.id, success: true };
+    return { id: result.id, success: true };
   } catch (error) {
     console.error('Error creating sponsor application:', error);
     throw error;
@@ -79,6 +97,9 @@ export const createPerformerApplication = async (performerData) => {
     const registrationId = await generatePerformerRegistrationId();
     const normalizedPerformerData = {
       ...performerData,
+      email: normalizeRegistrationEmail(performerData?.email),
+      phone: normalizeRegistrationPhone(performerData?.phone),
+      userId: normalizeRegistrationUserId(performerData?.userId),
       registrationId,
       performanceType:
         performerData.performanceType ||
@@ -89,19 +110,25 @@ export const createPerformerApplication = async (performerData) => {
       memberCount: performerData.memberCount ? String(performerData.memberCount) : ''
     };
 
-    const docRef = await addDoc(collection(db, PERFORMERS_COLLECTION), {
-      ...normalizedPerformerData,
-      status: 'pending',
-      reviewStatus: 'pending',
-      adminNotes: '',
-      confirmedAt: null,
-      performanceDate: null,
-      performanceTime: null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      type: 'performer'
+    const result = await createSingleRegistrationWithGuard({
+      collectionName: PERFORMERS_COLLECTION,
+      userId: normalizedPerformerData.userId,
+      email: normalizedPerformerData.email,
+      phone: normalizedPerformerData.phone,
+      data: {
+        ...normalizedPerformerData,
+        status: 'pending',
+        reviewStatus: 'pending',
+        adminNotes: '',
+        confirmedAt: null,
+        performanceDate: null,
+        performanceTime: null,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        type: 'performer'
+      }
     });
-    return { id: docRef.id, registrationId, success: true };
+    return { id: result.id, registrationId, success: true };
   } catch (error) {
     console.error('Error creating performer application:', error);
     throw error;

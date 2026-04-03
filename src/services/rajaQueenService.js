@@ -1,6 +1,12 @@
-import { collection, addDoc, Timestamp, doc, runTransaction } from 'firebase/firestore';
+import { collection, Timestamp, doc, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
+import {
+  createSingleRegistrationWithGuard,
+  normalizeRegistrationEmail,
+  normalizeRegistrationPhone,
+  normalizeRegistrationUserId,
+} from '@/utils/registrationGuards';
 
 const RAJA_QUEEN_COLLECTION = 'raja_queen_applications';
 
@@ -55,24 +61,37 @@ export const createRajaQueenApplication = async (applicationData, photoFile) => 
     const photoUrl = await getDownloadURL(uploadResult.ref);
     const registrationId = await generateRajaQueenRegistrationId();
 
-    const docRef = await addDoc(collection(db, RAJA_QUEEN_COLLECTION), {
+    const normalizedApplicationData = {
       ...applicationData,
-      registrationId,
-      photoUrl,
-      photoPath: uploadResult.ref.fullPath,
-      competitions: ['Self-introduction', 'Rangoli', 'Quiz', 'Dress/Attire'],
-      status: 'pending',
-      reviewStatus: 'pending',
-      adminNotes: '',
-      confirmedAt: null,
-      eventDate: null,
-      eventTime: null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      type: 'raja-queen'
+      email: normalizeRegistrationEmail(applicationData?.email),
+      phone: normalizeRegistrationPhone(applicationData?.phone),
+      userId: normalizeRegistrationUserId(applicationData?.userId),
+    };
+
+    const result = await createSingleRegistrationWithGuard({
+      collectionName: RAJA_QUEEN_COLLECTION,
+      userId: normalizedApplicationData.userId,
+      email: normalizedApplicationData.email,
+      phone: normalizedApplicationData.phone,
+      data: {
+        ...normalizedApplicationData,
+        registrationId,
+        photoUrl,
+        photoPath: uploadResult.ref.fullPath,
+        competitions: ['Self-introduction', 'Rangoli', 'Quiz', 'Dress/Attire'],
+        status: 'pending',
+        reviewStatus: 'pending',
+        adminNotes: '',
+        confirmedAt: null,
+        eventDate: null,
+        eventTime: null,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        type: 'raja-queen'
+      }
     });
 
-    return { id: docRef.id, registrationId, success: true, photoUrl };
+    return { id: result.id, registrationId, success: true, photoUrl };
   } catch (error) {
     console.error('Error creating Raja Queen application:', error);
     throw error;

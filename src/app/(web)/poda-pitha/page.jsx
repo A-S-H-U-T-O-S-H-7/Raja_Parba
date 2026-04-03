@@ -20,7 +20,7 @@ import {
 import { createPodaPithaApplication } from "@/services/podaPithaService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
-import { hasExistingSingleRegistration } from "@/utils/registrationGuards";
+import { DuplicateRegistrationError, hasExistingSingleRegistration } from "@/utils/registrationGuards";
 import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const competitionItems = [
@@ -222,6 +222,16 @@ export default function PodaPithaPage() {
       router.push("/profile?tab=podaPitha");
     } catch (error) {
       console.error("Error submitting Poda Pitha registration:", error);
+      if (error instanceof DuplicateRegistrationError) {
+        await Swal.fire({
+          icon: "info",
+          title: "Already Registered",
+          text: "A Poda Pitha registration already exists for this email, phone, or account.",
+          confirmButtonColor: "#d97706",
+        });
+        router.push("/profile?tab=podaPitha");
+        return;
+      }
       await Swal.fire({
         icon: "error",
         title: "Submission Failed",

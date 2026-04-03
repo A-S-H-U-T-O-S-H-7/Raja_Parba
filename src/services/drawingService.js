@@ -1,6 +1,12 @@
-import { collection, addDoc, Timestamp, doc, runTransaction } from 'firebase/firestore';
+import { Timestamp, doc, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
+import {
+  createSingleRegistrationWithGuard,
+  normalizeRegistrationEmail,
+  normalizeRegistrationPhone,
+  normalizeRegistrationUserId,
+} from '@/utils/registrationGuards';
 
 const DRAWING_COLLECTION = 'drawing_applications';
 
@@ -55,24 +61,37 @@ export const createDrawingApplication = async (applicationData, photoFile) => {
     const photoUrl = await getDownloadURL(uploadResult.ref);
     const registrationId = await generateDrawingRegistrationId();
 
-    const docRef = await addDoc(collection(db, DRAWING_COLLECTION), {
+    const normalizedApplicationData = {
       ...applicationData,
-      registrationId,
-      photoUrl,
-      photoPath: uploadResult.ref.fullPath,
-      competitions: ['Self-introduction', 'Quiz', 'Drawing in the Given Topic'],
-      status: 'pending',
-      reviewStatus: 'pending',
-      adminNotes: '',
-      confirmedAt: null,
-      eventDate: null,
-      eventTime: null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      type: 'drawing'
+      email: normalizeRegistrationEmail(applicationData?.email),
+      phone: normalizeRegistrationPhone(applicationData?.phone),
+      userId: normalizeRegistrationUserId(applicationData?.userId),
+    };
+
+    const result = await createSingleRegistrationWithGuard({
+      collectionName: DRAWING_COLLECTION,
+      userId: normalizedApplicationData.userId,
+      email: normalizedApplicationData.email,
+      phone: normalizedApplicationData.phone,
+      data: {
+        ...normalizedApplicationData,
+        registrationId,
+        photoUrl,
+        photoPath: uploadResult.ref.fullPath,
+        competitions: ['Self-introduction', 'Quiz', 'Drawing in the Given Topic'],
+        status: 'pending',
+        reviewStatus: 'pending',
+        adminNotes: '',
+        confirmedAt: null,
+        eventDate: null,
+        eventTime: null,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        type: 'drawing'
+      }
     });
 
-    return { id: docRef.id, registrationId, success: true, photoUrl };
+    return { id: result.id, registrationId, success: true, photoUrl };
   } catch (error) {
     console.error('Error creating Drawing application:', error);
     throw error;

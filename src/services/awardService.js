@@ -1,6 +1,12 @@
-import { collection, addDoc, Timestamp, doc, runTransaction } from 'firebase/firestore';
+import { Timestamp, doc, runTransaction } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, initializeAuth } from '@/lib/firebase';
+import {
+  createSingleRegistrationWithGuard,
+  normalizeRegistrationEmail,
+  normalizeRegistrationPhone,
+  normalizeRegistrationUserId,
+} from '@/utils/registrationGuards';
 
 const AWARD_COLLECTION = 'award_applications';
 
@@ -75,26 +81,39 @@ export const createAwardApplication = async (applicationData, photoFile, profile
       profileFileName = profileFile.name || safeProfileName;
     }
 
-    const docRef = await addDoc(collection(db, AWARD_COLLECTION), {
+    const normalizedApplicationData = {
       ...applicationData,
-      registrationId,
-      photoUrl,
-      photoPath: uploadResult.ref.fullPath,
-      profileUrl,
-      profilePath,
-      profileFileName,
-      status: 'pending',
-      reviewStatus: 'pending',
-      adminNotes: '',
-      confirmedAt: null,
-      awardDate: null,
-      awardTime: null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      type: 'award'
+      email: normalizeRegistrationEmail(applicationData?.email),
+      phone: normalizeRegistrationPhone(applicationData?.phone),
+      userId: normalizeRegistrationUserId(applicationData?.userId),
+    };
+
+    const result = await createSingleRegistrationWithGuard({
+      collectionName: AWARD_COLLECTION,
+      userId: normalizedApplicationData.userId,
+      email: normalizedApplicationData.email,
+      phone: normalizedApplicationData.phone,
+      data: {
+        ...normalizedApplicationData,
+        registrationId,
+        photoUrl,
+        photoPath: uploadResult.ref.fullPath,
+        profileUrl,
+        profilePath,
+        profileFileName,
+        status: 'pending',
+        reviewStatus: 'pending',
+        adminNotes: '',
+        confirmedAt: null,
+        awardDate: null,
+        awardTime: null,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        type: 'award'
+      }
     });
 
-    return { id: docRef.id, registrationId, success: true, photoUrl };
+    return { id: result.id, registrationId, success: true, photoUrl };
   } catch (error) {
     console.error('Error creating Award application:', error);
 

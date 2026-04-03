@@ -22,6 +22,7 @@ import {
 import { createPerformerApplication } from "@/services/sponsorPerformerService";
 import useAuthStore from "@/lib/stores/useAuthStore";
 import { showEntryPassAlert } from "@/utils/showEntryPassAlert";
+import { DuplicateRegistrationError, hasExistingSingleRegistration } from "@/utils/registrationGuards";
 import DonationSupportCard from "@/components/donation/DonationSupportCard";
 
 const performanceOptions = ["Song", "Dance", "Others"];
@@ -169,6 +170,8 @@ export default function PerformerPage() {
 
     const performerPayload = {
       ...form,
+      email: (form.email || "").trim(),
+      phone: (form.phone || "").trim(),
       performanceType: resolvedPerformanceType,
       groupName: isGroup ? form.groupName.trim() : "",
       memberCount: isGroup ? String(memberCount) : "",
@@ -179,6 +182,42 @@ export default function PerformerPage() {
         : trackDuration,
       userId: user?.uid || null,
     };
+
+    const alreadyRegistered = await hasExistingSingleRegistration({
+      collectionName: "performers",
+      userId: performerPayload.userId,
+      email: performerPayload.email,
+      phone: performerPayload.phone,
+    });
+
+    if (alreadyRegistered) {
+      const result = await Swal.fire({
+        html: `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 4px;">
+            <div style="width:56px;height:56px;border-radius:9999px;background:linear-gradient(135deg,#2563eb,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-size:26px;font-weight:700;">!</div>
+            <h2 style="margin:0;font-size:1.2rem;color:#111827;">Already Registered</h2>
+            <p style="margin:0;font-size:0.95rem;color:#4b5563;text-align:center;line-height:1.45;">
+              You have already submitted a Performer application.<br/>
+              Please go to your profile to view details.
+            </p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Go to Profile",
+        cancelButtonText: "Close",
+        confirmButtonColor: "#2563eb",
+        cancelButtonColor: "#6b7280",
+        background: "#ffffff",
+        customClass: {
+          popup: "rounded-2xl shadow-2xl",
+        },
+      });
+
+      if (result.isConfirmed) {
+        router.push("/profile?tab=performer");
+      }
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -219,6 +258,16 @@ export default function PerformerPage() {
       router.push("/profile?tab=performer");
     } catch (error) {
       console.error("Error submitting performer application:", error);
+      if (error instanceof DuplicateRegistrationError) {
+        await Swal.fire({
+          icon: "info",
+          title: "Already Registered",
+          text: "A performer application already exists for this email, phone, or account.",
+          confirmButtonColor: "#2563eb",
+        });
+        router.push("/profile?tab=performer");
+        return;
+      }
       await Swal.fire({
         icon: "error",
         title: "Submission Failed",

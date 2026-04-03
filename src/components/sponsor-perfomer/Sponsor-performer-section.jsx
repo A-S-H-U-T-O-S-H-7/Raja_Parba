@@ -5,6 +5,7 @@ import ToastNotification from './ToastNotification';
 import SponsorModal from './SponsorModal';
 import PerformerModal from './PerformerModal';
 import { createSponsorApplication, createPerformerApplication } from '@/services/sponsorPerformerService';
+import { DuplicateRegistrationError, hasExistingSingleRegistration } from '@/utils/registrationGuards';
 import Image from 'next/image';
 
 export default function SponsorPerformerSection() {
@@ -46,6 +47,17 @@ export default function SponsorPerformerSection() {
   const handleSponsorSubmit = async () => {
     if (sponsorForm.name && sponsorForm.email && sponsorForm.phone && sponsorForm.organization && sponsorForm.address && sponsorForm.city) {
       try {
+        const alreadyRegistered = await hasExistingSingleRegistration({
+          collectionName: 'sponsors',
+          email: sponsorForm.email,
+          phone: sponsorForm.phone,
+        });
+
+        if (alreadyRegistered) {
+          showToastMessage('A sponsor request already exists for this email or phone.');
+          return;
+        }
+
         const result = await createSponsorApplication(sponsorForm);
         
         // Send confirmation email
@@ -62,6 +74,10 @@ export default function SponsorPerformerSection() {
         setShowSponsorModal(false);
       } catch (error) {
         console.error('Error submitting sponsor application:', error);
+        if (error instanceof DuplicateRegistrationError) {
+          showToastMessage('A sponsor request already exists for this email or phone.');
+          return;
+        }
         showToastMessage("Sorry, there was an error submitting your application. Please try again later.");
       }
     }
@@ -97,6 +113,8 @@ export default function SponsorPerformerSection() {
     if (isFormValid) {
       const performerPayload = {
         ...performerForm,
+        email: (performerForm.email || '').trim(),
+        phone: (performerForm.phone || '').trim(),
         performanceType: resolvedPerformanceType,
         groupName: isGroup ? performerForm.groupName : '',
         memberCount: isGroup ? String(memberCount) : '',
@@ -107,6 +125,18 @@ export default function SponsorPerformerSection() {
       };
 
       try {
+        const alreadyRegistered = await hasExistingSingleRegistration({
+          collectionName: 'performers',
+          userId: performerPayload.userId,
+          email: performerPayload.email,
+          phone: performerPayload.phone,
+        });
+
+        if (alreadyRegistered) {
+          showToastMessage('A performer application already exists for this email, phone, or account.');
+          return;
+        }
+
         const result = await createPerformerApplication(performerPayload);
         
         // Send confirmation email
@@ -138,6 +168,10 @@ export default function SponsorPerformerSection() {
         setShowPerformerModal(false);
       } catch (error) {
         console.error('Error submitting performer application:', error);
+        if (error instanceof DuplicateRegistrationError) {
+          showToastMessage('A performer application already exists for this email, phone, or account.');
+          return;
+        }
         showToastMessage("Sorry, there was an error submitting your application. Please try again later.");
       }
     }
