@@ -50,30 +50,6 @@ function HeroActions({ user }) {
   // Handle action for non-authenticated users
   const handleAction = (action) => {
     if (!user) {
-      if (action === 'sponsor') {
-        window.location.href = '/sponsor';
-        return;
-      }
-      if (action === 'performer') {
-        window.location.href = '/performer';
-        return;
-      }
-      if (action === 'raja-queen') {
-        window.location.href = '/raja-queen';
-        return;
-      }
-      if (action === 'poda-pitha') {
-        window.location.href = '/poda-pitha';
-        return;
-      }
-      if (action === 'drawing') {
-        window.location.href = '/drawing';
-        return;
-      }
-      if (action === 'awards') {
-        window.location.href = '/award';
-        return;
-      }
       setPendingAction(action);
       setShowLoginPrompt(true);
     } else {
