@@ -111,7 +111,7 @@ export default function RajaParbaCancel({
           className={`
             rpc-modal-${visible ? "shown" : "hidden"}
             rpc-modal-bg rpc-font-body rpc-scroll
-            relative w-full max-w-lg max-h-[80vh]
+            relative w-full max-w-lg md:max-w-2xl max-h-[80vh] md:max-h-[90vh]
             overflow-y-auto rounded-2xl
             transition-all duration-400
           `}
