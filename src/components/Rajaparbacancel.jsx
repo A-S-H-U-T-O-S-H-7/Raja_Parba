@@ -2,24 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-/**
- * RajaParbaCancel — Modal popup for Odisha Raja Parba 2026 cancellation
- *
- * USAGE in page.js:
- *   import RajaParbaCancel from "@/components/RajaParbaCancel";
- *   <RajaParbaCancel
- *     photoSrc="/sudiptamohanty.jpeg"
- *     videoSrc="/sudipta_mohanty_video.mp4"
- *     showOncePerSession={false}
- *     onClose={() => setNoticeClosed(true)}
- *   />
- *
- * PROPS:
- *   photoSrc           {string}    – Photo URL
- *   videoSrc           {string}    – Video URL or YouTube embed URL
- *   showOncePerSession {boolean}   – If true, only shows once per browser session (default: true)
- *   onClose            {function}  – Called when modal is closed
- */
+
 export default function RajaParbaCancel({
   photoSrc = null,
   videoSrc = null,
@@ -39,25 +22,12 @@ export default function RajaParbaCancel({
     return () => clearTimeout(t);
   }, []);
 
+  // Lock body scroll while modal is open
   useEffect(() => {
     if (!open) return;
-
-    const originalOverflow = document.body.style.overflow;
-    const originalPaddingRight = document.body.style.paddingRight;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    if (scrollbarWidth > 0) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    }
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.paddingRight = originalPaddingRight;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-    };
+    return () => { document.body.style.overflow = prev; };
   }, [open]);
 
   const handleClose = () => {
@@ -69,7 +39,6 @@ export default function RajaParbaCancel({
     }, 380);
   };
 
-  // Detect if videoSrc is a local file (not YouTube)
   const isLocalVideo = videoSrc && !videoSrc.includes("youtube") && !videoSrc.includes("youtu.be");
 
   if (!open) return null;
@@ -79,160 +48,130 @@ export default function RajaParbaCancel({
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
 
-        .rpc-backdrop {
-          position: fixed; inset: 0; z-index: 9999;
-          background: rgba(20, 12, 4, 0.70);
-          backdrop-filter: blur(5px);
-          display: flex; align-items: center; justify-content: center;
-          padding: 16px;
-          transition: opacity .35s ease;
-          overscroll-behavior: contain;
-          touch-action: none;
+        .rpc-font-body    { font-family: 'DM Sans', sans-serif; }
+        .rpc-font-serif   { font-family: 'Libre Baskerville', serif; }
+
+        .rpc-modal-bg {
+          background: linear-gradient(160deg, #fef9f0 0%, #fdf3e0 40%, #fefcf7 100%);
         }
+        .rpc-top-stripe {
+          background: linear-gradient(90deg, #7a4a10, #c8923e, #f0d080, #c8923e, #7a4a10);
+        }
+        .rpc-divider-line {
+          background: linear-gradient(90deg, transparent, #d4a84b88, #d4a84b, #d4a84b88, transparent);
+        }
+        .rpc-photo-ring {
+          box-shadow: 0 8px 28px rgba(120,75,15,.22), 0 0 0 5px #fef0d0;
+        }
+
+        /* Backdrop fade */
         .rpc-backdrop-hidden { opacity: 0; pointer-events: none; }
         .rpc-backdrop-shown  { opacity: 1; }
 
-        .rpc-modal {
-          /* Soft warm gradient background */
-          background: linear-gradient(160deg, #fef9f0 0%, #fdf3e0 40%, #fefcf7 100%);
-          border-radius: 18px;
-          width: 100%;
-          max-width: 560px;
-          max-height: 90vh;
-          overflow-y: auto;
-          box-shadow:
-            0 40px 100px rgba(0,0,0,0.32),
-            0 0 0 1px rgba(200,150,60,0.22);
-          transition: opacity .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
-          font-family: 'DM Sans', sans-serif;
-          position: relative;
-          overscroll-behavior: contain;
-          touch-action: pan-y;
-        }
-        .rpc-modal-hidden { opacity:0; transform: scale(.95) translateY(24px); }
-        .rpc-modal-shown  { opacity:1; transform: scale(1)   translateY(0);    }
+        /* Modal scale-in */
+        .rpc-modal-hidden { opacity: 0; transform: scale(.95) translateY(24px); }
+        .rpc-modal-shown  { opacity: 1; transform: scale(1) translateY(0); }
 
-        /* Visible scrollbar */
-        .rpc-modal::-webkit-scrollbar       { width: 6px; }
-        .rpc-modal::-webkit-scrollbar-track { background: #f0e5cc; border-radius: 0 18px 18px 0; }
-        .rpc-modal::-webkit-scrollbar-thumb { background: #c8923e; border-radius: 6px; }
-        .rpc-modal::-webkit-scrollbar-thumb:hover { background: #a0702a; }
-
+        /* Diya flicker */
         @keyframes rpc-flicker {
-          0%,100% { transform: scaleY(1)    rotate(-2deg); opacity: 1;   }
-          35%     { transform: scaleY(1.08) rotate(2deg);  opacity: .78; }
-          65%     { transform: scaleY(.95)  rotate(-1deg); opacity: .94; }
+          0%,100% { transform: scaleY(1) rotate(-2deg); opacity: 1; }
+          35%     { transform: scaleY(1.08) rotate(2deg); opacity: .78; }
+          65%     { transform: scaleY(.95) rotate(-1deg); opacity: .94; }
         }
-        .rpc-flame  { display:inline-block; animation: rpc-flicker 2.5s ease-in-out infinite; }
+        .rpc-flame  { display: inline-block; animation: rpc-flicker 2.5s ease-in-out infinite; }
         .rpc-flame2 { animation-delay: .85s; }
 
+        /* Blinking dot */
         @keyframes rpc-blink { 0%,100%{opacity:1} 50%{opacity:.25} }
         .rpc-blink { animation: rpc-blink 1.8s ease-in-out infinite; }
 
-        /* Cancelled badge pulse ring */
+        /* Cancelled badge ring pulse */
         @keyframes rpc-ring {
-          0%   { box-shadow: 0 0 0 0 rgba(185,28,28,.35); }
-          70%  { box-shadow: 0 0 0 8px rgba(185,28,28,0);  }
-          100% { box-shadow: 0 0 0 0 rgba(185,28,28,0);    }
+          0%   { box-shadow: 0 0 0 0   rgba(185,28,28,.35); }
+          70%  { box-shadow: 0 0 0 8px rgba(185,28,28,0); }
+          100% { box-shadow: 0 0 0 0   rgba(185,28,28,0); }
         }
-        .rpc-cancelled-badge {
-          display: inline-flex; align-items: center; gap: 8px;
-          background: #fee2e2;
-          border: 1.5px solid #f87171;
-          color: #991b1b;
-          border-radius: 8px;
-          padding: 10px 20px;
-          font-size: 14px;
-          font-weight: 700;
-          letter-spacing: 0.04em;
-          animation: rpc-ring 2.2s ease-out infinite;
-        }
+        .rpc-badge-pulse { animation: rpc-ring 2.2s ease-out infinite; }
 
-        .rpc-divider {
-          height: 1px;
-          background: linear-gradient(90deg, transparent, #d4a84b88, #d4a84b, #d4a84b88, transparent);
-          margin: 20px 0;
-        }
+        /* Scrollbar */
+        .rpc-scroll::-webkit-scrollbar       { width: 6px; }
+        .rpc-scroll::-webkit-scrollbar-track { background: #f0e5cc; border-radius: 0 18px 18px 0; }
+        .rpc-scroll::-webkit-scrollbar-thumb { background: #c8923e; border-radius: 6px; }
+        .rpc-scroll::-webkit-scrollbar-thumb:hover { background: #a0702a; }
       `}</style>
 
-      {/* Backdrop */}
-      <div className={`rpc-backdrop ${visible ? "rpc-backdrop-shown" : "rpc-backdrop-hidden"}`}>
+      {/* ── Backdrop ── */}
+      <div
+        className={`rpc-backdrop-${visible ? "shown" : "hidden"} fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-opacity duration-300`}
+        style={{ background: "rgba(20,12,4,0.72)", backdropFilter: "blur(5px)" }}
+      >
 
-        {/* Modal */}
-        <div className={`rpc-modal ${visible ? "rpc-modal-shown" : "rpc-modal-hidden"}`}>
+        {/* ── Modal ── */}
+        <div
+          className={`
+            rpc-modal-${visible ? "shown" : "hidden"}
+            rpc-modal-bg rpc-font-body rpc-scroll
+            relative w-full max-w-lg max-h-[80vh]
+            overflow-y-auto rounded-2xl
+            transition-all duration-400
+          `}
+          style={{ boxShadow: "0 40px 100px rgba(0,0,0,0.32), 0 0 0 1px rgba(200,150,60,0.22)" }}
+        >
 
-          {/* ── Top gold stripe ── */}
-          <div style={{
-            height: 5,
-            background: "linear-gradient(90deg, #7a4a10, #c8923e, #f0d080, #c8923e, #7a4a10)",
-            borderRadius: "18px 18px 0 0",
-          }} />
+          {/* Top gold stripe */}
+          <div className="rpc-top-stripe h-1.5 w-full rounded-t-2xl" />
 
-          {/* ── Header ── */}
-          <div style={{ padding: "28px 32px 0", textAlign: "center" }}>
+          {/* ── HEADER ── */}
+          <div className="px-4 pt-5 pb-0 text-center">
 
             {/* Diyas */}
-            <div style={{ fontSize: 24, marginBottom: 14, letterSpacing: 10 }}>
+            <div className="text-2xl mb-1 md:mb-3" style={{ letterSpacing: 10 }}>
               <span className="rpc-flame">🪔</span>
-              <span style={{ display: "inline-block", width: 28 }} />
+              <span className="inline-block w-4 md:w-6" />
               <span className="rpc-flame rpc-flame2">🪔</span>
             </div>
 
-            {/* Shanti */}
-            <p style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: 11, letterSpacing: "0.24em",
-              color: "#b8832a", marginBottom: 16, textTransform: "uppercase",
-            }}>
+            {/* Shanti line */}
+            <p className="rpc-font-serif text-[11px] uppercase tracking-[0.22em] text-amber-700 mb-4">
               ॐ शान्ति &nbsp;·&nbsp; श्रद्धांजलि
             </p>
 
             {/* Main heading */}
-            <h1 style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: 26, fontWeight: 700,
-              color: "#1a0e04", marginBottom: 6, lineHeight: 1.2,
-            }}>
+            <h1 className="rpc-font-serif text-xl md:text-2xl font-bold text-stone-900 mb-1.5 leading-snug">
               An Important Notice
             </h1>
 
             {/* Sub heading */}
-            <p style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontStyle: "italic", fontSize: 14,
-              color: "#7a5220", marginBottom: 24,
-            }}>
+            <p className="rpc-font-serif italic text-sm text-amber-800 mb-6">
               Odisha Raja Parba 2026 &mdash; Samudayik Vikas Samiti
             </p>
 
             {/* ── Photo ── */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
-              <div style={{
-                width: 160, height: 190, borderRadius: 12, overflow: "hidden",
-                border: "3px solid #d4a84b",
-                boxShadow: "0 8px 28px rgba(120,75,15,.22), 0 0 0 5px #fef0d0",
-                background: "#f5e8cc",
-                position: "relative", flexShrink: 0,
-              }}>
+            <div className="flex justify-center mb-5">
+              <div
+                className="rpc-photo-ring relative w-40 h-48 rounded-xl overflow-hidden flex-shrink-0 border-[3px] border-amber-400"
+                style={{ background: "#f5e8cc" }}
+              >
                 {photoSrc ? (
                   <>
-                    <img src={photoSrc} alt="Mrs. Sudipta Mohanty"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                    <div style={{
-                      position: "absolute", bottom: 0, left: 0, right: 0,
-                      padding: "20px 8px 8px",
-                      background: "linear-gradient(transparent, rgba(15,8,0,.82))",
-                      textAlign: "center",
-                    }}>
-                      <p style={{ fontFamily: "'Libre Baskerville',serif", fontSize: 11, color: "#fdf6e0", margin: 0 }}>
+                    <img
+                      src={photoSrc}
+                      alt="Mrs. Sudipta Mohanty"
+                      className="w-full h-full object-cover block"
+                    />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 px-2 pb-2 pt-5 text-center"
+                      style={{ background: "linear-gradient(transparent, rgba(15,8,0,.82))" }}
+                    >
+                      <p className="rpc-font-serif text-[11px] text-amber-50 m-0">
                         Mrs. Sudipta Mohanty
                       </p>
                     </div>
                   </>
                 ) : (
-                  <div style={{ width:"100%", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
-                    <div style={{ fontSize: 30 }}>🖼️</div>
-                    <p style={{ fontSize:10, color:"#c8923e", textAlign:"center", padding:"0 10px", fontStyle:"italic", lineHeight:1.45 }}>
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 px-3">
+                    <span className="text-3xl">🖼️</span>
+                    <p className="text-[10px] text-amber-600 text-center italic leading-snug">
                       Pass <code>photoSrc</code><br />prop to show photo
                     </p>
                   </div>
@@ -240,179 +179,141 @@ export default function RajaParbaCancel({
               </div>
             </div>
 
-            {/* Name under photo */}
-            <p style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontSize: 18, fontWeight: 700,
-              color: "#1a0e04", marginBottom: 3,
-            }}>
+            {/* Name & role under photo */}
+            <p className="rpc-font-serif text-lg font-bold text-stone-900 mb-1">
               Mrs. Sudipta Mohanty
             </p>
-            <p style={{ fontSize: 12, color: "#9a7040", marginBottom: 5, letterSpacing: "0.04em" }}>
+            <p className="text-xs text-amber-700 tracking-wide mb-1">
               Promoter, Samudayik Vikas Samiti
             </p>
-            <p style={{ fontSize: 11, color: "#b8832a", letterSpacing: "0.16em", marginBottom: 24, textTransform: "uppercase" }}>
+            <p className="text-[11px] text-amber-600 uppercase tracking-widest mb-6">
               18 April 2026 &nbsp;·&nbsp; Eternal Rest
             </p>
 
-            <div className="rpc-divider" />
+            {/* Divider */}
+            <div className="rpc-divider-line h-px mb-0" />
           </div>
 
-          {/* ── Body ── */}
-          <div style={{ padding: "4px 32px 30px" }}>
+          {/* ── BODY ── */}
+          <div className="px-4 md:px-8 pt-3 md:pt-5 pb-6 md:pb-8">
 
-            {/* ── Cancelled badge — highlighted ── */}
-            <div style={{ textAlign: "center", marginBottom: 22 }}>
-              <span className="rpc-cancelled-badge">
-                <span className="rpc-blink" style={{
-                  width: 8, height: 8, borderRadius: "50%",
-                  background: "#dc2626", display: "inline-block", flexShrink: 0,
-                }} />
+            {/* Cancelled badge */}
+            <div className="flex justify-center mb-3 md:mb-5">
+              <span
+                className="rpc-badge-pulse inline-flex items-center gap-2 px-3 md:px-5 py-1 md:py-2.5 rounded-lg bg-red-100 border-[1.5px] border-red-400 text-red-800 text-sm font-bold tracking-wide"
+              >
+                <span className="rpc-blink w-2 h-2 rounded-full bg-red-600 flex-shrink-0 inline-block" />
                 Event Cancelled &nbsp;·&nbsp; 13–15 June 2026
               </span>
             </div>
 
             {/* Salutation */}
-            <p style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontStyle: "italic", fontSize: 14,
-              color: "#5a3e18", textAlign: "center",
-              marginBottom: 18, lineHeight: 1.65,
-            }}>
+            <p className="rpc-font-serif italic text-sm text-amber-900 text-center mb-5 leading-relaxed">
               Dear members of the Odisha community in Delhi NCR,
             </p>
 
             {/* Body paragraphs */}
-            <div style={{ fontSize: 15, lineHeight: 1.82, color: "#3a2810" }}>
-              <p style={{ marginBottom: 14 }}>
+            <div className="text-[15px] leading-[1.82] text-stone-800 space-y-3 mb-6">
+              <p>
                 It is with deep sorrow that we inform you of the passing of{" "}
-                <strong style={{ color: "#1a0e04" }}>Mrs. Sudipta Mohanty</strong>,
+                <strong className="text-stone-900">Mrs. Sudipta Mohanty</strong>,
                 promoter of Samudayik Vikas Samiti, on{" "}
-                <strong style={{ color: "#1a0e04" }}>18 April 2026</strong>.
+                <strong className="text-stone-900">18 April 2026</strong>.
               </p>
-              <p style={{ marginBottom: 14 }}>
+              <p>
                 In view of this untimely loss, the scheduled{" "}
-                <strong style={{ color: "#1a0e04" }}>Odisha Raja Parba 2026 (13–15 June 2026)</strong>{" "}
-                at <strong style={{ color: "#1a0e04" }}>Noida Stadium</strong> has been{" "}
-                <span style={{ color: "#991b1b", fontWeight: 700 }}>cancelled</span>.
+                <strong className="text-stone-900">Odisha Raja Parba 2026 (13–15 June 2026)</strong>{" "}
+                at <strong className="text-stone-900">Noida Stadium</strong> has been{" "}
+                <span className="text-red-700 font-bold">cancelled</span>.
                 We know this news will be disheartening, and we extend our heartfelt condolences to her family.
               </p>
-              <p style={{ marginBottom: 22 }}>
+              <p>
                 We plan to hold Raja Parba in{" "}
-                <strong style={{ color: "#1a0e04" }}>2027</strong> to honour her memory
+                <strong className="text-stone-900">2027</strong> to honour her memory
                 and hope for your continued support then.
               </p>
             </div>
 
-            {/* Alternative event */}
-            <div style={{
-              background: "linear-gradient(135deg, #f0fdf5, #e8f8ee)",
-              border: "1px solid #6ee7a0",
-              borderRadius: 12, padding: "16px 20px", marginBottom: 22,
-            }}>
-              <p style={{
-                fontSize: 11, fontWeight: 700, letterSpacing: "0.16em",
-                color: "#15803d", marginBottom: 10, textTransform: "uppercase",
-              }}>
+            {/* Alternative event box */}
+            <div className="bg-green-50 border border-green-300 rounded-xl p-4 mb-6">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-green-700 mb-2">
                 🌸 &nbsp;Alternative Celebration — Gurgaon
               </p>
-              <p style={{ fontSize: 14.5, lineHeight: 1.78, color: "#14532d", marginBottom: 8 }}>
+              <p className="text-sm leading-relaxed text-green-900 mb-2">
                 You are warmly invited to join the Raja Parba being organized in{" "}
                 <strong>Gurgaon</strong> by{" "}
                 <strong>Mr. Askhya Samal</strong>, Founder of{" "}
                 <strong>Kalinga Bharati Foundation</strong>.
               </p>
-              <p style={{ fontSize: 13, color: "#166534", fontStyle: "italic" }}>
+              <p className="text-xs text-green-800 italic">
                 For details, please contact Mr. Askhya Samal or follow updates from Kalinga Bharati Foundation.
               </p>
             </div>
 
-            {/* ── Tribute Video ── */}
-            <div style={{ marginBottom: 26 }}>
-              <p style={{
-                fontSize: 11, fontWeight: 700, letterSpacing: "0.16em",
-                color: "#b8832a", textAlign: "center",
-                marginBottom: 12, textTransform: "uppercase",
-              }}>
+            {/* Tribute video */}
+            <div className="mb-6">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700 text-center mb-3">
                 🎞️ &nbsp;Tribute Video
               </p>
-              <div style={{
-                borderRadius: 12, overflow: "hidden",
-                border: "1.5px solid #d4a84b",
-                background: "#f5e8cc",
-                /* Fix: use fixed height instead of aspect-ratio so iframe fills it */
-                height: 280,
-                display: "flex",
-                boxShadow: "0 4px 16px rgba(120,75,15,.12)",
-              }}>
+              <div
+                className="rounded-xl overflow-hidden border border-amber-400 w-full"
+                style={{ height: 280, background: "#f5e8cc", boxShadow: "0 4px 16px rgba(120,75,15,.12)" }}
+              >
                 {videoSrc ? (
                   isLocalVideo ? (
                     <video
                       src={videoSrc}
                       controls
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      className="w-full h-full object-cover block"
                     />
                   ) : (
                     <iframe
                       src={videoSrc}
-                      style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+                      className="w-full h-full block border-0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       title="Tribute video"
                     />
                   )
                 ) : (
-                  <div style={{
-                    width: "100%", display: "flex",
-                    flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12,
-                  }}>
-                    <div style={{
-                      width: 52, height: 52, borderRadius: "50%",
-                      background: "#eddcb8", border: "1.5px dashed #c8923e",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 20, color: "#b8832a",
-                    }}>▶</div>
-                    <p style={{ fontSize: 13, color: "#b8832a", textAlign: "center", fontStyle: "italic", lineHeight: 1.5 }}>
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-lg text-amber-700 border border-dashed border-amber-400"
+                      style={{ background: "#eddcb8" }}
+                    >
+                      ▶
+                    </div>
+                    <p className="text-sm text-amber-700 text-center italic leading-snug">
                       Tribute video coming soon<br />
-                      <span style={{ fontSize: 11, opacity: .65 }}>Pass <code>videoSrc</code> prop to embed</span>
+                      <span className="text-xs opacity-60">Pass <code>videoSrc</code> prop to embed</span>
                     </p>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="rpc-divider" />
+            {/* Divider */}
+            <div className="rpc-divider-line h-px mb-5" />
 
-            {/* Closing */}
-            <p style={{
-              fontFamily: "'Libre Baskerville', serif",
-              fontStyle: "italic", fontSize: 13,
-              color: "#7a5220", textAlign: "center", marginBottom: 16,
-            }}>
+            {/* Closing line */}
+            <p className="rpc-font-serif italic text-sm text-amber-800 text-center mb-4">
               Thank you for your understanding during this difficult time.
             </p>
 
             {/* Signature */}
-            <div style={{ textAlign: "center" }}>
-              <p style={{
-                fontFamily: "'Libre Baskerville', serif",
-                fontStyle: "italic", fontSize: 16,
-                color: "#2e1a08", marginBottom: 4,
-              }}>
+            <div className="text-center">
+              <p className="rpc-font-serif italic text-base text-stone-800 mb-1">
                 With sympathy,
               </p>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "#b8832a", letterSpacing: "0.06em" }}>
+              <p className="text-[13px] font-semibold text-amber-700 tracking-wide">
                 Samudayik Vikas Samiti Organizing Committee
               </p>
             </div>
           </div>
 
-          {/* ── Bottom gold stripe ── */}
-          <div style={{
-            height: 5,
-            background: "linear-gradient(90deg, #7a4a10, #c8923e, #f0d080, #c8923e, #7a4a10)",
-            borderRadius: "0 0 18px 18px",
-          }} />
+          {/* Bottom gold stripe */}
+          <div className="rpc-top-stripe h-1.5 w-full rounded-b-2xl" />
+
         </div>
       </div>
     </>
