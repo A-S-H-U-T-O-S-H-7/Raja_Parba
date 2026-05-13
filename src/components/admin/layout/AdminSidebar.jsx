@@ -20,6 +20,7 @@ import {
   Sparkles,
   ScanLine,
   ClipboardCheck,
+  MailWarning,
   Menu,
   X
 } from 'lucide-react';
@@ -128,6 +129,12 @@ const navigation = [
     name: 'System Settings',
     href: '/admin/settings',
     icon: Settings,
+    permission: 'manage_settings'
+  },
+  {
+    name: 'Cancellation Mail',
+    href: '/admin/cancellation-mails',
+    icon: MailWarning,
     permission: 'manage_settings'
   },
   {
