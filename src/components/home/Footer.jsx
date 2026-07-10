@@ -288,6 +288,7 @@ function Footer() {
         <p className={`${cinzel.className} text-amber-100 text-sm md:text-base font-medium`}>
           © {currentYear} Samudayik Vikas Samiti. All Rights Reserved.
         </p>
+        <p className='text-red-950'>Made By Ashutosh Mohanty</p>
       </div>
 
       {/* Tribal Border */}

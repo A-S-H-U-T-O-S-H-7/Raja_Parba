@@ -47,14 +47,14 @@ function Layout({ children }) {
 
   return (
     <div>
-      {!noticeClosed && (
+      {/* {!noticeClosed && (
         <RajaParbaCancel
           photoSrc="/sudiptamohanty.jpeg"
           videoSrc="/sudipta_mohanty_video.mp4"
           showOncePerSession={false}
           onClose={() => setNoticeClosed(true)}
         />
-      )}
+      )} */}
 
       <Header user={user} handleLogout={handleLogout} />
 

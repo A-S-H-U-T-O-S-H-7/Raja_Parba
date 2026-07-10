@@ -12,16 +12,16 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
-      {!noticeClosed && (
+      {/* {!noticeClosed && (
         <RajaParbaCancel
           photoSrc="/sudiptamohanty.jpeg"
           videoSrc="/sudipta_mohanty_video.mp4"
           showOncePerSession={false}
           onClose={() => setNoticeClosed(true)}
         />
-      )}
+      )} */}
 
-      {noticeClosed && loading && (
+      {loading && (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
@@ -30,7 +30,7 @@ function HomePage() {
         </div>
       )}
 
-      {noticeClosed && !loading && <HeroSection user={user} />}
+      { !loading && <HeroSection user={user} />}
     </div>
   );
 }
